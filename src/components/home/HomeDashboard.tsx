@@ -274,8 +274,15 @@ export default function HomeDashboard({ onEmergencyTest }: { onEmergencyTest?: (
         >
           <span
             aria-hidden="true"
-            className="absolute right-[42px] top-[66px] size-[112px] rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, var(--home-glow) 0%, transparent 68%)", filter: "blur(5px)" }}
+            className="absolute right-[38px] top-[62px] z-0 size-[120px] rounded-full pointer-events-none"
+            style={{ background: "radial-gradient(circle, var(--home-glow) 0%, transparent 68%)", filter: "blur(8px)" }}
+          />
+          <img
+            src="/sun.png"
+            alt=""
+            aria-hidden="true"
+            draggable={false}
+            className="absolute right-[38px] top-[62px] z-10 size-[120px] object-contain pointer-events-none select-none"
           />
           <div className="relative flex items-center justify-between">
             {w.heatWarningLevel ? (
