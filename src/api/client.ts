@@ -51,7 +51,7 @@ function extractMessage(data: unknown, fallback: string): string {
   return fallback;
 }
 
-const MOCK = true;
+const MOCK = false;
 
 const records = [
   { id: "r1", type: "온도계", place: "3층 외벽", temperature: 36, humidity: 65, apparentTemperature: 36.2, time: "09:02" },
