@@ -28,9 +28,9 @@ export default function MobileTopBar({
       </button>
       <div className="flex min-w-0 flex-1 items-center gap-2">
         <span className="flex size-6 shrink-0 items-center justify-center overflow-hidden rounded bg-[var(--home-nav-active-bg)]">
-          <img alt="폭염가드 로고" className="size-6 object-cover" src={logo} />
+          <img alt="현장가드 로고" className="size-6 object-cover" src={logo} />
         </span>
-        <p className="truncate text-sm font-semibold text-[var(--color-text-heading)]">폭염가드</p>
+        <p className="truncate text-sm font-semibold text-[var(--color-text-heading)]">현장가드</p>
         <span className="text-[10px] text-[var(--color-accent)]">{subtitle}</span>
       </div>
       <ThemeToggleButton />

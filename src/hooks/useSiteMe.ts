@@ -9,13 +9,13 @@ interface MeResponse {
 
 /** 불러오기 전/실패 시 표시값 — 실제 사람 이름처럼 보이는 가짜 값을 쓰지 않는다. */
 const PLACEHOLDER: MeResponse = {
-  brand: "폭염가드 - 현장",
+  brand: "현장가드",
   user: { name: "관리자" },
   site: { name: "" },
 };
 
 const DEMO: MeResponse = {
-  brand: "폭염가드 - 현장",
+  brand: "현장가드",
   user: { name: "김철수" },
   site: { name: "인천 복합물류센터" },
 };
@@ -34,7 +34,7 @@ async function loadMe(): Promise<MeResponse> {
   if (!inFlight) {
     inFlight = Promise.all([authApi.me(), siteApi.getProfile()])
       .then(([user, profile]) => {
-        cache = { brand: "폭염가드 - 현장", user: { name: user.name }, site: { name: profile.siteName } };
+        cache = { brand: "현장가드", user: { name: user.name }, site: { name: profile.siteName } };
         return cache;
       })
       .catch((err) => {

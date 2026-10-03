@@ -56,9 +56,9 @@ export default function HomeSidebar() {
       <div className="relative z-10 border-[var(--color-border)] border-b border-solid flex flex-col items-start p-5 w-full">
         <div className="flex gap-2.5 items-center w-full">
           <div className="bg-[var(--home-nav-active-bg)] flex items-center justify-center rounded shrink-0 size-6 overflow-hidden">
-            <img alt="폭염가드 로고" className="size-6 object-cover" src={logo} />
+            <img alt="현장가드 로고" className="size-6 object-cover" src={logo} />
           </div>
-          <p className="font-semibold leading-5 text-sm text-[var(--color-text-heading)] whitespace-nowrap">폭염가드</p>
+          <p className="font-semibold leading-5 text-sm text-[var(--color-text-heading)] whitespace-nowrap">현장가드</p>
         </div>
         <p className="font-['JetBrains_Mono',monospace] leading-[15px] pl-8 pt-0.5 text-[var(--color-text-body)] text-[10px] tracking-[0.5px] whitespace-nowrap">
           현장 안전을 더 가깝게

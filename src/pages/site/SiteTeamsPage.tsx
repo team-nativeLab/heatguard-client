@@ -68,7 +68,7 @@ export default function SiteTeamsPage() {
   const openTeam = teams.find((t) => t.id === openTeamId) ?? null;
 
   const handleShare = async (team: TeamSummary) => {
-    const text = `[폭염가드] ${team.leaderName} 팀 접속 링크입니다.\n${team.accessUrl}`;
+    const text = `[현장가드] ${team.leaderName} 팀 접속 링크입니다.\n${team.accessUrl}`;
     if (navigator.share) {
       try {
         await navigator.share({ title: `${team.leaderName} 팀 접속 링크`, text, url: team.accessUrl });

@@ -22,9 +22,9 @@ export default function AuthSplitLayout({
       <div className="hidden md:flex flex-col bg-[var(--home-sidebar-bg)] border-r border-[var(--color-border)] w-[420px] shrink-0 relative overflow-hidden px-10 py-10 justify-between">
         <div className="relative z-10 flex gap-2.5 items-center">
           <div className="bg-[var(--home-nav-active-bg)] flex items-center justify-center rounded shrink-0 size-7 overflow-hidden">
-            <img alt="폭염가드 로고" className="size-7 object-cover" src={logo} />
+            <img alt="현장가드 로고" className="size-7 object-cover" src={logo} />
           </div>
-          <p className="font-semibold leading-[21px] text-sm text-[var(--color-text-heading)]">폭염가드</p>
+          <p className="font-semibold leading-[21px] text-sm text-[var(--color-text-heading)]">현장가드</p>
         </div>
 
         <div className="relative z-10">
