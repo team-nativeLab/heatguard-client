@@ -6,7 +6,7 @@ export function getProfile() {
 }
 
 export function updateProfile(payload: UpdateSiteProfilePayload) {
-  return apiFetch<{ id: string; version: number; createdAt: string; updatedAt: string }>(
+  return apiFetch<{ siteId: string; siteName: string; managerPhone: string; version: number; updatedAt: string }>(
     "/api/v1/site/profile",
     { method: "PATCH", body: payload },
   );

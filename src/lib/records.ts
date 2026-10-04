@@ -11,6 +11,9 @@ export function feelsLikeColorClass(temp: number): string {
 export function toRecordRow(item: RecordItem): RecordRow {
   const apparent = item.apparentTemperature ?? 0;
   return {
+    id: item.id,
+    photoUrl: item.photoUrl ?? null,
+    teamName: item.teamName,
     type: item.type,
     place: item.place,
     temp: item.temperature != null ? `${item.temperature}°` : "-",
