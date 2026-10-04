@@ -1,5 +1,4 @@
 import { useState } from "react";
-import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 import { useToast } from "../../shared/ui/Toast";
 import { useEscapeKey } from "../../shared/ui/useEscapeKey";
 import { CloseIcon } from "../icons/Icons";
@@ -21,34 +20,28 @@ export default function TeamDetailModal({
   const { showToast } = useToast();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [confirmRotate, setConfirmRotate] = useState(false);
-  const [rotating, setRotating] = useState(false);
+  const [editingCredentials, setEditingCredentials] = useState(false);
+  const [savingCredentials, setSavingCredentials] = useState(false);
   const [form, setForm] = useState({
     leaderName: team.leaderName,
     workLocation: team.workLocation ?? "",
     contact: team.contact ?? "",
     memberCount: team.memberCount ? String(team.memberCount) : "",
   });
+  const [credentials, setCredentials] = useState({ leaderEmail: team.loginEmail ?? "", newPassword: "" });
 
-  useEscapeKey(confirmRotate || saving ? undefined : onClose);
-
-  const copyUrl = async () => {
-    try {
-      await navigator.clipboard.writeText(team.accessUrl);
-      showToast("접속 URL을 복사했어요.", "success");
-    } catch {
-      showToast("복사하지 못했어요. URL을 직접 선택해 복사해주세요.", "error");
-    }
-  };
+  useEscapeKey(saving || savingCredentials ? undefined : onClose);
 
   const save = async () => {
     const error = validateTeamForm(form);
     if (error) return showToast(error, "error");
     const payload: UpdateTeamPayload = {
+      name: team.name,
+      workplace: form.workLocation.trim(),
       leaderName: form.leaderName.trim(),
-      workLocation: form.workLocation.trim(),
-      contact: form.contact.trim(),
-      memberCount: form.memberCount.trim() ? Number(form.memberCount) : undefined,
+      leaderPhone: form.contact.trim(),
+      workerCount: form.memberCount.trim() ? Number(form.memberCount) : team.memberCount,
+      version: team.version,
     };
     setSaving(true);
     try {
@@ -58,7 +51,14 @@ export default function TeamDetailModal({
       setEditing(false);
     } catch (err) {
       if (isDemoFallback(err)) {
-        onUpdated({ ...team, ...payload, memberCount: payload.memberCount ?? 0 });
+        onUpdated({
+          ...team,
+          name: payload.name ?? team.name,
+          workLocation: payload.workplace ?? team.workLocation,
+          leaderName: payload.leaderName ?? team.leaderName,
+          contact: payload.leaderPhone ?? team.contact,
+          memberCount: payload.workerCount ?? team.memberCount,
+        });
         showToast("팀 정보를 저장했어요. (데모)", "success");
         setEditing(false);
       } else {
@@ -69,30 +69,41 @@ export default function TeamDetailModal({
     }
   };
 
-  const rotate = async () => {
-    setRotating(true);
+  const saveCredentials = async () => {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(credentials.leaderEmail.trim())) {
+      return showToast("팀장 로그인 이메일을 확인해주세요.", "error");
+    }
+    if (credentials.newPassword.length < 8) return showToast("새 비밀번호는 8자 이상이어야 해요.", "error");
+    setSavingCredentials(true);
     try {
-      const res = await teamsApi.rotateTeamToken(team.id);
-      onUpdated({ ...team, accessUrl: res.accessUrl });
-      showToast("새 접속 URL을 발급했어요. 기존 URL은 더 이상 쓸 수 없어요.", "success");
+      const res = await teamsApi.updateTeamCredentials(team.id, {
+        leaderEmail: credentials.leaderEmail.trim(),
+        newPassword: credentials.newPassword,
+      });
+      onUpdated({ ...team, loginEmail: res.loginEmail });
+      setCredentials((current) => ({ ...current, newPassword: "" }));
+      setEditingCredentials(false);
+      showToast("팀원 로그인 정보를 변경했어요. 기존 로그인 세션은 종료됐어요.", "success");
     } catch (err) {
       if (isDemoFallback(err)) {
-        const base = team.accessUrl.replace(/[^/]+$/, "");
-        onUpdated({ ...team, accessUrl: `${base}${Math.random().toString(36).slice(2, 8)}` });
-        showToast("새 접속 URL을 발급했어요. (데모)", "success");
+        onUpdated({ ...team, loginEmail: credentials.leaderEmail.trim() });
+        setCredentials((current) => ({ ...current, newPassword: "" }));
+        setEditingCredentials(false);
+        showToast("팀원 로그인 정보를 변경했어요. (데모)", "success");
       } else {
-        showToast(errorMessage(err, "URL 재발급에 실패했어요."), "error");
+        showToast(errorMessage(err, "로그인 정보 변경에 실패했어요."), "error");
       }
     } finally {
-      setRotating(false);
-      setConfirmRotate(false);
+      setSavingCredentials(false);
     }
   };
 
   const rows = [
+    { key: "name", label: "팀명", value: team.name },
     { key: "workLocation", label: "작업 장소", value: team.workLocation || "미지정" },
     { key: "contact", label: "연락처", value: team.contact || "-" },
     { key: "memberCount", label: "작업 인원", value: team.memberCount ? `${team.memberCount}명` : "-" },
+    { key: "loginEmail", label: "로그인 이메일", value: team.loginEmail || "계정 미등록" },
   ] as const;
 
   return (
@@ -108,7 +119,7 @@ export default function TeamDetailModal({
       <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl shadow-2xl w-full max-w-[440px] overflow-hidden">
         <div className="border-[var(--color-border)] border-b flex items-center justify-between px-5 py-4">
           <h3 className="font-semibold text-[var(--color-text-heading)] text-base">
-            {editing ? "팀 정보 수정" : `${team.leaderName} 팀`}
+            {editing ? "팀 정보 수정" : editingCredentials ? "팀원 로그인 정보 변경" : `${team.name} 정보`}
           </h3>
           <button
             type="button"
@@ -120,7 +131,30 @@ export default function TeamDetailModal({
           </button>
         </div>
 
-        {editing ? (
+        {editingCredentials ? (
+          <div className="flex flex-col p-5 gap-3">
+            <label className="flex flex-col gap-1.5">
+              <span className="text-[var(--color-text-body)] text-xs">팀장 로그인 이메일 *</span>
+              <input
+                type="email"
+                autoComplete="username"
+                value={credentials.leaderEmail}
+                onChange={(e) => setCredentials((current) => ({ ...current, leaderEmail: e.target.value }))}
+                className={inputCls}
+              />
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <span className="text-[var(--color-text-body)] text-xs">새 비밀번호 * (8자 이상)</span>
+              <input
+                type="password"
+                autoComplete="new-password"
+                value={credentials.newPassword}
+                onChange={(e) => setCredentials((current) => ({ ...current, newPassword: e.target.value }))}
+                className={inputCls}
+              />
+            </label>
+          </div>
+        ) : editing ? (
           <div className="flex flex-col p-5 gap-3">
             {(
               [
@@ -151,41 +185,30 @@ export default function TeamDetailModal({
                 <span className="text-[var(--color-text-heading)] text-sm break-all">{row.value}</span>
               </div>
             ))}
-            <div className="flex gap-3">
-              <span className="w-20 shrink-0 text-[var(--color-text-body)] text-xs pt-0.5">접속 URL</span>
-              <div className="flex-1 min-w-0 flex flex-col gap-2">
-                <span className="font-['JetBrains_Mono',monospace] text-[var(--color-text-heading)] text-xs break-all">
-                  {team.accessUrl}
-                </span>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={copyUrl}
-                    className="border border-[var(--color-border)] text-[var(--color-text-label)] text-xs px-2.5 py-1 rounded-md hover:bg-[var(--color-bg-tile)] transition"
-                  >
-                    복사
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setConfirmRotate(true)}
-                    className="border border-[var(--color-border)] text-[var(--color-text-label)] text-xs px-2.5 py-1 rounded-md hover:bg-[var(--color-bg-tile)] transition"
-                  >
-                    URL 재발급
-                  </button>
-                </div>
-              </div>
-            </div>
-            {team.qrCodeUrl && (
-              <div className="flex gap-3">
-                <span className="w-20 shrink-0 text-[var(--color-text-body)] text-xs pt-0.5">접속 QR</span>
-                <img src={team.qrCodeUrl} alt={`${team.leaderName} 팀 접속 QR 코드`} className="size-28 rounded-md border border-[var(--color-border)] bg-white p-1" />
-              </div>
-            )}
           </div>
         )}
 
         <div className="border-[var(--color-border)] border-t flex justify-end gap-2 px-5 py-4">
-          {editing ? (
+          {editingCredentials ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setEditingCredentials(false)}
+                disabled={savingCredentials}
+                className="border border-[var(--color-border)] text-[var(--color-text-label)] text-sm px-4 py-2 rounded-lg hover:bg-[var(--color-bg-tile)] transition disabled:opacity-50"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={saveCredentials}
+                disabled={savingCredentials}
+                className="bg-[var(--color-accent)] text-white text-sm font-medium px-4 py-2 rounded-lg hover:brightness-110 transition disabled:opacity-60"
+              >
+                {savingCredentials ? "변경 중..." : "로그인 정보 변경"}
+              </button>
+            </>
+          ) : editing ? (
             <>
               <button
                 type="button"
@@ -208,10 +231,17 @@ export default function TeamDetailModal({
             <>
               <button
                 type="button"
+                onClick={() => setEditingCredentials(true)}
+                className="border border-[var(--color-border)] text-[var(--color-text-label)] text-sm px-4 py-2 rounded-lg hover:bg-[var(--color-bg-tile)] transition"
+              >
+                로그인 정보 변경
+              </button>
+              <button
+                type="button"
                 onClick={() => setEditing(true)}
                 className="border border-[var(--color-border)] text-[var(--color-text-label)] text-sm px-4 py-2 rounded-lg hover:bg-[var(--color-bg-tile)] transition"
               >
-                수정
+                팀 정보 수정
               </button>
               <button
                 type="button"
@@ -225,16 +255,6 @@ export default function TeamDetailModal({
         </div>
       </div>
 
-      {confirmRotate && (
-        <ConfirmDialog
-          title="접속 URL을 재발급할까요?"
-          description={"재발급하면 기존 URL과 QR 코드로는 더 이상 접속할 수 없어요.\n팀원에게 새 URL을 다시 공유해주세요."}
-          confirmLabel={rotating ? "발급 중..." : "재발급"}
-          busy={rotating}
-          onCancel={() => setConfirmRotate(false)}
-          onConfirm={rotate}
-        />
-      )}
     </div>
   );
 }

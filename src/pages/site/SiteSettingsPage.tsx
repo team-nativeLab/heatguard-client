@@ -23,6 +23,7 @@ export default function SiteSettingsPage() {
   const [temp, setTemp] = useState("");
   const [humidity, setHumidity] = useState("");
   const [phone, setPhone] = useState("");
+  const [profileVersion, setProfileVersion] = useState<number | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
   const [savingCheckTimes, setSavingCheckTimes] = useState(false);
@@ -42,6 +43,7 @@ export default function SiteSettingsPage() {
           setTemp("35");
           setHumidity("65");
           setPhone("032-000-0000");
+          setProfileVersion(1);
         } else if (failures.length) {
           showToast("일부 설정을 불러오지 못했어요. 새로고침해주세요.", "error");
         }
@@ -50,7 +52,10 @@ export default function SiteSettingsPage() {
           if (weather.value.temperature != null) setTemp(String(weather.value.temperature));
           if (weather.value.humidity != null) setHumidity(String(weather.value.humidity));
         }
-        if (profile.status === "fulfilled" && profile.value.manager.phone != null) setPhone(profile.value.manager.phone);
+        if (profile.status === "fulfilled") {
+          if (profile.value.manager.phone != null) setPhone(profile.value.manager.phone);
+          setProfileVersion(profile.value.version);
+        }
         setLoading(false);
       },
     );
@@ -104,10 +109,12 @@ export default function SiteSettingsPage() {
 
   const savePhone = async () => {
     if (savingPhone) return;
+    if (profileVersion == null) return showToast("현장 설정을 다시 불러와주세요.", "error");
     if (!PHONE_RE.test(phone.trim())) return showToast("전화번호 형식을 확인해주세요. (예: 032-000-0000)", "error");
     setSavingPhone(true);
     try {
-      await siteApi.updateProfile({ managerPhone: phone.trim() });
+      const updated = await siteApi.updateProfile({ managerPhone: phone.trim(), version: profileVersion });
+      setProfileVersion(updated.version);
       showToast("관리자 전화번호를 저장했어요.", "success");
     } catch (err) {
       if (isDemoFallback(err)) return showToast("관리자 전화번호를 저장했어요. (데모)", "success");

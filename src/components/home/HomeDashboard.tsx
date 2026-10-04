@@ -34,7 +34,7 @@ interface DashboardTodayResponse {
     skyStatus?: string | null;
     heatWarningLevel?: string;
     deltaFromYesterday?: number;
-  };
+  } | null;
   stats: { workPhotoCount: number; restPhotoCount: number; siteRequestCount: number; dangerAlertCount: number };
   records: RecordItem[];
 }
@@ -73,6 +73,7 @@ function feelsLikeColor(temp: number) {
 }
 
 function weatherGlowColor(weather: DashboardTodayResponse["weather"], hour: number) {
+  if (!weather) return "rgba(148, 163, 184, 0.3)";
   const condition = `${weather.condition === "-" ? "" : weather.condition ?? ""} ${weather.skyStatus ?? ""}`.toLowerCase();
   const isNight = hour < 6 || hour >= 19;
 
@@ -237,18 +238,23 @@ export default function HomeDashboard() {
         setToday({
           date: todayStr,
           siteName: "",
-          weather: {
-            temperature: dash.weather.temperature,
-            humidity: dash.weather.humidity,
-            feelsLike: dash.weather.feelsLike ?? dash.weather.apparentTemperature ?? dash.weather.temperature,
-            condition: dash.weather.condition ?? weatherConditionLabel(undefined, dash.weather.skyStatus),
-            skyStatus: dash.weather.skyStatus,
-            heatWarningLevel: dash.heatLevel,
-            deltaFromYesterday: dash.weather.deltaFromYesterday,
-          },
+          weather: dash.weather
+            ? {
+                temperature: dash.weather.temperature,
+                humidity: dash.weather.humidity,
+                feelsLike:
+                  dash.weather.feelsLike ??
+                  dash.weather.apparentTemperature ??
+                  dash.weather.temperature,
+                condition: dash.weather.condition ?? weatherConditionLabel(undefined, dash.weather.skyStatus),
+                skyStatus: dash.weather.skyStatus,
+                heatWarningLevel: dash.heatLevel,
+                deltaFromYesterday: dash.weather.deltaFromYesterday,
+              }
+            : null,
           stats: {
-            workPhotoCount: records.filter((r) => r.type === "작업사진").length,
-            restPhotoCount: records.filter((r) => r.type === "휴식사진").length,
+            workPhotoCount: dash.summary.workPhotoCount ?? records.filter((r) => r.type === "작업사진").length,
+            restPhotoCount: dash.summary.restPhotoCount ?? records.filter((r) => r.type === "휴식사진").length,
             siteRequestCount: dash.summary.siteRequestCount ?? 0,
             dangerAlertCount: dash.summary.activeEmergencyCount,
           },
@@ -422,7 +428,7 @@ export default function HomeDashboard() {
             className="absolute right-[43px] top-[67px] z-10 size-[112px] object-contain pointer-events-none select-none"
           />
           <div className="relative flex items-center justify-between">
-            {w.heatWarningLevel ? (
+            {w?.heatWarningLevel ? (
               <span className="bg-[var(--color-heat-badge-bg)] text-[#ff6800] text-xs font-medium leading-4 px-2.5 py-1 rounded-full">
                 <span className="figma-emoji">☀</span> {w.heatWarningLevel}
               </span>
@@ -444,11 +450,11 @@ export default function HomeDashboard() {
           <p className="relative text-[12px] leading-4 text-[var(--color-text-body)] pt-4">현재 온도</p>
           <div className="relative flex items-end gap-3 pt-1 h-[64px]">
             <span className="font-light text-[60px] leading-[60px] tracking-[-1.5px] text-[var(--color-text-heading)]">
-              {w.temperature.toFixed(1)}
+              {w ? w.temperature.toFixed(1) : "—"}
             </span>
             <div className="flex items-center gap-2 pb-1.5">
               <span className="font-light text-2xl leading-8 text-[var(--color-text-heading)]">°C</span>
-              {w.deltaFromYesterday != null && (
+              {w && w.deltaFromYesterday != null && (
                 <span className="font-['JetBrains_Mono',monospace] text-xs leading-4 px-1.5 py-[2px] rounded bg-[var(--color-delta-bg)] text-[var(--color-delta-fg)]">
                   {w.deltaFromYesterday > 0 ? "+" : ""}
                   {w.deltaFromYesterday.toFixed(1)}°C
@@ -457,14 +463,14 @@ export default function HomeDashboard() {
             </div>
           </div>
           <p className="relative text-[12px] leading-4 pt-2 text-[var(--color-text-body)] whitespace-pre">
-            {`습도 ${w.humidity}%  |  체감온도 ${w.feelsLike.toFixed(1)}°C`}
+            {w ? `습도 ${w.humidity}%  |  체감온도 ${w.feelsLike.toFixed(1)}°C` : "기상 기준값 미입력"}
           </p>
 
           <div className="relative grid grid-cols-3 gap-3 mt-auto pt-4">
             {[
-              ["습도", `${w.humidity}%`],
-              ["체감온도", `${w.feelsLike.toFixed(1)}°C`],
-              ["날씨", weatherConditionLabel(w.condition, w.skyStatus)],
+              ["습도", w ? `${w.humidity}%` : "—"],
+              ["체감온도", w ? `${w.feelsLike.toFixed(1)}°C` : "—"],
+              ["날씨", w ? weatherConditionLabel(w.condition, w.skyStatus) : "—"],
             ].map(([label, value]) => (
               <div
                 key={label}

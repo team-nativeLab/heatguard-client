@@ -13,7 +13,7 @@ function buildFallback(date: string): PrintSummaryResponse {
   return {
     date,
     site: { siteName: "인천 복합물류센터 신축", address: "인천광역시 서구 원창동", managerName: "김철수" },
-    weather: { temperature: 36.2, humidity: 65, feelsLike: 36.2, condition: "맑음", heatWarningLevel: "폭염 경보" },
+    weather: { temperature: 36.2, humidity: 65, feelsLike: 36.2, heatWarningLevel: "폭염 경보" },
     records: [
       { id: "r1", type: "온도계", place: "3층 외벽", temperature: 36, humidity: 65, apparentTemperature: 36.2, time: "09:02" },
       { id: "r2", type: "작업사진", place: "지하 배관", temperature: 34, humidity: 72, apparentTemperature: 34.5, time: "10:30" },
@@ -136,10 +136,10 @@ export default function PrintSummaryPage() {
 
         <div className="grid grid-cols-4 gap-4 py-5 border-b border-[var(--color-border)]">
           {[
-            ["현재 온도", `${data.weather.temperature.toFixed(1)}°C`],
-            ["습도", `${data.weather.humidity}%`],
-            ["체감온도", `${data.weather.feelsLike.toFixed(1)}°C`],
-            ["폭염 단계", data.weather.heatWarningLevel || "-"],
+            ["현재 온도", data.weather?.temperature != null ? `${data.weather.temperature.toFixed(1)}°C` : "-"],
+            ["습도", data.weather?.humidity != null ? `${data.weather.humidity}%` : "-"],
+            ["체감온도", data.weather?.feelsLike != null ? `${data.weather.feelsLike.toFixed(1)}°C` : "-"],
+            ["폭염 단계", data.weather?.heatWarningLevel || "-"],
           ].map(([label, value]) => (
             <div key={label}>
               <p className="text-[11px] text-[var(--color-text-body)]">{label}</p>
@@ -207,24 +207,28 @@ export default function PrintSummaryPage() {
 
         <div className="pt-8">
           <h2 className="text-sm font-semibold pb-2">결재</h2>
-          <table className="border-collapse text-xs w-full max-w-[360px] ml-auto">
-            <tbody>
-              <tr>
-                {data.approvalLine.map((row) => (
-                  <td key={row.role} className="border border-[var(--color-text-faint)] text-center text-[var(--color-text-body)] py-1 w-1/3">
-                    {row.role}
-                  </td>
-                ))}
-              </tr>
-              <tr>
-                {data.approvalLine.map((row) => (
-                  <td key={row.role} className="border border-[var(--color-text-faint)] text-center h-14 align-bottom pb-1.5">
-                    {row.name || "\u00A0"}
-                  </td>
-                ))}
-              </tr>
-            </tbody>
-          </table>
+          {data.approvalLine.length ? (
+            <table className="border-collapse text-xs w-full max-w-[360px] ml-auto">
+              <tbody>
+                <tr>
+                  {data.approvalLine.map((row) => (
+                    <td key={row.role} className="border border-[var(--color-text-faint)] text-center text-[var(--color-text-body)] py-1 w-1/3">
+                      {row.role}
+                    </td>
+                  ))}
+                </tr>
+                <tr>
+                  {data.approvalLine.map((row) => (
+                    <td key={row.role} className="border border-[var(--color-text-faint)] text-center h-14 align-bottom pb-1.5">
+                      {row.name || "\u00A0"}
+                    </td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          ) : (
+            <p className="text-xs text-[var(--color-text-faint)] text-right">결재선 정보가 없습니다.</p>
+          )}
         </div>
       </div>
     </div>

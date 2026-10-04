@@ -131,7 +131,7 @@ export default function SiteTodayPage() {
     const date = todayStr();
     Promise.all([
       teamsApi.listTeams(),
-      recordsApi.listRecords({ date }),
+      recordsApi.listAllRecords({ date }),
       settingsApi.getCheckTimes().catch(() => null),
       checklistsApi.listChecklistItems().catch(() => null),
     ])

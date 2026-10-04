@@ -53,11 +53,13 @@ export interface SiteProfile {
   siteId: string;
   siteName: string;
   manager: { name: string; phone?: string };
+  version: number;
 }
 
 export interface UpdateSiteProfilePayload {
   siteName?: string;
   managerPhone?: string;
+  version: number;
 }
 
 export interface WithdrawSitePayload {
@@ -80,13 +82,15 @@ export type HeatLevel = "미입력" | "관심" | "주의보" | "경보" | "중�
 
 export interface DashboardResponse {
   summary: {
-    teamCount: number;
+    teamCount?: number;
     todayRecordCount: number;
     activeEmergencyCount: number;
+    workPhotoCount?: number;
+    restPhotoCount?: number;
     /** 팀에서 올린 현장 요청 건수 (서버 미제공 시 0) */
     siteRequestCount?: number;
   };
-  weather: WeatherInfo;
+  weather: (Partial<WeatherInfo> & Pick<WeatherInfo, "temperature" | "humidity">) | null;
   heatLevel: HeatLevel;
 }
 
@@ -109,50 +113,85 @@ export interface RecordItem {
   apparentTemperature?: number;
   time: string;
   photoUrl?: string | null;
-  teamId?: string;
+  teamId?: string | null;
   teamName?: string;
 }
 
-export interface RecordDetail extends ResourceEnvelope {
-  record: RecordItem;
+export interface BackendRecord {
+  recordId: string;
+  type: "THERMOMETER" | "WORK" | "REST";
+  measuredAt: string;
+  temperature?: number | null;
+  humidity?: number | null;
+  apparentTemperature?: number | null;
+  photoUrls?: string[];
+  photoKeys?: string[];
+  teamId?: string | null;
+  teamName?: string | null;
+  workplace?: string | null;
+}
+
+export interface RecordDetail extends BackendRecord {
+  createdAt?: string | null;
+  updatedAt?: string | null;
 }
 
 export interface PrintSummaryResponse {
   date: string;
   site: { siteName: string; address?: string; managerName?: string };
-  weather: WeatherInfo;
+  weather: {
+    temperature: number | null;
+    humidity: number | null;
+    feelsLike: number | null;
+    heatWarningLevel?: string;
+  } | null;
   records: RecordItem[];
-    teamsChecklist: { teamName: string; completed: number; total: number }[];
-    approvalLine: { role: string; name: string; approved: boolean }[];
+  teamsChecklist: { teamName: string; completed: number; total: number }[];
+  approvalLine: { role: string; name: string; approved: boolean }[];
 }
 
 export interface TeamSummary {
   id: string;
+  name: string;
   leaderName: string;
   workLocation: string;
   contact: string;
   memberCount: number;
-  accessUrl: string;
-  qrCodeUrl?: string;
   active: boolean;
+  version: number;
+  loginEmail?: string | null;
+  memberUserId?: string | null;
 }
 
 export interface CreateTeamPayload {
+  name: string;
+  workplace: string;
   leaderName: string;
-  workLocation?: string;
-  contact?: string;
-  memberCount?: number;
+  leaderPhone: string;
+  leaderEmail: string;
+  initialPassword: string;
+  workerCount: number;
 }
 
 export interface UpdateTeamPayload {
+  name?: string;
+  workplace?: string;
   leaderName?: string;
-  workLocation?: string;
-  contact?: string;
-  memberCount?: number;
+  leaderPhone?: string;
+  workerCount?: number;
+  version?: number;
 }
 
-export interface TokenRotationResponse extends ResourceEnvelope {
-  accessUrl: string;
+export interface TeamCredentialsPayload {
+  leaderEmail?: string;
+  newPassword: string;
+}
+
+export interface TeamCredentialsResponse {
+  teamId: string;
+  userId: string;
+  loginEmail: string;
+  passwordChangedAt: string;
 }
 
 export type ChecklistQuickAddKey = "식수" | "그늘막" | "건강상태" | "옥외작업자제" | "2시간휴식";
@@ -162,11 +201,12 @@ export interface ChecklistItem {
   text: string;
   sortOrder: number;
   active: boolean;
+  version?: number;
 }
 
 export interface CreateChecklistItemPayload {
-  text?: string;
-  quickAddKey?: ChecklistQuickAddKey;
+  text: string;
+  sortOrder: number;
 }
 
 export interface UpdateChecklistItemPayload {
@@ -176,7 +216,7 @@ export interface UpdateChecklistItemPayload {
 
 export interface CheckTimesResponse {
   times: string[];
-  updatedAt: string;
+  updatedAt: string | null;
 }
 
 export interface CheckTimesPayload {
@@ -220,8 +260,8 @@ export interface CreateInquiryPayload {
 export interface TeamMember {
   id: string;
   name: string;
-  teamId: string;
-  teamName: string;
+  teamId?: string | null;
+  teamName?: string | null;
   active: boolean;
   withdrawnAt?: string;
 }

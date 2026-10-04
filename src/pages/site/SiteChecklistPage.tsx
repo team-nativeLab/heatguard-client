@@ -74,7 +74,7 @@ export default function SiteChecklistPage() {
 
     setBusyKey(payload.quickAddKey ?? "draft");
     try {
-      const created = await checklistsApi.createChecklistItem(payload);
+      const created = await checklistsApi.createChecklistItem({ text, sortOrder: items.length });
       setItems((prev) => [...prev, created]);
       if (payload.text) setDraft("");
       showToast("항목을 추가했어요.", "success");

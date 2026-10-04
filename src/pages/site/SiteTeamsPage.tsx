@@ -10,12 +10,19 @@ import { validateTeamForm, type TeamFormValues } from "../../lib/teamForm";
 import { LoadError, SkeletonList } from "../../shared/ui/Skeleton";
 
 const FALLBACK_TEAMS: TeamSummary[] = [
-  { id: "t1", qrCodeUrl: "", leaderName: "홍길동", workLocation: "3층 외벽", contact: "010-1234-5678", memberCount: 8, accessUrl: "https://heatguard.app/t/abc123", active: true },
-  { id: "t2", qrCodeUrl: "", leaderName: "김영희", workLocation: "지하 1층 배관", contact: "010-9876-5432", memberCount: 6, accessUrl: "https://heatguard.app/t/def456", active: true },
-  { id: "t3", qrCodeUrl: "", leaderName: "이철호", workLocation: "옥상 방수", contact: "010-5555-7777", memberCount: 4, accessUrl: "https://heatguard.app/t/ghi789", active: true },
+  { id: "t1", name: "A팀", leaderName: "홍길동", workLocation: "3층 외벽", contact: "010-1234-5678", memberCount: 8, active: true, version: 1, loginEmail: "team-a@example.com" },
+  { id: "t2", name: "B팀", leaderName: "김영희", workLocation: "지하 1층 배관", contact: "010-9876-5432", memberCount: 6, active: true, version: 1, loginEmail: "team-b@example.com" },
+  { id: "t3", name: "C팀", leaderName: "이철호", workLocation: "옥상 방수", contact: "010-5555-7777", memberCount: 4, active: true, version: 1, loginEmail: "team-c@example.com" },
 ];
 
-const EMPTY_FORM: TeamFormValues = { leaderName: "", workLocation: "", contact: "", memberCount: "" };
+const EMPTY_FORM: TeamFormValues = {
+  leaderName: "",
+  workLocation: "",
+  contact: "",
+  memberCount: "",
+  leaderEmail: "",
+  initialPassword: "",
+};
 
 const inputCls =
   "bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg h-[38px] px-3 text-sm text-[var(--color-text-heading)] outline-none focus:border-[var(--color-accent)] transition-colors";
@@ -67,38 +74,27 @@ export default function SiteTeamsPage() {
 
   const openTeam = teams.find((t) => t.id === openTeamId) ?? null;
 
-  const handleShare = async (team: TeamSummary) => {
-    const text = `[현장가드] ${team.leaderName} 팀 접속 링크입니다.\n${team.accessUrl}`;
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: `${team.leaderName} 팀 접속 링크`, text, url: team.accessUrl });
-        return;
-      } catch (err) {
-        if ((err as DOMException)?.name === "AbortError") return;
-      }
-    }
-    try {
-      await navigator.clipboard.writeText(text);
-      showToast(`${team.leaderName} 팀 접속 링크를 복사했어요.`, "success");
-    } catch {
-      showToast("복사하지 못했어요. ‘열기’에서 URL을 확인해주세요.", "error");
-    }
-  };
-
   const handleAddTeam = async (e: FormEvent) => {
     e.preventDefault();
     if (submitting) return;
     const error = validateTeamForm(form);
     if (error) return showToast(error, "error");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.leaderEmail.trim())) {
+      return showToast("팀장 로그인 이메일을 확인해주세요.", "error");
+    }
+    if (form.initialPassword.length < 8) return showToast("초기 비밀번호는 8자 이상이어야 해요.", "error");
     if (teams.some((t) => t.leaderName === form.leaderName.trim())) {
       return showToast("같은 팀장 이름의 팀이 이미 있어요.", "error");
     }
     setSubmitting(true);
     const payload = {
+      name: `${form.leaderName.trim()} 팀`,
+      workplace: form.workLocation.trim(),
       leaderName: form.leaderName.trim(),
-      workLocation: form.workLocation.trim() || undefined,
-      contact: form.contact.trim() || undefined,
-      memberCount: form.memberCount.trim() ? Number(form.memberCount.trim()) : undefined,
+      leaderPhone: form.contact.trim(),
+      leaderEmail: form.leaderEmail.trim(),
+      initialPassword: form.initialPassword,
+      workerCount: form.memberCount.trim() ? Number(form.memberCount.trim()) : 0,
     };
     try {
       const created = await teamsApi.createTeam(payload);
@@ -111,13 +107,14 @@ export default function SiteTeamsPage() {
           ...prev,
           {
             id: `local-${Date.now()}`,
-            qrCodeUrl: "",
+            name: `${payload.leaderName} 팀`,
             leaderName: payload.leaderName,
-            workLocation: payload.workLocation || "",
-            contact: payload.contact || "",
-            memberCount: payload.memberCount || 0,
-            accessUrl: `https://heatguard.app/t/${Math.random().toString(36).slice(2, 8)}`,
+            workLocation: payload.workplace,
+            contact: payload.leaderPhone,
+            memberCount: payload.workerCount,
             active: true,
+            version: 1,
+            loginEmail: payload.leaderEmail,
           },
         ]);
         showToast(`${payload.leaderName} 팀을 추가했어요. (데모)`, "success");
@@ -168,11 +165,7 @@ export default function SiteTeamsPage() {
               className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg flex flex-col md:flex-row gap-4 items-start md:items-center px-5 py-4 w-full"
             >
               <div className="bg-[var(--color-bg-tile)] rounded-md flex items-center justify-center size-8 shrink-0 text-[var(--color-text-body)] overflow-hidden">
-                {team.qrCodeUrl ? (
-                  <img src={team.qrCodeUrl} alt="접속 QR 코드" className="size-full object-cover bg-white" />
-                ) : (
-                  <TeamMemberIcon className="size-4" />
-                )}
+                <TeamMemberIcon className="size-4" />
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 flex-1 min-w-0 w-full">
@@ -186,17 +179,14 @@ export default function SiteTeamsPage() {
                 <p className="leading-4 text-[var(--color-text-label)] text-xs self-center">
                   {team.memberCount ? `${team.memberCount}명` : "-"}
                 </p>
-                <p className="font-['JetBrains_Mono',monospace] leading-4 text-[var(--color-text-body)] text-[11px] self-center truncate" title={team.accessUrl}>
-                  {team.accessUrl}
+                <p className="font-['JetBrains_Mono',monospace] leading-4 text-[var(--color-text-body)] text-[11px] self-center truncate" title={team.loginEmail ?? undefined}>
+                  {team.loginEmail || "로그인 계정 미등록"}
                 </p>
               </div>
 
               <div className="flex gap-2 shrink-0">
-                <button type="button" onClick={() => handleShare(team)} className={ghostBtn}>
-                  공유
-                </button>
                 <button type="button" onClick={() => setOpenTeamId(team.id)} className={ghostBtn}>
-                  열기
+                  정보·계정
                 </button>
                 <button
                   type="button"
@@ -231,6 +221,14 @@ export default function SiteTeamsPage() {
             <label className="flex flex-col gap-1.5">
               <span className="leading-4 text-[var(--color-text-body)] text-xs">작업 인원</span>
               <input type="text" inputMode="numeric" value={form.memberCount} onChange={setField("memberCount")} className={inputCls} />
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <span className="leading-4 text-[var(--color-text-body)] text-xs">팀장 로그인 이메일 *</span>
+              <input type="email" autoComplete="username" value={form.leaderEmail} onChange={setField("leaderEmail")} className={inputCls} />
+            </label>
+            <label className="flex flex-col gap-1.5">
+              <span className="leading-4 text-[var(--color-text-body)] text-xs">초기 비밀번호 * (8자 이상)</span>
+              <input type="password" autoComplete="new-password" value={form.initialPassword} onChange={setField("initialPassword")} className={inputCls} />
             </label>
           </div>
           <button
