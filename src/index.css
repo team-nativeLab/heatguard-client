@@ -1,0 +1,372 @@
+@import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  /* ── 블랙 모드 · 라이트 리디자인(Figma 607:2)과 같은 위계를 블랙 톤으로 매핑 ── */
+  --color-bg-app: #0a0b0e;
+  --color-bg-surface: #111318;
+  --color-bg-card: #15181e;
+  --color-bg-input: #1a1d24;
+  --color-bg-tile: #20242c;
+  --color-border: #22262e;
+  --color-text-heading: #f4f6fa;
+  --color-text-body: #8a93a3;
+  --color-text-label: #b8c0cc;
+  --color-text-faint: #565e6b;
+  --color-text-value: #e2e6ed;
+  --color-accent: #3b82f6;
+  --color-delta-bg: rgba(239, 68, 68, 0.16);
+  --color-delta-fg: #f87171;
+  --color-success: #4ade80;
+  --color-success-soft-bg: rgba(74, 222, 128, 0.14);
+  --color-accent-soft-bg: rgba(59, 130, 246, 0.16);
+  --color-modal-danger-border: #5c1d1d;
+  --color-modal-strong-text: #ffffff;
+  --color-checktime-done-bg: rgba(239, 68, 68, 0.14);
+  --color-checktime-done-border: #ef4444;
+  --color-checktime-done-text: #f87171;
+  --color-checkbox-border: #3a404b;
+  --color-danger-text: #f87171;
+  --color-heat-badge-bg: rgba(255, 104, 0, 0.14);
+  --color-danger-soft-bg: rgba(239, 68, 68, 0.14);
+  --native-color-scheme: dark;
+
+  /* ── 현장 관리자 메인(리디자인) 전용 토큰 · 블랙 ── */
+  --home-sidebar-bg: #0e1015;
+  --home-main-bg: #0a0b0e;
+  --home-nav-active-bg: rgba(59, 130, 246, 0.16);
+  --home-nav-active-fg: #7cacf8;
+  --home-search-bg: #15181e;
+  --home-search-border: #22262e;
+  --home-card-bg: #13161b;
+  --home-card-border: #1e2229;
+  --home-mini-tile-bg: #1a1d24;
+  --home-weather-tile-bg: rgba(255, 255, 255, 0.04);
+  --home-weather-tile-border: rgba(255, 255, 255, 0.06);
+  --home-pill-border: rgba(255, 255, 255, 0.08);
+  --home-pill-bg: rgba(255, 255, 255, 0.05);
+  --home-pill-fg: #a3abb8;
+  --home-glow: rgba(255, 140, 60, 0.28);
+  --home-stat-blue-bg: rgba(59, 130, 246, 0.14);
+  --home-stat-blue-fg: #7cacf8;
+  --home-stat-green-bg: rgba(74, 222, 128, 0.12);
+  --home-stat-green-fg: #4ade80;
+  --home-stat-purple-bg: rgba(139, 92, 246, 0.16);
+  --home-stat-purple-fg: #a78bfa;
+  --home-stat-red-bg: rgba(239, 68, 68, 0.14);
+  --home-stat-red-fg: #f87171;
+  --home-table-bg: #13161b;
+  --home-table-border: #1e2229;
+  --home-table-head: #565e6b;
+  --home-table-text: #b8c0cc;
+  --home-table-value: #e2e6ed;
+  --home-table-time: #a3abb8;
+  --home-table-more: #8a93a3;
+  --home-date-pill-bg: #15181e;
+  --home-date-fg: #e2e6ed;
+  --home-date-sub: #565e6b;
+  --home-btn-primary-bg: #3b82f6;
+  --home-btn-border: #22262e;
+  --home-wave-1: rgba(59, 130, 246, 0.05);
+  --home-wave-2: rgba(59, 130, 246, 0.18);
+  --home-wave-3: rgba(59, 130, 246, 0.08);
+  --home-wave-4: rgba(59, 130, 246, 0.28);
+  --home-wave-img-opacity: 0.55;
+  --home-wave-img-filter: invert(1) hue-rotate(180deg) saturate(1.4);
+  --home-tagline: #565e6b;
+  --home-avatar-bg: #20242c;
+}
+
+[data-theme="light"] {
+  --color-bg-app: #f3f8ff;
+  --color-bg-surface: #ffffff;
+  --color-bg-card: #f9fbff;
+  --color-bg-input: #ffffff;
+  --color-bg-tile: #eef2f8;
+  --color-border: #e3e8f0;
+  --color-text-heading: #111827;
+  --color-text-body: #6b7280;
+  --color-text-label: #374151;
+  --color-text-faint: #9ca3af;
+  --color-text-value: #1f2937;
+  --color-accent: #2879ea;
+  --color-delta-bg: #fee2e2;
+  --color-delta-fg: #dc2626;
+  --color-success: #16a34a;
+  --color-success-soft-bg: rgba(74, 222, 128, 0.15);
+  --color-accent-soft-bg: rgba(40, 121, 234, 0.12);
+  --color-modal-danger-border: #fecaca;
+  --color-modal-strong-text: #000000;
+  --color-checktime-done-bg: #fde6e6;
+  --color-checktime-done-border: #ea282b;
+  --color-checktime-done-text: #ea282b;
+  --color-checkbox-border: #cbd2dd;
+  --color-danger-text: #dc2626;
+  --color-heat-badge-bg: #fffbeb;
+  --color-danger-soft-bg: #fee2e2;
+  --native-color-scheme: light;
+
+  /* ── 현장 관리자 메인(리디자인) 전용 토큰 · 라이트 (Figma 607:2) ── */
+  --home-sidebar-bg: #f3f5ff;
+  --home-main-bg: #f3f8ff;
+  --home-nav-active-bg: #eef2fd;
+  --home-nav-active-fg: #2563eb;
+  --home-search-bg: #f5f5f6;
+  --home-search-border: transparent;
+  --home-card-bg: #f9fbff;
+  --home-card-border: transparent;
+  --home-mini-tile-bg: #fffbf6;
+  --home-weather-tile-bg: rgba(255, 255, 255, 0.72);
+  --home-weather-tile-border: rgba(255, 255, 255, 0.9);
+  --home-pill-border: transparent;
+  --home-pill-bg: #ffffff;
+  --home-pill-fg: #66707a;
+  --home-glow: rgba(255, 150, 80, 0.55);
+  --home-stat-blue-bg: #edf4ff;
+  --home-stat-blue-fg: #2563eb;
+  --home-stat-green-bg: #e9f6ed;
+  --home-stat-green-fg: #16a34a;
+  --home-stat-purple-bg: #f4f1fe;
+  --home-stat-purple-fg: #7c3aed;
+  --home-stat-red-bg: #fdefef;
+  --home-stat-red-fg: #dc2626;
+  --home-table-bg: #f7f9ff;
+  --home-table-border: #efefef;
+  --home-table-head: #9ca3af;
+  --home-table-text: #374151;
+  --home-table-value: #1f2937;
+  --home-table-time: #6b7280;
+  --home-table-more: #99999e;
+  --home-date-pill-bg: #f7f9ff;
+  --home-date-fg: #47474d;
+  --home-date-sub: #9e9c99;
+  --home-btn-primary-bg: #171c29;
+  --home-btn-border: #e3e8f0;
+  --home-wave-1: #e8f0ff;
+  --home-wave-2: #bcd3ff;
+  --home-wave-3: #d7e4ff;
+  --home-wave-4: #98b9f8;
+  --home-wave-img-opacity: 1;
+  --home-wave-img-filter: none;
+  --home-tagline: #999ea6;
+  --home-avatar-bg: #e6e8f0;
+}
+
+/*
+ * 테마 전환: 요소별 transition 대신 화면 전체를 한 번에 크로스페이드한다.
+ * (ThemeContext의 applyThemeAtOnce 참고)
+ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.35s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* View Transitions 미지원 브라우저: 전환 순간에만 모든 transition을 꺼서 동시에 바뀌게 한다. */
+.theme-switching,
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+}
+
+html {
+  color-scheme: var(--native-color-scheme);
+}
+
+body {
+  margin: 0;
+  font-family: "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--color-text-body);
+  background: var(--color-bg-app);
+}
+
+#root {
+  min-height: 100svh;
+}
+
+.figma-emoji {
+  font-family: "Noto Emoji", "Noto Sans KR", sans-serif;
+  font-variant-emoji: text;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── 인증 화면(본사 로그인/회원가입) 전용 토큰 · 다크 (Figma 1:3818 등) ── */
+:root {
+  --auth-page-bg: #0a0c0f;
+  --auth-panel-bg: rgba(17, 20, 24, 0.6);
+  --auth-panel-border: rgba(255, 255, 255, 0.06);
+  --auth-panel-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  --auth-card-bg: #111418;
+  --auth-card-border: #1a1f26;
+  --auth-card-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+  --auth-input-bg: #0d1014;
+  --auth-input-border: #232a33;
+  --auth-text-strong: #ffffff;
+  --auth-text-body: #9aabb7;
+  --auth-text-muted: #6b7f8e;
+  --auth-accent: #2f86f6;
+  --auth-danger: #ef4444;
+  --auth-divider: #232a33;
+  --auth-secondary-bg: #0d1014;
+  --auth-tile-blue-bg: rgba(47, 134, 246, 0.16);
+  --auth-tile-orange-bg: rgba(255, 138, 76, 0.16);
+  --auth-dot-off: #232a33;
+  --auth-glow-blue: rgba(47, 134, 246, 0.16);
+  --auth-glow-warm: rgba(255, 150, 90, 0.12);
+  --auth-btn-shadow: 0 8px 20px rgba(46, 133, 245, 0.28);
+}
+
+/* ── 인증 화면 · 라이트 (Figma 화이트 시안) ── */
+[data-theme="light"] {
+  --auth-page-bg: #f1f5fb;
+  --auth-panel-bg: rgba(255, 255, 255, 0.55);
+  --auth-panel-border: rgba(255, 255, 255, 0.8);
+  --auth-panel-shadow: 0 12px 40px rgba(51, 77, 128, 0.06);
+  --auth-card-bg: #ffffff;
+  --auth-card-border: rgba(227, 232, 239, 0.6);
+  --auth-card-shadow: 0 16px 48px rgba(51, 77, 128, 0.08);
+  --auth-input-bg: #ffffff;
+  --auth-input-border: #e3e8ef;
+  --auth-text-strong: #111827;
+  --auth-text-body: #4b5563;
+  --auth-text-muted: #6b7280;
+  --auth-accent: #2f86f6;
+  --auth-danger: #ef4444;
+  --auth-divider: #e3e8ef;
+  --auth-secondary-bg: #f8fafc;
+  --auth-tile-blue-bg: #eaf2fe;
+  --auth-tile-orange-bg: #fff0e8;
+  --auth-dot-off: #e3e8ef;
+  --auth-glow-blue: rgba(47, 134, 246, 0.2);
+  --auth-glow-warm: rgba(255, 150, 90, 0.2);
+  --auth-btn-shadow: 0 8px 20px rgba(46, 133, 245, 0.28);
+}
+
+/* ── 로그인 직후 스플래시 ── */
+:root {
+  --splash-bg: linear-gradient(180deg, #0a0c0f 0%, #10151c 100%);
+  --splash-title: #ffffff;
+  --splash-sub: #9aabb7;
+  --splash-blob-blue: rgba(47, 134, 246, 0.18);
+  --splash-blob-warm: rgba(255, 150, 90, 0.14);
+}
+[data-theme="light"] {
+  --splash-bg: linear-gradient(180deg, #ffffff 0%, #eef4ff 100%);
+  --splash-title: #111827;
+  --splash-sub: #6b7280;
+  --splash-blob-blue: rgba(47, 134, 246, 0.2);
+  --splash-blob-warm: rgba(255, 150, 90, 0.2);
+}
+@keyframes splash-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes splash-pop {
+  from { opacity: 0; transform: translateY(10px) scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash-anim { animation: none !important; }
+}
+
+/* 인증 화면 배경: 라이트는 Figma 블러 이미지, 다크는 CSS 글로우 */
+[data-theme="light"] .auth-bg {
+  background-image: url("./assets/auth/bg.png");
+  background-size: cover;
+  background-position: center;
+}
+[data-theme="light"] .auth-glows {
+  display: none;
+}
+
+/* 인쇄 결과물은 테마와 관계없이 흰 종이 기준(라이트 토큰)으로 출력 */
+@media print {
+  :root,
+  [data-theme] {
+    --color-bg-app: #ffffff;
+    --color-bg-surface: #ffffff;
+    --color-bg-card: #f9fbff;
+    --color-bg-input: #ffffff;
+    --color-bg-tile: #eef2f8;
+    --color-border: #e3e8f0;
+    --color-text-heading: #111827;
+    --color-text-body: #6b7280;
+    --color-text-label: #374151;
+    --color-text-faint: #9ca3af;
+    --color-text-value: #1f2937;
+    --color-accent: #2879ea;
+    --color-delta-bg: #fee2e2;
+    --color-delta-fg: #dc2626;
+    --color-success: #16a34a;
+    --color-success-soft-bg: rgba(74, 222, 128, 0.15);
+    --color-accent-soft-bg: rgba(40, 121, 234, 0.12);
+    --color-modal-danger-border: #fecaca;
+    --color-modal-strong-text: #000000;
+    --color-checktime-done-bg: #fde6e6;
+    --color-checktime-done-border: #ea282b;
+    --color-checktime-done-text: #ea282b;
+    --color-checkbox-border: #cbd2dd;
+    --color-danger-text: #dc2626;
+    --color-heat-badge-bg: #fffbeb;
+    --color-danger-soft-bg: #fee2e2;
+    --native-color-scheme: light;
+  
+    /* ── 현장 관리자 메인(리디자인) 전용 토큰 · 라이트 (Figma 607:2) ── */
+    --home-sidebar-bg: #f3f5ff;
+    --home-main-bg: #f3f8ff;
+    --home-nav-active-bg: #eef2fd;
+    --home-nav-active-fg: #2563eb;
+    --home-search-bg: #f5f5f6;
+    --home-search-border: transparent;
+    --home-card-bg: #f9fbff;
+    --home-card-border: transparent;
+    --home-card-warm-bg: linear-gradient(90deg, #fdf6ee 0%, #faf9f6 100%);
+    --home-mini-tile-bg: #fffbf6;
+    --home-pill-bg: #ffffff;
+    --home-pill-fg: #66707a;
+    --home-glow: rgba(255, 150, 80, 0.55);
+    --home-stat-blue-bg: #edf4ff;
+    --home-stat-blue-fg: #2563eb;
+    --home-stat-green-bg: #e9f6ed;
+    --home-stat-green-fg: #16a34a;
+    --home-stat-purple-bg: #f4f1fe;
+    --home-stat-purple-fg: #7c3aed;
+    --home-stat-red-bg: #fdefef;
+    --home-stat-red-fg: #dc2626;
+    --home-table-bg: #f7f9ff;
+    --home-table-border: #efefef;
+    --home-table-head: #9ca3af;
+    --home-table-text: #374151;
+    --home-table-value: #1f2937;
+    --home-table-time: #6b7280;
+    --home-table-more: #99999e;
+    --home-date-pill-bg: #f7f9ff;
+    --home-date-fg: #47474d;
+    --home-date-sub: #9e9c99;
+    --home-btn-primary-bg: #171c29;
+    --home-btn-border: #e3e8f0;
+    --home-wave-1: #e8f0ff;
+    --home-wave-2: #bcd3ff;
+    --home-wave-3: #d7e4ff;
+    --home-wave-4: #98b9f8;
+    --home-wave-img-opacity: 1;
+    --home-wave-img-filter: none;
+    --home-tagline: #999ea6;
+    --home-avatar-bg: #e6e8f0;
+  }
+
+  *, *::before, *::after {
+    transition: none !important;
+  }
+}
