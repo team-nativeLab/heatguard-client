@@ -204,6 +204,92 @@ body {
   }
 }
 
+/* ── 인증 화면(본사 로그인/회원가입) 전용 토큰 · 다크 (Figma 1:3818 등) ── */
+:root {
+  --auth-page-bg: #0a0c0f;
+  --auth-panel-bg: rgba(17, 20, 24, 0.6);
+  --auth-panel-border: rgba(255, 255, 255, 0.06);
+  --auth-panel-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  --auth-card-bg: #111418;
+  --auth-card-border: #1a1f26;
+  --auth-card-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+  --auth-input-bg: #0d1014;
+  --auth-input-border: #232a33;
+  --auth-text-strong: #ffffff;
+  --auth-text-body: #9aabb7;
+  --auth-text-muted: #6b7f8e;
+  --auth-accent: #2f86f6;
+  --auth-danger: #ef4444;
+  --auth-divider: #232a33;
+  --auth-secondary-bg: #0d1014;
+  --auth-tile-blue-bg: rgba(47, 134, 246, 0.16);
+  --auth-tile-orange-bg: rgba(255, 138, 76, 0.16);
+  --auth-dot-off: #232a33;
+  --auth-glow-blue: rgba(47, 134, 246, 0.16);
+  --auth-glow-warm: rgba(255, 150, 90, 0.12);
+  --auth-btn-shadow: 0 8px 20px rgba(46, 133, 245, 0.28);
+}
+
+/* ── 인증 화면 · 라이트 (Figma 화이트 시안) ── */
+[data-theme="light"] {
+  --auth-page-bg: #f1f5fb;
+  --auth-panel-bg: rgba(255, 255, 255, 0.55);
+  --auth-panel-border: rgba(255, 255, 255, 0.8);
+  --auth-panel-shadow: 0 12px 40px rgba(51, 77, 128, 0.06);
+  --auth-card-bg: #ffffff;
+  --auth-card-border: rgba(227, 232, 239, 0.6);
+  --auth-card-shadow: 0 16px 48px rgba(51, 77, 128, 0.08);
+  --auth-input-bg: #ffffff;
+  --auth-input-border: #e3e8ef;
+  --auth-text-strong: #111827;
+  --auth-text-body: #4b5563;
+  --auth-text-muted: #6b7280;
+  --auth-accent: #2f86f6;
+  --auth-danger: #ef4444;
+  --auth-divider: #e3e8ef;
+  --auth-secondary-bg: #f8fafc;
+  --auth-tile-blue-bg: #eaf2fe;
+  --auth-tile-orange-bg: #fff0e8;
+  --auth-dot-off: #e3e8ef;
+  --auth-glow-blue: rgba(47, 134, 246, 0.2);
+  --auth-glow-warm: rgba(255, 150, 90, 0.2);
+  --auth-btn-shadow: 0 8px 20px rgba(46, 133, 245, 0.28);
+}
+
+/* ── 로그인 직후 스플래시 ── */
+:root {
+  --splash-bg: linear-gradient(180deg, #0a0c0f 0%, #10151c 100%);
+  --splash-title: #ffffff;
+  --splash-sub: #9aabb7;
+  --splash-blob-blue: rgba(47, 134, 246, 0.18);
+  --splash-blob-warm: rgba(255, 150, 90, 0.14);
+}
+[data-theme="light"] {
+  --splash-bg: linear-gradient(180deg, #ffffff 0%, #eef4ff 100%);
+  --splash-title: #111827;
+  --splash-sub: #6b7280;
+  --splash-blob-blue: rgba(47, 134, 246, 0.2);
+  --splash-blob-warm: rgba(255, 150, 90, 0.2);
+}
+@keyframes splash-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes splash-pop {
+  from { opacity: 0; transform: translateY(10px) scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash-anim { animation: none !important; }
+}
+
+/* 인증 화면 배경: 라이트는 Figma 블러 이미지, 다크는 CSS 글로우 */
+[data-theme="light"] .auth-bg {
+  background-image: url("./assets/auth/bg.png");
+  background-size: cover;
+  background-position: center;
+}
+[data-theme="light"] .auth-glows {
+  display: none;
+}
+
 /* 인쇄 결과물은 테마와 관계없이 흰 종이 기준(라이트 토큰)으로 출력 */
 @media print {
   :root,
