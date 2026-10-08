@@ -425,7 +425,7 @@ export default function HomeDashboard() {
             alt=""
             aria-hidden="true"
             draggable={false}
-            className="absolute right-[43px] top-[67px] z-10 size-[112px] object-contain pointer-events-none select-none"
+            className="absolute right-[25px] top-[70px] z-10 w-[148px] h-auto object-contain pointer-events-none select-none drop-shadow-[0_8px_16px_rgba(0,0,0,0.12)]"
           />
           <div className="relative flex items-center justify-between">
             {w?.heatWarningLevel ? (
