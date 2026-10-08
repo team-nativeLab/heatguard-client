@@ -415,18 +415,19 @@ export default function HomeDashboard() {
             background: `linear-gradient(110deg, color-mix(in srgb, ${glowColor} 32%, var(--home-card-bg)) 0%, var(--home-card-bg) 100%)`,
           }}
         >
-          <span
-            aria-hidden="true"
-            className="absolute right-[34px] top-[58px] z-0 size-[130px] rounded-full pointer-events-none"
-            style={{ background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)`, filter: "blur(14px)" }}
-          />
-          <img
-            src="/sun.png"
-            alt=""
-            aria-hidden="true"
-            draggable={false}
-            className="absolute right-[25px] top-[70px] z-10 w-[148px] h-auto object-contain pointer-events-none select-none drop-shadow-[0_8px_16px_rgba(0,0,0,0.12)]"
-          />
+          {/* 날씨 아이콘 + 글로우: 한 묶음으로 두어 블러가 항상 아이콘 정중앙에 오도록 한다 */}
+          <div aria-hidden="true" className="pointer-events-none absolute right-[52px] top-[78px] z-10 w-[104px] select-none">
+            <span
+              className="absolute left-1/2 top-1/2 size-[120px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+              style={{ background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)`, filter: "blur(14px)" }}
+            />
+            <img
+              src="/sun.png"
+              alt=""
+              draggable={false}
+              className="relative h-auto w-full object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.12)]"
+            />
+          </div>
           <div className="relative flex items-center justify-between">
             {w?.heatWarningLevel ? (
               <span className="bg-[var(--color-heat-badge-bg)] text-[#ff6800] text-xs font-medium leading-4 px-2.5 py-1 rounded-full">
