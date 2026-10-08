@@ -390,3 +390,34 @@ body {
   --color-warn: #b45309;
   --color-warn-soft-bg: #fef3c7;
 }
+
+/* ── 사이드바 물결: 천천히 흐르는 움직임 ── */
+.sidebar-wave {
+  transform-origin: 0% 100%;
+  opacity: var(--home-wave-img-opacity);
+  filter: var(--home-wave-img-filter);
+  will-change: transform;
+}
+.sidebar-wave-a {
+  animation: sidebar-wave-a 9s ease-in-out infinite alternate;
+}
+.sidebar-wave-b {
+  opacity: calc(var(--home-wave-img-opacity) * 0.45);
+  animation: sidebar-wave-b 13s ease-in-out infinite alternate;
+}
+@keyframes sidebar-wave-a {
+  0%   { transform: translate3d(0, 0, 0) scale(1, 1); }
+  50%  { transform: translate3d(7px, -8px, 0) scale(1.03, 1.06); }
+  100% { transform: translate3d(-5px, 3px, 0) scale(1.01, 0.97); }
+}
+@keyframes sidebar-wave-b {
+  0%   { transform: translate3d(-6px, 4px, 0) scale(1.06, 0.96); }
+  50%  { transform: translate3d(4px, -6px, 0) scale(1.02, 1.08); }
+  100% { transform: translate3d(8px, 2px, 0) scale(1.08, 1.0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-wave-a,
+  .sidebar-wave-b {
+    animation: none;
+  }
+}

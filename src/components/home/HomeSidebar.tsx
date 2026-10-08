@@ -1,6 +1,7 @@
 import { useState, type ComponentType } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
+import sidebarWave from "../../assets/images/sidebar-wave.png";
 import { DashboardIcon, SiteManageIcon, AccountIcon, ContactIcon } from "../icons/Icons";
 import { useToast } from "../../shared/ui/Toast";
 import { useSiteMe, clearSiteMeCache } from "../../hooks/useSiteMe";
@@ -95,6 +96,24 @@ export default function HomeSidebar() {
       </nav>
 
       <div className="flex-1" />
+
+      {/* 하단 파란 물결: 겹친 두 층이 서로 다른 속도로 천천히 흘러 유동적으로 보인다 */}
+      <img
+        src={sidebarWave}
+        alt=""
+        aria-hidden="true"
+        className="sidebar-wave sidebar-wave-b pointer-events-none absolute -left-4 bottom-0 z-0 w-[calc(100%+32px)] max-w-none h-auto select-none"
+      />
+      <img
+        src={sidebarWave}
+        alt=""
+        aria-hidden="true"
+        className="sidebar-wave sidebar-wave-a pointer-events-none absolute -left-2 bottom-0 z-0 w-[calc(100%+16px)] max-w-none h-auto select-none"
+      />
+
+      <p className="relative z-10 px-5 pb-5 text-[10px] leading-[1.4] text-[var(--home-tagline)] whitespace-pre-line select-none">
+        {"Safer\nWorkplaces\nBrighter Tomorrows"}
+      </p>
 
       <div className="relative z-10 border-[var(--color-border)] border-solid border-t flex flex-col items-start p-4 w-full">
         <div className="flex gap-2 items-center w-full">
