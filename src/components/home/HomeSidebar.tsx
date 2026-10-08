@@ -1,7 +1,6 @@
 import { useState, type ComponentType } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
-import sidebarWave from "../../assets/images/sidebar-wave.png";
 import { DashboardIcon, SiteManageIcon, AccountIcon, ContactIcon } from "../icons/Icons";
 import { useToast } from "../../shared/ui/Toast";
 import { useSiteMe, clearSiteMeCache } from "../../hooks/useSiteMe";
@@ -56,12 +55,12 @@ export default function HomeSidebar() {
       <div className="relative z-10 border-[var(--color-border)] border-b border-solid flex flex-col items-start p-5 w-full">
         <div className="flex gap-2.5 items-center w-full">
           <div className="bg-[var(--home-nav-active-bg)] flex items-center justify-center rounded shrink-0 size-6 overflow-hidden">
-            <img alt="현장가드 로고" className="size-6 object-cover" src={logo} />
+            <img alt="폭염가드 로고" className="size-6 object-cover" src={logo} />
           </div>
-          <p className="font-semibold leading-5 text-sm text-[var(--color-text-heading)] whitespace-nowrap">현장가드</p>
+          <p className="font-semibold leading-5 text-sm text-[var(--color-text-heading)] whitespace-nowrap">폭염가드</p>
         </div>
         <p className="font-['JetBrains_Mono',monospace] leading-[15px] pl-8 pt-0.5 text-[var(--color-text-body)] text-[10px] tracking-[0.5px] whitespace-nowrap">
-          현장 안전을 더 가깝게
+          현장
         </p>
       </div>
 
@@ -96,17 +95,6 @@ export default function HomeSidebar() {
       </nav>
 
       <div className="flex-1" />
-
-      <img
-        src={sidebarWave}
-        alt=""
-        aria-hidden="true"
-        className="pointer-events-none absolute left-0 bottom-0 z-0 w-[calc(100%+8px)] max-w-none h-auto select-none opacity-[var(--home-wave-img-opacity)] [filter:var(--home-wave-img-filter)]"
-      />
-
-      <p className="relative z-10 px-5 pb-5 text-[10px] leading-[1.4] text-[var(--home-tagline)] whitespace-pre-line select-none">
-        {"Safer\nWorkplaces\nBrighter Tomorrows"}
-      </p>
 
       <div className="relative z-10 border-[var(--color-border)] border-solid border-t flex flex-col items-start p-4 w-full">
         <div className="flex gap-2 items-center w-full">

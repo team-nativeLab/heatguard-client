@@ -34,7 +34,7 @@ export default function AuthField({
   const inputType = type === "password" && revealed ? "text" : type;
 
   return (
-    <div className={`flex flex-col ${isLg ? "gap-2" : "gap-1.5"} ${className}`}>
+    <div className={`relative flex flex-col pb-[18px] ${isLg ? "gap-2" : "gap-1.5"} ${className}`}>
       <div className="flex items-start justify-between">
         <label htmlFor={inputId} className={`font-bold leading-[1.4] text-[var(--auth-text-strong)] ${isLg ? "text-sm" : "text-[13px]"}`}>
           {label}
@@ -73,7 +73,7 @@ export default function AuthField({
       </div>
 
       {error && (
-        <p id={`${inputId}-error`} role="alert" className="text-xs leading-[1.4] text-[var(--auth-danger)]">
+        <p id={`${inputId}-error`} role="alert" className="absolute bottom-0 left-0 text-xs leading-[1.4] text-[var(--auth-danger)]">
           {error}
         </p>
       )}

@@ -16,13 +16,13 @@ const FEATURES = [
     icon: <UsersIcon />,
     tone: "blue" as const,
     title: "작업자 계정 추가",
-    description: "팀마다 작업자를 지정하세요",
+    description: "현장 작업자를 팀에 초대하세요",
   },
   {
     icon: <MapPinIcon />,
     tone: "orange" as const,
     title: "소속 현장 관리",
-    description: "현장 정보와 팀을 관리하세요",
+    description: "현장별 기록과 알림을 관리하세요",
   },
 ];
 
@@ -50,8 +50,18 @@ function validate(v: Values): Errors {
   return errors;
 }
 
+const STEP1_KEYS: (keyof Values)[] = ["companyName", "managerName", "siteName", "email"];
+const STEP2_KEYS: (keyof Values)[] = ["password", "passwordConfirm"];
+
+function pick(errors: Errors, keys: (keyof Values)[]): Errors {
+  const out: Errors = {};
+  for (const k of keys) if (errors[k]) out[k] = errors[k];
+  return out;
+}
+
 export default function SignupPage() {
   const navigate = useNavigate();
+  const [step, setStep] = useState<1 | 2>(1);
   const { showToast } = useToast();
 
   const [values, setValues] = useState<Values>({
@@ -78,9 +88,26 @@ export default function SignupPage() {
     e.preventDefault();
     if (submitting) return;
 
-    const nextErrors = validate(values);
-    setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0) return;
+    const all = validate(values);
+
+    // 1단계: 기본 정보 검증 후 다음 단계로
+    if (step === 1) {
+      const step1Errors = pick(all, STEP1_KEYS);
+      setErrors(step1Errors);
+      if (Object.keys(step1Errors).length === 0) setStep(2);
+      return;
+    }
+
+    // 2단계: 비밀번호 검증 후 가입
+    const step1Errors = pick(all, STEP1_KEYS);
+    if (Object.keys(step1Errors).length > 0) {
+      setErrors(step1Errors);
+      setStep(1);
+      return;
+    }
+    const step2Errors = pick(all, STEP2_KEYS);
+    setErrors(step2Errors);
+    if (Object.keys(step2Errors).length > 0) return;
 
     setSubmitting(true);
     try {
@@ -92,15 +119,16 @@ export default function SignupPage() {
         password: values.password,
       });
       showToast("가입이 완료됐어요. 로그인해주세요.", "success");
-      navigate("/auth/login");
+      navigate("/auth/login", { state: { authFrom: "signup" } });
     } catch (err) {
       if (isDemoFallback(err)) {
         showToast("서버 연결 없이 데모 모드로 진행할게요.", "default");
-        navigate("/auth/login");
+        navigate("/auth/login", { state: { authFrom: "signup" } });
         return;
       }
       if (err instanceof ApiError && err.status === 409) {
         setErrors({ email: "이미 가입된 이메일이에요" });
+        setStep(1);
       } else {
         showToast(errorMessage(err, "회원가입에 실패했어요."), "error");
       }
@@ -111,35 +139,56 @@ export default function SignupPage() {
 
   return (
     <AuthCardLayout
-      eyebrow="현장관리자 회원가입"
-      titleLines={["가입 즉시", "현장 관리가 시작됩니다"]}
+      side="signup"
+      eyebrow="관리자 회원가입"
+      titleLines={["가입 즉시", "현장 관리자가 됩니다"]}
       descriptionLines={["현장관리자 계정 생성 후, 작업자 계정을 추가하고", "소속 현장을 관리할 수 있습니다."]}
       features={FEATURES}
       step={2}
-      footerLabel="폭염가드 현장관리자 포털"
-      cardTitle="현장관리자 회원가입"
-      cardSubtitle="가입 시 관리자 계정이 생성됩니다."
+      footerLabel="폭염가드 관리자 포털"
+      cardTitle="관리자 회원가입"
+      cardSubtitle={step === 1 ? "가입 시 관리자 계정이 생성됩니다." : "로그인에 사용할 비밀번호를 설정해주세요."}
     >
       <form className="mt-[22px] flex flex-col" onSubmit={handleSubmit} noValidate>
-        <div className="flex flex-col gap-3">
-          <AuthField size="md" label="회사 이름" icon={<BuildingIcon />} placeholder="탑세이프티컨설팅" autoComplete="organization" {...bind("companyName")} />
-          <AuthField size="md" label="담당자 이름" icon={<UserIcon />} placeholder="홍길동" autoComplete="name" {...bind("managerName")} />
-          <AuthField size="md" label="현장 이름" icon={<MapPinIcon size={18} />} placeholder="울산 석유화학 플랜트 증설" {...bind("siteName")} />
-          <AuthField size="md" label="이메일" type="email" icon={<MailIcon />} placeholder="manager@example.com" autoComplete="username" {...bind("email")} />
-          <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2">
-            <AuthField size="md" label="비밀번호" type="password" icon={<LockIcon />} placeholder="8자 이상" autoComplete="new-password" {...bind("password")} />
-            <AuthField size="md" label="비밀번호 확인" type="password" icon={<LockIcon />} placeholder="한 번 더 입력" autoComplete="new-password" {...bind("passwordConfirm")} />
-          </div>
+
+        <div key={step} className="auth-fade-in flex min-h-[340px] flex-col">
+          {step === 1 ? (
+            <>
+              <AuthField size="md" label="회사 이름" icon={<BuildingIcon />} placeholder="탑세이프티컨설팅" autoComplete="organization" {...bind("companyName")} />
+              <AuthField size="md" label="담당자 이름" icon={<UserIcon />} placeholder="홍길동" autoComplete="name" {...bind("managerName")} />
+              <AuthField size="md" label="현장 이름" icon={<MapPinIcon size={18} />} placeholder="울산 석유화학 플랜트 증설" {...bind("siteName")} />
+              <AuthField size="md" label="이메일" type="email" icon={<MailIcon />} placeholder="manager@example.com" autoComplete="username" {...bind("email")} />
+            </>
+          ) : (
+            <>
+              <AuthField size="md" label="비밀번호" type="password" icon={<LockIcon />} placeholder="8자 이상 입력하세요" autoComplete="new-password" revealable {...bind("password")} />
+              <AuthField size="md" label="비밀번호 확인" type="password" icon={<LockIcon />} placeholder="비밀번호를 한 번 더 입력하세요" autoComplete="new-password" revealable {...bind("passwordConfirm")} />
+            </>
+          )}
         </div>
 
-        <AuthSubmitButton className="mt-6" disabled={submitting}>
-          {submitting ? "가입 중..." : "가입하기"}
-        </AuthSubmitButton>
+        {step === 1 ? (
+          <AuthSubmitButton className="mt-6">다음</AuthSubmitButton>
+        ) : (
+          <div className="mt-6 flex gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setErrors({});
+                setStep(1);
+              }}
+              className="h-12 w-[96px] shrink-0 rounded-xl border border-[var(--auth-input-border)] bg-[var(--auth-secondary-bg)] text-base font-medium text-[var(--auth-text-strong)] transition hover:border-[var(--auth-accent)]"
+            >
+              이전
+            </button>
+            <AuthSubmitButton disabled={submitting}>{submitting ? "가입 중..." : "가입하기"}</AuthSubmitButton>
+          </div>
+        )}
       </form>
 
       <p className="mt-[18px] flex justify-center gap-3 text-sm leading-[1.4]">
         <span className="text-[var(--auth-text-muted)]">이미 계정이 있으신가요?</span>
-        <Link to="/auth/login" className="font-bold text-[var(--auth-accent)] hover:underline">
+        <Link to="/auth/login" state={{ authFrom: "signup" }} className="font-bold text-[var(--auth-accent)] hover:underline">
           로그인
         </Link>
       </p>

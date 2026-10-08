@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import logo from "../../assets/images/logo.png";
 
 /** 스플래시를 완전히 보여주는 시간 */
@@ -8,26 +8,12 @@ const FADE_MS = 600;
 
 type Phase = "idle" | "show" | "fade";
 
-interface SplashContextValue {
-  /** 로그인 직후 호출 — 메인 아이콘 스플래시를 보여준 뒤 자연스럽게 사라진다. */
-  showSplash: () => void;
-}
-
-const SplashContext = createContext<SplashContextValue>({ showSplash: () => {} });
-
-export function useSplash() {
-  return useContext(SplashContext);
-}
-
 /**
- * 앱 최상단에서 스플래시 오버레이를 관리한다.
- * showSplash() 호출 즉시 화면 전체를 덮고(라우팅은 뒤에서 진행),
- * 2초 뒤 페이드아웃되며 그 아래의 화면이 자연스럽게 드러난다.
+ * 웹에 들어올 때(첫 로드·새로고침)마다 스플래시를 보여준다.
+ * 처음부터 화면 전체를 덮고 있다가 2초 뒤 페이드아웃되며 그 아래의 화면이 자연스럽게 드러난다.
  */
 export function SplashProvider({ children }: { children: ReactNode }) {
-  const [phase, setPhase] = useState<Phase>("idle");
-
-  const showSplash = useCallback(() => setPhase("show"), []);
+  const [phase, setPhase] = useState<Phase>("show");
 
   useEffect(() => {
     if (phase === "show") {
@@ -40,13 +26,11 @@ export function SplashProvider({ children }: { children: ReactNode }) {
     }
   }, [phase]);
 
-  const value = useMemo(() => ({ showSplash }), [showSplash]);
-
   return (
-    <SplashContext.Provider value={value}>
+    <>
       {children}
       {phase !== "idle" && <SplashOverlay fading={phase === "fade"} />}
-    </SplashContext.Provider>
+    </>
   );
 }
 
@@ -62,7 +46,6 @@ function SplashOverlay({ fading }: { fading: boolean }) {
         opacity: fading ? 0 : 1,
         transition: `opacity ${FADE_MS}ms ease`,
         pointerEvents: fading ? "none" : "auto",
-        animation: "splash-fade-in 300ms ease both",
       }}
     >
       <div className={`${blob} -bottom-[18%] -left-[8%] h-[40%] w-[34%]`} style={{ background: "var(--splash-blob-blue)" }} />

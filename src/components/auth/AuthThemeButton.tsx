@@ -13,7 +13,7 @@ export default function AuthThemeButton({ className = "" }: { className?: string
       onClick={toggleTheme}
       aria-label={label}
       title={label}
-      className={`flex size-9 items-center justify-center rounded-[10px] text-[var(--auth-text-body)] border border-[var(--auth-input-border)] bg-[var(--auth-input-bg)] transition-colors hover:border-[var(--auth-accent)] ${className}`}
+      className={`flex size-9 items-center justify-center rounded-[10px] text-[var(--auth-text-body)] border border-[var(--auth-input-border)] bg-[var(--auth-card-bg)] transition-colors hover:border-[var(--auth-accent)] ${className}`}
     >
       {isLight ? <SunIcon /> : <MoonIcon />}
     </button>

@@ -3,8 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthCardLayout from "../components/auth/AuthCardLayout";
 import AuthField from "../components/auth/AuthField";
 import AuthSubmitButton from "../components/auth/AuthSubmitButton";
-import { BarChartIcon, FileTextIcon, LockIcon, MailIcon, UsersIcon } from "../components/auth/AuthIcons";
-import { useSplash } from "../components/splash/LoginSplash";
+import { BarChartIcon, FileTextIcon, LockIcon, MailIcon } from "../components/auth/AuthIcons";
 import { useToast } from "../shared/ui/Toast";
 import { markSignedIn } from "../shared/auth/RequireAuth";
 import { clearSiteMeCache } from "../hooks/useSiteMe";
@@ -16,20 +15,14 @@ const FEATURES = [
   {
     icon: <BarChartIcon />,
     tone: "blue" as const,
-    title: "소속 현장 위험도 순 대시보드",
-    description: "위험도가 높은 팀부터 한눈에",
-  },
-  {
-    icon: <UsersIcon />,
-    tone: "orange" as const,
-    title: "작업자 계정 생성 및 관리",
-    description: "팀별 작업자 계정을 손쉽게",
+    title: "소속 현장 위험도 대시보드",
+    description: "실시간 위험도와 현황을 한눈에",
   },
   {
     icon: <FileTextIcon />,
-    tone: "blue" as const,
+    tone: "orange" as const,
     title: "전체 기록 통합 피드",
-    description: "팀별 기록과 알림을 통합 관리",
+    description: "현장별 기록과 알림을 통합 관리",
   },
 ];
 
@@ -39,18 +32,13 @@ export default function LoginPage() {
   // 로그인 가드가 보낸 경우 원래 보던 화면으로 돌아간다.
   const redirectTo = (location.state as { from?: string } | null)?.from ?? "/manager";
   const { showToast } = useToast();
-  const { showSplash } = useSplash();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  /** 메인 아이콘 스플래시를 띄운 채 대상 화면으로 이동 */
-  const enter = () => {
-    showSplash();
-    navigate(redirectTo, { replace: true });
-  };
+  const enter = () => navigate(redirectTo, { replace: true });
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -90,16 +78,16 @@ export default function LoginPage() {
 
   return (
     <AuthCardLayout
-      eyebrow="현장관리자 포털"
+      eyebrow="관리자 포털"
       titleLines={["여러 팀을", "한눈에 관리하세요"]}
-      descriptionLines={["소속 현장의 폭염 상황 · 기록 · 긴급호출을", "실시간으로 관리합니다."]}
+      descriptionLines={["소속 현장 전체의 폭염 상황 · 기록 · 긴급호출을", "실시간으로 관리합니다."]}
       features={FEATURES}
       step={1}
-      footerLabel="폭염가드 현장관리자 포털"
+      footerLabel="폭염가드 관리자 포털"
       cardTitle="폭염가드"
-      cardSubtitle="현장관리자 계정으로 로그인해주세요."
+      cardSubtitle="관리자 계정으로 로그인해주세요."
     >
-      <form className="mt-9 flex flex-col gap-5" onSubmit={handleSubmit} noValidate>
+      <form className="mt-9 flex flex-col gap-0.5" onSubmit={handleSubmit} noValidate>
         <AuthField
           label="이메일"
           type="email"
@@ -130,9 +118,9 @@ export default function LoginPage() {
         <AuthSubmitButton disabled={submitting}>{submitting ? "로그인 중..." : "로그인"}</AuthSubmitButton>
       </form>
 
-      <p className="mt-10 flex justify-center gap-3 text-sm leading-[1.4]">
-        <span className="text-[var(--auth-text-muted)]">계정이 없으신가요?</span>
-        <Link to="/auth/signup" className="font-bold text-[var(--auth-accent)] hover:underline">
+      <p className="mt-4 flex justify-center gap-3 text-sm leading-[1.4]">
+        <span className="text-[var(--auth-text-muted)]">관리자 계정이 없으신가요?</span>
+        <Link to="/auth/signup" state={{ authFrom: "login" }} className="font-bold text-[var(--auth-accent)] hover:underline">
           회원가입
         </Link>
       </p>

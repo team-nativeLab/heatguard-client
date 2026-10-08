@@ -206,25 +206,25 @@ body {
 
 /* ── 인증 화면(본사 로그인/회원가입) 전용 토큰 · 다크 (Figma 1:3818 등) ── */
 :root {
-  --auth-page-bg: #0a0c0f;
-  --auth-panel-bg: rgba(17, 20, 24, 0.6);
-  --auth-panel-border: rgba(255, 255, 255, 0.06);
-  --auth-panel-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
-  --auth-card-bg: #111418;
-  --auth-card-border: #1a1f26;
-  --auth-card-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
-  --auth-input-bg: #0d1014;
-  --auth-input-border: #232a33;
-  --auth-text-strong: #ffffff;
-  --auth-text-body: #9aabb7;
-  --auth-text-muted: #6b7f8e;
+  --auth-page-bg: #0a0e17;
+  --auth-panel-bg: rgba(17, 24, 39, 0.7);
+  --auth-panel-border: rgba(31, 41, 55, 0.8);
+  --auth-panel-shadow: 0 12px 40px rgba(51, 77, 128, 0.06);
+  --auth-card-bg: #141b2a;
+  --auth-card-border: #263042;
+  --auth-card-shadow: 0 16px 48px rgba(51, 77, 128, 0.3);
+  --auth-input-bg: #0f1522;
+  --auth-input-border: #263042;
+  --auth-text-strong: #f1f5f9;
+  --auth-text-body: #94a3b8;
+  --auth-text-muted: #64748b;
   --auth-accent: #2f86f6;
   --auth-danger: #ef4444;
-  --auth-divider: #232a33;
-  --auth-secondary-bg: #0d1014;
-  --auth-tile-blue-bg: rgba(47, 134, 246, 0.16);
-  --auth-tile-orange-bg: rgba(255, 138, 76, 0.16);
-  --auth-dot-off: #232a33;
+  --auth-divider: #263042;
+  --auth-secondary-bg: #182133;
+  --auth-tile-blue-bg: #1a2740;
+  --auth-tile-orange-bg: #2a1e18;
+  --auth-dot-off: #263042;
   --auth-glow-blue: rgba(47, 134, 246, 0.16);
   --auth-glow-warm: rgba(255, 150, 90, 0.12);
   --auth-btn-shadow: 0 8px 20px rgba(46, 133, 245, 0.28);
@@ -369,4 +369,24 @@ body {
   *, *::before, *::after {
     transition: none !important;
   }
+}
+
+/* 인증 화면 내용 페이드인 (카드 이동·단계 전환 시) */
+@keyframes auth-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.auth-fade-in { animation: auth-fade-in 450ms ease both; }
+@media (prefers-reduced-motion: reduce) {
+  .auth-fade-in { animation: none; }
+}
+
+/* ── 상태 배지(답변 대기 등) 경고 톤 ── */
+:root {
+  --color-warn: #fbbf24;
+  --color-warn-soft-bg: rgba(251, 191, 36, 0.14);
+}
+[data-theme="light"] {
+  --color-warn: #b45309;
+  --color-warn-soft-bg: #fef3c7;
 }
