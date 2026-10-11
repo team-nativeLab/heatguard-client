@@ -204,6 +204,92 @@ body {
   }
 }
 
+/* ── 인증 화면(본사 로그인/회원가입) 전용 토큰 · 다크 (Figma 1:3818 등) ── */
+:root {
+  --auth-page-bg: #0a0e17;
+  --auth-panel-bg: rgba(17, 24, 39, 0.7);
+  --auth-panel-border: rgba(31, 41, 55, 0.8);
+  --auth-panel-shadow: 0 12px 40px rgba(51, 77, 128, 0.06);
+  --auth-card-bg: #141b2a;
+  --auth-card-border: #263042;
+  --auth-card-shadow: 0 16px 48px rgba(51, 77, 128, 0.3);
+  --auth-input-bg: #0f1522;
+  --auth-input-border: #263042;
+  --auth-text-strong: #f1f5f9;
+  --auth-text-body: #94a3b8;
+  --auth-text-muted: #64748b;
+  --auth-accent: #2f86f6;
+  --auth-danger: #ef4444;
+  --auth-divider: #263042;
+  --auth-secondary-bg: #182133;
+  --auth-tile-blue-bg: #1a2740;
+  --auth-tile-orange-bg: #2a1e18;
+  --auth-dot-off: #263042;
+  --auth-glow-blue: rgba(47, 134, 246, 0.16);
+  --auth-glow-warm: rgba(255, 150, 90, 0.12);
+  --auth-btn-shadow: 0 8px 20px rgba(46, 133, 245, 0.28);
+}
+
+/* ── 인증 화면 · 라이트 (Figma 화이트 시안) ── */
+[data-theme="light"] {
+  --auth-page-bg: #f1f5fb;
+  --auth-panel-bg: rgba(255, 255, 255, 0.55);
+  --auth-panel-border: rgba(255, 255, 255, 0.8);
+  --auth-panel-shadow: 0 12px 40px rgba(51, 77, 128, 0.06);
+  --auth-card-bg: #ffffff;
+  --auth-card-border: rgba(227, 232, 239, 0.6);
+  --auth-card-shadow: 0 16px 48px rgba(51, 77, 128, 0.08);
+  --auth-input-bg: #ffffff;
+  --auth-input-border: #e3e8ef;
+  --auth-text-strong: #111827;
+  --auth-text-body: #4b5563;
+  --auth-text-muted: #6b7280;
+  --auth-accent: #2f86f6;
+  --auth-danger: #ef4444;
+  --auth-divider: #e3e8ef;
+  --auth-secondary-bg: #f8fafc;
+  --auth-tile-blue-bg: #eaf2fe;
+  --auth-tile-orange-bg: #fff0e8;
+  --auth-dot-off: #e3e8ef;
+  --auth-glow-blue: rgba(47, 134, 246, 0.2);
+  --auth-glow-warm: rgba(255, 150, 90, 0.2);
+  --auth-btn-shadow: 0 8px 20px rgba(46, 133, 245, 0.28);
+}
+
+/* ── 로그인 직후 스플래시 ── */
+:root {
+  --splash-bg: linear-gradient(180deg, #0a0c0f 0%, #10151c 100%);
+  --splash-title: #ffffff;
+  --splash-sub: #9aabb7;
+  --splash-blob-blue: rgba(47, 134, 246, 0.18);
+  --splash-blob-warm: rgba(255, 150, 90, 0.14);
+}
+[data-theme="light"] {
+  --splash-bg: linear-gradient(180deg, #ffffff 0%, #eef4ff 100%);
+  --splash-title: #111827;
+  --splash-sub: #6b7280;
+  --splash-blob-blue: rgba(47, 134, 246, 0.2);
+  --splash-blob-warm: rgba(255, 150, 90, 0.2);
+}
+@keyframes splash-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes splash-pop {
+  from { opacity: 0; transform: translateY(10px) scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash-anim { animation: none !important; }
+}
+
+/* 인증 화면 배경: 라이트는 Figma 블러 이미지, 다크는 CSS 글로우 */
+[data-theme="light"] .auth-bg {
+  background-image: url("./assets/auth/bg.png");
+  background-size: cover;
+  background-position: center;
+}
+[data-theme="light"] .auth-glows {
+  display: none;
+}
+
 /* 인쇄 결과물은 테마와 관계없이 흰 종이 기준(라이트 토큰)으로 출력 */
 @media print {
   :root,
@@ -282,5 +368,56 @@ body {
 
   *, *::before, *::after {
     transition: none !important;
+  }
+}
+
+/* 인증 화면 내용 페이드인 (카드 이동·단계 전환 시) */
+@keyframes auth-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.auth-fade-in { animation: auth-fade-in 450ms ease both; }
+@media (prefers-reduced-motion: reduce) {
+  .auth-fade-in { animation: none; }
+}
+
+/* ── 상태 배지(답변 대기 등) 경고 톤 ── */
+:root {
+  --color-warn: #fbbf24;
+  --color-warn-soft-bg: rgba(251, 191, 36, 0.14);
+}
+[data-theme="light"] {
+  --color-warn: #b45309;
+  --color-warn-soft-bg: #fef3c7;
+}
+
+/* ── 사이드바 물결: 천천히 흐르는 움직임 ── */
+.sidebar-wave {
+  transform-origin: 0% 100%;
+  opacity: var(--home-wave-img-opacity);
+  filter: var(--home-wave-img-filter);
+  will-change: transform;
+}
+.sidebar-wave-a {
+  animation: sidebar-wave-a 9s ease-in-out infinite alternate;
+}
+.sidebar-wave-b {
+  opacity: calc(var(--home-wave-img-opacity) * 0.45);
+  animation: sidebar-wave-b 13s ease-in-out infinite alternate;
+}
+@keyframes sidebar-wave-a {
+  0%   { transform: translate3d(0, 0, 0) scale(1, 1); }
+  50%  { transform: translate3d(7px, -8px, 0) scale(1.03, 1.06); }
+  100% { transform: translate3d(-5px, 3px, 0) scale(1.01, 0.97); }
+}
+@keyframes sidebar-wave-b {
+  0%   { transform: translate3d(-6px, 4px, 0) scale(1.06, 0.96); }
+  50%  { transform: translate3d(4px, -6px, 0) scale(1.02, 1.08); }
+  100% { transform: translate3d(8px, 2px, 0) scale(1.08, 1.0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-wave-a,
+  .sidebar-wave-b {
+    animation: none;
   }
 }

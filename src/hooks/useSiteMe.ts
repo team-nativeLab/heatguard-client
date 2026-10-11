@@ -3,20 +3,20 @@ import { authApi, siteApi, isDemoFallback } from "../api";
 
 interface MeResponse {
   brand: string;
-  user: { name: string };
+  user: { name: string; email: string; phone?: string };
   site: { name: string };
 }
 
 /** 불러오기 전/실패 시 표시값 — 실제 사람 이름처럼 보이는 가짜 값을 쓰지 않는다. */
 const PLACEHOLDER: MeResponse = {
   brand: "현장가드",
-  user: { name: "관리자" },
+  user: { name: "관리자", email: "" },
   site: { name: "" },
 };
 
 const DEMO: MeResponse = {
   brand: "현장가드",
-  user: { name: "김철수" },
+  user: { name: "김철수", email: "manager01@example.com" },
   site: { name: "인천 복합물류센터" },
 };
 
@@ -34,7 +34,7 @@ async function loadMe(): Promise<MeResponse> {
   if (!inFlight) {
     inFlight = Promise.all([authApi.me(), siteApi.getProfile()])
       .then(([user, profile]) => {
-        cache = { brand: "현장가드", user: { name: user.name }, site: { name: profile.siteName } };
+        cache = { brand: "현장가드", user: { name: user.name, email: user.email, phone: (user as { phone?: string }).phone }, site: { name: profile.siteName } };
         return cache;
       })
       .catch((err) => {
