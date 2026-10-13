@@ -1,7 +1,8 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
 import AuthThemeButton from "./AuthThemeButton";
+import { ArrowLeftIcon } from "./AuthIcons";
 
 export interface AuthFeature {
   icon: ReactNode;
@@ -161,6 +162,18 @@ export default function AuthCardLayout({
           }}
         >
           <AuthThemeButton className={`absolute top-7 ${themeButtonSide === "left" ? "left-7" : "right-7"}`} />
+          {/* 소속 선택 화면으로 돌아가는 뒤로가기 (소속 선택 화면 자신에는 표시하지 않는다) */}
+          {!hideCardHeader && themeButtonSide === "right" && (
+            <Link
+              to={side === "signup" ? "/auth/select/signup" : "/auth/select"}
+              state={{ authFrom: side }}
+              aria-label="소속 선택으로 돌아가기"
+              title="소속 선택으로 돌아가기"
+              className="group absolute left-7 top-7 flex size-9 items-center justify-center rounded-[10px] border border-[var(--auth-input-border)] bg-[var(--auth-card-bg)] text-[var(--auth-text-body)] transition-colors hover:border-[var(--auth-accent)] hover:text-[var(--auth-accent)]"
+            >
+              <ArrowLeftIcon size={18} className="transition-transform group-hover:-translate-x-0.5" />
+            </Link>
+          )}
 
           <div className="auth-fade-in mx-auto w-full max-w-[388px]">
             {!hideCardHeader && (

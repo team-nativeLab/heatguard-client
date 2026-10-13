@@ -149,6 +149,19 @@ export default function SignupPage() {
       cardSubtitle={step === 1 ? "가입 시 관리자 계정이 생성됩니다." : "로그인에 사용할 비밀번호를 설정해주세요."}
     >
       <form className="mt-[22px] flex flex-col" onSubmit={handleSubmit} noValidate>
+        {/* 단계 표시 */}
+        <div className="mb-4 flex items-center gap-2">
+          {[1, 2].map((n) => (
+            <span
+              key={n}
+              className="h-[3px] w-6 rounded-[2px] transition-colors"
+              style={{ background: n <= step ? "var(--auth-accent)" : "var(--auth-dot-off)" }}
+            />
+          ))}
+          <span className="ml-1 text-xs leading-[1.4] text-[var(--auth-text-muted)]">
+            {step} / 2 · {step === 1 ? "기본 정보" : "비밀번호 설정"}
+          </span>
+        </div>
 
         <div key={step} className="auth-fade-in flex min-h-[340px] flex-col">
           {step === 1 ? (
