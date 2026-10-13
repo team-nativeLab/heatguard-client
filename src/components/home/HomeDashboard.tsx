@@ -415,19 +415,6 @@ export default function HomeDashboard() {
             background: `linear-gradient(110deg, color-mix(in srgb, ${glowColor} 32%, var(--home-card-bg)) 0%, var(--home-card-bg) 100%)`,
           }}
         >
-          {/* 날씨 아이콘 + 글로우: 한 묶음으로 두어 블러가 항상 아이콘 정중앙에 오도록 한다 */}
-          <div aria-hidden="true" className="pointer-events-none absolute right-[52px] top-[78px] z-10 w-[104px] select-none">
-            <span
-              className="absolute left-1/2 top-1/2 size-[120px] -translate-x-1/2 -translate-y-1/2 rounded-full"
-              style={{ background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)`, filter: "blur(14px)" }}
-            />
-            <img
-              src="/sun.png"
-              alt=""
-              draggable={false}
-              className="relative h-auto w-full object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.12)]"
-            />
-          </div>
           <div className="relative flex items-center justify-between">
             {w?.heatWarningLevel ? (
               <span className="bg-[var(--color-heat-badge-bg)] text-[#ff6800] text-xs font-medium leading-4 px-2.5 py-1 rounded-full">
@@ -448,23 +435,43 @@ export default function HomeDashboard() {
             </button>
           </div>
 
-          <p className="relative text-[15px] font-medium leading-5 text-[var(--color-text-label)] pt-4">현재 온도</p>
-          <div className="relative flex items-end gap-3 pt-1 h-[64px]">
-            <span className="font-semibold text-[72px] leading-[72px] tracking-[-1.5px] text-[var(--color-text-heading)]">
-              {w ? w.temperature.toFixed(1) : "—"}
-            </span>
-            <div className="flex items-center gap-2 pb-1.5">
-              <span className="font-medium text-[24px] leading-8 text-[var(--color-text-heading)]">°C</span>
-              {w && w.deltaFromYesterday != null && (
-                <span className="font-['JetBrains_Mono',monospace] text-sm font-medium leading-5 px-2 py-[2px] rounded bg-[var(--color-delta-bg)] text-[var(--color-delta-fg)]">
-                  {w.deltaFromYesterday > 0 ? "+" : ""}
-                  {w.deltaFromYesterday.toFixed(1)}°C
-                </span>
-              )}
+          {/* 헤더와 하단 타일 사이의 정중앙에 온도 영역과 날씨 아이콘을 맞춘다 */}
+          <div className="relative flex flex-1 flex-col justify-center py-4">
+            {/* 날씨 아이콘 + 글로우: 한 묶음으로 두어 블러가 항상 아이콘 정중앙에 오도록 한다 */}
+            <div aria-hidden="true" className="pointer-events-none absolute right-[52px] top-1/2 z-10 w-[104px] -translate-y-1/2 select-none">
+              <span
+                className="absolute left-1/2 top-1/2 size-[120px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+                style={{ background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)`, filter: "blur(14px)" }}
+              />
+              <img
+                src="/sun.png"
+                alt=""
+                draggable={false}
+                className="relative h-auto w-full object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.12)]"
+              />
             </div>
+            <p className="relative text-[15px] font-medium leading-5 text-[var(--color-text-label)]">현재 온도</p>
+            <div className="relative flex items-end gap-3 pt-1 h-[64px]">
+              <span className="font-semibold text-[56px] leading-[56px] tracking-[-1.5px] text-[var(--color-text-heading)]">
+                {w ? w.temperature.toFixed(1) : "—"}
+              </span>
+              <div className="flex items-center gap-2 pb-1.5">
+                <span className="font-medium text-[24px] leading-8 text-[var(--color-text-heading)]">°C</span>
+                {w && w.deltaFromYesterday != null && (
+                  <span className="font-['JetBrains_Mono',monospace] text-sm font-medium leading-5 px-2 py-[2px] rounded bg-[var(--color-delta-bg)] text-[var(--color-delta-fg)]">
+                    {w.deltaFromYesterday > 0 ? "+" : ""}
+                    {w.deltaFromYesterday.toFixed(1)}°C
+                  </span>
+                )}
+              </div>
+            </div>
+            <p className="relative text-[15px] font-medium leading-5 pt-2 text-[var(--color-text-label)] whitespace-pre">
+              {w ? `습도 ${w.humidity}%  |  체감온도 ${w.feelsLike.toFixed(1)}°C` : "기상 기준값 미입력"}
+            </p>
+
           </div>
 
-          <div className="relative grid grid-cols-3 gap-3 mt-auto pt-4">
+          <div className="relative grid grid-cols-3 gap-3">
             {[
               ["습도", w ? `${w.humidity}%` : "—"],
               ["체감온도", w ? `${w.feelsLike.toFixed(1)}°C` : "—"],

@@ -130,15 +130,6 @@ export default function ScreenHQDashboard() {
             className="relative flex min-h-[275px] flex-col overflow-hidden rounded-xl border border-[var(--home-card-border)] p-5"
             style={{ background: `linear-gradient(110deg, color-mix(in srgb, ${glowColor} 32%, var(--home-card-bg)) 0%, var(--home-card-bg) 100%)` }}
           >
-            {/* 날씨 아이콘 + 글로우: 한 묶음으로 두어 블러가 항상 아이콘 정중앙에 오도록 한다 */}
-            <div aria-hidden="true" className="pointer-events-none absolute right-[52px] top-[78px] z-10 w-[104px] select-none">
-              <span
-                className="absolute left-1/2 top-1/2 size-[120px] -translate-x-1/2 -translate-y-1/2 rounded-full"
-                style={{ background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)`, filter: "blur(14px)" }}
-              />
-              <img src="/sun.png" alt="" draggable={false} className="relative h-auto w-full object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.12)]" />
-            </div>
-
             <div className="relative flex items-center justify-between">
               <span className="rounded-full bg-[var(--color-danger-soft-bg)] px-2.5 py-1 text-xs font-medium leading-4 text-[var(--color-danger-text)]">
                 <span className="figma-emoji">☀</span> {top ? heatLabel(top) : "현장 없음"}
@@ -159,20 +150,32 @@ export default function ScreenHQDashboard() {
               )}
             </div>
 
-            <p className="relative pt-4 text-[15px] font-medium leading-5 text-[var(--color-text-label)]">가장 높은 현장 온도</p>
-            <div className="relative flex h-[64px] items-end gap-3 pt-1">
-              <span className="text-[56px] font-semibold leading-[56px] tracking-[-1.5px] text-[var(--color-text-heading)]">{topTemp != null ? topTemp.toFixed(1) : "-"}</span>
-              {topTemp != null && (
-                <div className="flex items-center gap-2 pb-1.5">
-                  <span className="text-[24px] font-medium leading-8 text-[var(--color-text-heading)]">°C</span>
-                </div>
-              )}
-            </div>
-            <p className="relative whitespace-pre pt-3 text-[15px] font-medium leading-5 text-[var(--color-text-label)]">
-              {`습도 ${weather?.humidity != null ? `${weather.humidity}%` : "-"}  |  체감온도 ${tempText(weather?.apparentTemperature) || "-"}`}
-            </p>
+            {/* 헤더와 하단 타일 사이의 정중앙에 온도 영역과 날씨 아이콘을 맞춘다 */}
+            <div className="relative flex flex-1 flex-col justify-center py-4">
+              {/* 날씨 아이콘 + 글로우: 한 묶음으로 두어 블러가 항상 아이콘 정중앙에 오도록 한다 */}
+              <div aria-hidden="true" className="pointer-events-none absolute right-[52px] top-1/2 z-10 w-[104px] -translate-y-1/2 select-none">
+                <span
+                  className="absolute left-1/2 top-1/2 size-[120px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+                  style={{ background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)`, filter: "blur(14px)" }}
+                />
+                <img src="/sun.png" alt="" draggable={false} className="relative h-auto w-full object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.12)]" />
+              </div>
 
-            <div className="relative mt-auto grid grid-cols-3 gap-3 pt-4">
+              <p className="relative text-[15px] font-medium leading-5 text-[var(--color-text-label)]">가장 높은 현장 온도</p>
+              <div className="relative flex h-[64px] items-end gap-3 pt-1">
+                <span className="text-[56px] font-semibold leading-[56px] tracking-[-1.5px] text-[var(--color-text-heading)]">{topTemp != null ? topTemp.toFixed(1) : "-"}</span>
+                {topTemp != null && (
+                  <div className="flex items-center gap-2 pb-1.5">
+                    <span className="text-[24px] font-medium leading-8 text-[var(--color-text-heading)]">°C</span>
+                  </div>
+                )}
+              </div>
+              <p className="relative whitespace-pre pt-2 text-[15px] font-medium leading-5 text-[var(--color-text-label)]">
+                {`습도 ${weather?.humidity != null ? `${weather.humidity}%` : "-"}  |  체감온도 ${tempText(weather?.apparentTemperature) || "-"}`}
+              </p>
+            </div>
+
+            <div className="relative grid grid-cols-3 gap-3">
               {[
                 ["습도", weather?.humidity != null ? `${weather.humidity}%` : "-"],
                 ["체감온도", tempText(weather?.apparentTemperature) || "-"],
