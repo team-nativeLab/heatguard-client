@@ -160,11 +160,11 @@ export default function ScreenHQDashboard() {
             </div>
 
             <p className="relative pt-4 text-[15px] font-medium leading-5 text-[var(--color-text-label)]">가장 높은 현장 온도</p>
-            <div className="relative flex h-[82px] items-end gap-3 pt-1">
-              <span className="text-[72px] font-semibold leading-[72px] tracking-[-2px] text-[var(--color-text-heading)]">{topTemp != null ? topTemp.toFixed(1) : "-"}</span>
+            <div className="relative flex h-[64px] items-end gap-3 pt-1">
+              <span className="text-[56px] font-semibold leading-[56px] tracking-[-1.5px] text-[var(--color-text-heading)]">{topTemp != null ? topTemp.toFixed(1) : "-"}</span>
               {topTemp != null && (
                 <div className="flex items-center gap-2 pb-1.5">
-                  <span className="text-[32px] font-medium leading-10 text-[var(--color-text-heading)]">°C</span>
+                  <span className="text-[24px] font-medium leading-8 text-[var(--color-text-heading)]">°C</span>
                 </div>
               )}
             </div>

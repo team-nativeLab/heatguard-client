@@ -129,9 +129,6 @@ export default function SiteWithdrawnPage() {
       <SiteManagementHeader active="withdrawn" />
 
       <div className="w-full pt-8">
-        <p className="text-[var(--color-text-body)] text-xs pb-3">
-          탈퇴한 팀원의 개인정보는 {RETENTION_DAYS}일간 보관 후 파기할 수 있어요.
-        </p>
         {!loaded && <SkeletonTable rows={4} />}
         <div className={`bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg w-full overflow-hidden ${loaded ? "" : "hidden"}`}>
           <table className="w-full text-left">
@@ -176,6 +173,9 @@ export default function SiteWithdrawnPage() {
                   </td>
                 </tr>
               )}
+              <p className="text-[var(--color-text-body)] text-xs pb-3">
+                탈퇴한 팀원의 개인정보는 {RETENTION_DAYS}일간 보관 후 파기할 수 있어요.
+              </p>
             </tbody>
           </table>
         </div>

@@ -83,9 +83,6 @@ export default function SiteTeamsPage() {
       return showToast("이메일을 확인해주세요.", "error");
     }
     if (form.initialPassword.length < 8) return showToast("초기 비밀번호는 8자 이상이어야 해요.", "error");
-    if (teams.some((t) => t.leaderName === form.leaderName.trim())) {
-      return showToast("같은 팀장 이름의 팀이 이미 있어요.", "error");
-    }
     setSubmitting(true);
     const payload = {
       name: `${form.leaderName.trim()} 팀`,

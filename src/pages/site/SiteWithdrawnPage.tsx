@@ -129,9 +129,6 @@ export default function SiteWithdrawnPage() {
       <SiteManagementHeader active="withdrawn" />
 
       <div className="w-full pt-8">
-        <p className="text-[var(--color-text-body)] text-xs pb-3">
-          탈퇴한 팀원의 개인정보는 {RETENTION_DAYS}일간 보관 후 파기할 수 있어요.
-        </p>
         {!loaded && <SkeletonTable rows={4} />}
         <div className={`bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg w-full overflow-hidden ${loaded ? "" : "hidden"}`}>
           <table className="w-full text-left">
@@ -179,6 +176,28 @@ export default function SiteWithdrawnPage() {
             </tbody>
           </table>
         </div>
+
+        <p className="mt-4 flex items-start gap-1.5 text-xs leading-[1.5] text-[var(--color-text-body)]">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            className="mt-[1px] shrink-0 text-[var(--color-heat-yellow-fg)]"
+          >
+            <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+            <path d="M12 9v4" />
+            <path d="M12 17h.01" />
+          </svg>
+          <span>
+            <span className="font-medium text-[var(--color-heat-yellow-fg)]">주의</span> 탈퇴한 팀원의 개인정보는 {RETENTION_DAYS}일간 보관 후 파기할 수 있어요.
+          </span>
+        </p>
       </div>
 
       {detail && detailInfo && (
