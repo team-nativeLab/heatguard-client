@@ -449,12 +449,12 @@ export default function HomeDashboard() {
           </div>
 
           <p className="relative text-[15px] font-medium leading-5 text-[var(--color-text-label)] pt-4">현재 온도</p>
-          <div className="relative flex items-end gap-3 pt-1 h-[82px]">
-            <span className="font-semibold text-[72px] leading-[72px] tracking-[-2px] text-[var(--color-text-heading)]">
+          <div className="relative flex items-end gap-3 pt-1 h-[64px]">
+            <span className="font-semibold text-[56px] leading-[56px] tracking-[-1.5px] text-[var(--color-text-heading)]">
               {w ? w.temperature.toFixed(1) : "—"}
             </span>
             <div className="flex items-center gap-2 pb-1.5">
-              <span className="font-medium text-[32px] leading-10 text-[var(--color-text-heading)]">°C</span>
+              <span className="font-medium text-[24px] leading-8 text-[var(--color-text-heading)]">°C</span>
               {w && w.deltaFromYesterday != null && (
                 <span className="font-['JetBrains_Mono',monospace] text-sm font-medium leading-5 px-2 py-[2px] rounded bg-[var(--color-delta-bg)] text-[var(--color-delta-fg)]">
                   {w.deltaFromYesterday > 0 ? "+" : ""}
