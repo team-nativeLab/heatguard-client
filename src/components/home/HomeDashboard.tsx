@@ -450,7 +450,7 @@ export default function HomeDashboard() {
 
           <p className="relative text-[15px] font-medium leading-5 text-[var(--color-text-label)] pt-4">현재 온도</p>
           <div className="relative flex items-end gap-3 pt-1 h-[64px]">
-            <span className="font-semibold text-[56px] leading-[56px] tracking-[-1.5px] text-[var(--color-text-heading)]">
+            <span className="font-semibold text-[72px] leading-[72px] tracking-[-1.5px] text-[var(--color-text-heading)]">
               {w ? w.temperature.toFixed(1) : "—"}
             </span>
             <div className="flex items-center gap-2 pb-1.5">
