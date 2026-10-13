@@ -463,9 +463,6 @@ export default function HomeDashboard() {
               )}
             </div>
           </div>
-          <p className="relative text-[15px] font-medium leading-5 pt-3 text-[var(--color-text-label)] whitespace-pre">
-            {w ? `습도 ${w.humidity}%  |  체감온도 ${w.feelsLike.toFixed(1)}°C` : "기상 기준값 미입력"}
-          </p>
 
           <div className="relative grid grid-cols-3 gap-3 mt-auto pt-4">
             {[
