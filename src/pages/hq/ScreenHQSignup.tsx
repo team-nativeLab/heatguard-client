@@ -1,3 +1,5 @@
+import EmailVerification from "../../components/auth/EmailVerification";
+import { useEmailVerification } from "../../hooks/useEmailVerification";
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthCardLayout from "../../components/auth/AuthCardLayout";
@@ -65,16 +67,22 @@ export default function ScreenHQSignup({ validation = false }: { validation?: bo
   const [submitting, setSubmitting] = useState(false);
   const [values, setValues] = useState<Values>(EMPTY);
   const [step, setStep] = useState<1 | 2>(1);
+  const verification = useEmailVerification(values.email);
+  const [codeError, setCodeError] = useState("");
   const [errors, setErrors] = useState<Errors>(() => (validation ? pick(validate(EMPTY), STEP1_KEYS) : {}));
 
   const set = (key: keyof Values) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setValues((prev) => ({ ...prev, [key]: e.target.value }));
+    if (key === "email") {
+      verification.reset();
+      setCodeError("");
+    }
     if (errors[key]) setErrors((prev) => ({ ...prev, [key]: undefined }));
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (submitting) return;
+    if (submitting || verification.sending) return;
     const all = validate(values);
     const step1Errors = pick(all, STEP1_KEYS);
 
@@ -95,6 +103,10 @@ export default function ScreenHQSignup({ validation = false }: { validation?: bo
     setErrors(step2Errors);
     if (Object.keys(step2Errors).length > 0) return;
 
+    const verificationError = verification.inputError();
+    setCodeError(verificationError ?? "");
+    if (verificationError) return;
+
     setSubmitting(true);
     try {
       await hqApi.register({
@@ -102,6 +114,7 @@ export default function ScreenHQSignup({ validation = false }: { validation?: bo
         managerName: values.manager.trim(),
         email: values.email.trim(),
         password: values.password,
+        verificationCode: verification.code,
       });
       showToast("가입이 완료됐어요. 로그인해주세요.", "success");
       navigate("/hq/login", { state: { authFrom: "signup" } });
@@ -112,6 +125,8 @@ export default function ScreenHQSignup({ validation = false }: { validation?: bo
       } else if (err instanceof ApiError && (err.code === "EMAIL_ALREADY_EXISTS" || (err.status === 409 && !err.code))) {
         setErrors({ email: "이미 가입된 이메일이에요" });
         setStep(1);
+      } else if (err instanceof ApiError && err.code === "INVALID_VERIFICATION_CODE") {
+        setCodeError("인증코드가 올바르지 않거나 만료됐어요. 확인 후 다시 입력하거나 재발송해주세요.");
       } else {
         showToast(errorMessage(err, "회원가입에 실패했어요."), "error");
       }
@@ -143,6 +158,7 @@ export default function ScreenHQSignup({ validation = false }: { validation?: bo
             <>
               <AuthField size="md" label="비밀번호" type="password" icon={<LockIcon />} placeholder="8자 이상 입력하세요" autoComplete="new-password" revealable value={values.password} onChange={set("password")} error={errors.password} />
               <AuthField size="md" label="비밀번호 확인" type="password" icon={<LockIcon />} placeholder="비밀번호를 한 번 더 입력하세요" autoComplete="new-password" revealable value={values.confirm} onChange={set("confirm")} error={errors.confirm} />
+              <EmailVerification email={values.email} verification={verification} disabled={submitting} error={codeError} onEdit={() => setCodeError("")} />
             </>
           )}
         </div>
@@ -153,6 +169,7 @@ export default function ScreenHQSignup({ validation = false }: { validation?: bo
           <div className="mt-6 flex gap-3">
             <button
               type="button"
+              disabled={submitting || verification.sending}
               onClick={() => {
                 setErrors({});
                 setStep(1);
@@ -161,7 +178,7 @@ export default function ScreenHQSignup({ validation = false }: { validation?: bo
             >
               이전
             </button>
-            <AuthSubmitButton className="mt-0" disabled={submitting}>{submitting ? "가입 중..." : "가입하기"}</AuthSubmitButton>
+            <AuthSubmitButton className="mt-0" disabled={submitting || verification.sending}>{submitting ? "가입 중..." : "가입하기"}</AuthSubmitButton>
           </div>
         )}
       </form>
