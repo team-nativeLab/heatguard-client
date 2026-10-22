@@ -132,7 +132,7 @@ export default function ScreenHQSignup({ validation = false }: { validation?: bo
       cardSubtitle={step === 1 ? "가입 시 회사와 본사 계정이 함께 생성됩니다." : "로그인에 사용할 비밀번호를 설정해주세요."}
     >
       <form className="mt-[22px] flex flex-col" onSubmit={handleSubmit} noValidate>
-        <div key={step} className="auth-fade-in flex flex-col">
+        <div key={step} className="auth-fade-in flex min-h-[340px] flex-col">
           {step === 1 ? (
             <>
               <AuthField size="md" label="본사(회사) 이름" icon={<BuildingIcon />} placeholder="탑세이프티컨설팅" autoComplete="organization" value={values.company} onChange={set("company")} error={errors.company} />
