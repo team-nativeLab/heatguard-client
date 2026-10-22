@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
+import ModalShell, { btnPrimary, btnSecondary } from "../../components/home/ModalShell";
 import HQLayout, { HQContent } from "../../components/hq/HQLayout";
 import { SiteHeatBadge } from "../../components/hq/RecordTable";
 import { EmptyBlock, ErrorBlock, LoadingBlock } from "../../components/hq/LoadState";
@@ -16,12 +17,19 @@ const EMPTY_FORM = { siteName: "", managerName: "", managerEmail: "", initialPas
 
 export default function ScreenHQSites() {
   const { showToast } = useToast();
+  const [adding, setAdding] = useState(false);
   const [sites, setSites] = useState<HqSite[] | null>(null);
   const [error, setError] = useState("");
   const [form, setForm] = useState(EMPTY_FORM);
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<HqSite | null>(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
+
+  const closeAdd = () => {
+    if (creating) return;
+    setAdding(false);
+    setForm(EMPTY_FORM);
+  };
 
   const load = useCallback(async () => {
     setError("");
@@ -43,22 +51,23 @@ export default function ScreenHQSites() {
     e.preventDefault();
     if (creating) return;
     const v = { ...form, siteName: form.siteName.trim(), managerName: form.managerName.trim(), managerEmail: form.managerEmail.trim() };
-    if (!v.siteName) return window.alert("현장 이름을 입력해 주세요.");
-    if (!v.managerName) return window.alert("현장관리자 이름을 입력해 주세요.");
-    if (!EMAIL_RE.test(v.managerEmail)) return window.alert("이메일 형식을 확인해 주세요.");
-    if (v.initialPassword.length < 8) return window.alert("초기 비밀번호는 8자 이상 입력해 주세요.");
+    if (!v.siteName) return showToast("현장 이름을 입력해 주세요.", "error");
+    if (!v.managerName) return showToast("현장관리자 이름을 입력해 주세요.", "error");
+    if (!EMAIL_RE.test(v.managerEmail)) return showToast("이메일 형식을 확인해 주세요.", "error");
+    if (v.initialPassword.length < 8) return showToast("초기 비밀번호는 8자 이상 입력해 주세요.", "error");
 
     setCreating(true);
     try {
       await hqApi.createSite({ ...v, initialPassword: form.initialPassword });
       setForm(EMPTY_FORM);
+      setAdding(false);
       showToast("현장과 관리자 계정을 만들었어요.", "success");
       await load();
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
-        window.alert("이미 사용 중인 이메일이거나 중복된 정보예요. 입력한 내용을 확인해 주세요.");
+        showToast("이미 사용 중인 이메일이거나 중복된 정보예요. 입력한 내용을 확인해 주세요.", "error");
       } else {
-        window.alert(errorMessage(err, "현장 생성에 실패했어요."));
+        showToast(errorMessage(err, "현장 생성에 실패했어요."), "error");
       }
     } finally {
       setCreating(false);
@@ -92,7 +101,7 @@ export default function ScreenHQSites() {
           ) : sites === null ? (
             <LoadingBlock />
           ) : sites.length === 0 ? (
-            <EmptyBlock>등록된 현장이 없어요. 아래에서 현장을 추가해 주세요.</EmptyBlock>
+            <EmptyBlock>등록된 현장이 없어요. 현장 추가 버튼으로 현장을 등록해 주세요.</EmptyBlock>
           ) : (
             sites.map((site) => (
               <div key={site.id} className="flex min-h-[74px] items-center gap-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-5 py-4">
@@ -122,30 +131,37 @@ export default function ScreenHQSites() {
           )}
         </div>
 
-        <form onSubmit={handleCreate} noValidate className="mt-10 border-t border-[var(--color-border)] pt-8">
-          <h2 className="text-sm font-medium text-[var(--color-text-heading)]">현장 추가</h2>
-          <div className="grid max-w-[576px] grid-cols-1 gap-4 py-5 sm:grid-cols-2">
-            <label className="flex flex-col gap-1.5">
-              <span className="text-xs text-[var(--color-text-body)]">현장 이름</span>
-              <input className={inputCls} value={form.siteName} onChange={setField("siteName")} />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className="text-xs text-[var(--color-text-body)]">현장관리자 이름</span>
-              <input className={inputCls} value={form.managerName} onChange={setField("managerName")} autoComplete="off" />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className="text-xs text-[var(--color-text-body)]">이메일</span>
-              <input className={inputCls} type="email" value={form.managerEmail} onChange={setField("managerEmail")} autoComplete="off" />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className="text-xs text-[var(--color-text-body)]">초기 비밀번호 (8자 이상)</span>
-              <input className={inputCls} type="password" value={form.initialPassword} onChange={setField("initialPassword")} autoComplete="new-password" />
-            </label>
-          </div>
-          <button type="submit" disabled={creating} className="rounded bg-[var(--color-accent)] px-3 py-1.5 text-[11px] font-medium text-white transition hover:brightness-110 disabled:opacity-60">
-            {creating ? "생성 중..." : "현장 ・ 계정 생성"}
-          </button>
-        </form>
+        <button type="button" onClick={() => setAdding(true)} className={`${btnPrimary} mt-6`}>현장 추가</button>
+
+        {adding && (
+          <ModalShell title="현장 추가" onClose={closeAdd} busy={creating} maxWidth={600}
+            footer={<>
+              <button type="button" onClick={closeAdd} disabled={creating} className={btnSecondary}>취소</button>
+              <button type="submit" form="add-site" disabled={creating} className={btnPrimary}>{creating ? "추가 중..." : "현장 추가"}</button>
+            </>}
+          >
+            <form id="add-site" onSubmit={handleCreate} noValidate>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs text-[var(--color-text-body)]">현장 이름</span>
+                  <input disabled={creating} className={inputCls} value={form.siteName} onChange={setField("siteName")} />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs text-[var(--color-text-body)]">현장관리자 이름</span>
+                  <input disabled={creating} className={inputCls} value={form.managerName} onChange={setField("managerName")} autoComplete="off" />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs text-[var(--color-text-body)]">이메일</span>
+                  <input disabled={creating} className={inputCls} type="email" value={form.managerEmail} onChange={setField("managerEmail")} autoComplete="off" />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs text-[var(--color-text-body)]">초기 비밀번호 (8자 이상)</span>
+                  <input disabled={creating} className={inputCls} type="password" value={form.initialPassword} onChange={setField("initialPassword")} autoComplete="new-password" />
+                </label>
+              </div>
+            </form>
+          </ModalShell>
+        )}
       </HQContent>
 
       {deleting && (

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { useEscapeKey } from "../../shared/ui/useEscapeKey";
 
 /** 페이지 안에서 쓰는 공용 모달 껍데기 (Figma Modal/* — 헤더·본문·푸터 구조) */
@@ -18,10 +18,40 @@ export default function ModalShell({
   busy?: boolean;
 }) {
   useEscapeKey(busy ? undefined : onClose);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const dialog = dialogRef.current;
+    (dialog?.querySelector<HTMLElement>("input:not(:disabled), textarea:not(:disabled), select:not(:disabled)") ?? dialog?.querySelector<HTMLElement>("button:not(:disabled)"))?.focus();
+    const trapFocus = (event: KeyboardEvent) => {
+      if (event.key !== "Tab" || !dialog) return;
+      const items = Array.from(dialog.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), a[href], [tabindex="0"]'));
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (!first) event.preventDefault();
+      else if (!dialog.contains(document.activeElement) || (event.shiftKey && document.activeElement === first)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", trapFocus);
+    return () => {
+      document.removeEventListener("keydown", trapFocus);
+      document.body.style.overflow = previousOverflow;
+      if (previousFocus?.isConnected) previousFocus.focus();
+    };
+  }, []);
 
   return (
     <div
       role="dialog"
+      ref={dialogRef}
       aria-modal="true"
       aria-label={title}
       className="fixed inset-0 z-[90] flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm animate-[fadeIn_0.15s_ease-out]"

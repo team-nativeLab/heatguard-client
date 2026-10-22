@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import HomeLayout from "../../components/home/HomeLayout";
+import ModalShell, { btnPrimary, btnSecondary } from "../../components/home/ModalShell";
 import SiteManagementHeader from "../../components/manager/SiteManagementHeader";
 import TeamDetailModal from "../../components/manager/TeamDetailModal";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
@@ -31,6 +32,7 @@ const ghostBtn =
 
 export default function SiteTeamsPage() {
   const { showToast } = useToast();
+  const [adding, setAdding] = useState(false);
   const [teams, setTeams] = useState<TeamSummary[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -40,6 +42,12 @@ export default function SiteTeamsPage() {
   const [deleting, setDeleting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<TeamFormValues>(EMPTY_FORM);
+
+  const closeAdd = () => {
+    if (submitting) return;
+    setAdding(false);
+    setForm(EMPTY_FORM);
+  };
 
   useEffect(() => {
     let alive = true;
@@ -98,6 +106,7 @@ export default function SiteTeamsPage() {
       setTeams((prev) => [...prev, created]);
       showToast(`${created.leaderName} 팀을 추가했어요.`, "success");
       setForm(EMPTY_FORM);
+      setAdding(false);
     } catch (err) {
       if (isDemoFallback(err)) {
         setTeams((prev) => [
@@ -116,6 +125,7 @@ export default function SiteTeamsPage() {
         ]);
         showToast(`${payload.leaderName} 팀을 추가했어요. (데모)`, "success");
         setForm(EMPTY_FORM);
+        setAdding(false);
         return;
       }
       showToast(errorMessage(err, "팀 추가에 실패했어요."), "error");
@@ -208,46 +218,49 @@ export default function SiteTeamsPage() {
             </div>
           ))}
           {loaded && teams.length === 0 && (
-            <p className="text-[var(--color-text-faint)] text-sm py-6">등록된 팀이 없어요. 아래에서 팀을 추가해주세요.</p>
+            <p className="text-[var(--color-text-faint)] text-sm py-6">등록된 팀이 없어요. 팀 추가 버튼으로 팀을 등록해주세요.</p>
           )}
         </div>
 
-        <form onSubmit={handleAddTeam} className="border-[var(--color-border)] border-t flex flex-col items-start pt-8 mt-8 w-full">
-          <h3 className="font-medium leading-5 text-sm text-[var(--color-text-heading)]">팀 추가</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-4 max-w-md w-full">
-            <label className="flex flex-col gap-1.5">
-              <span className="leading-4 text-[var(--color-text-body)] text-xs">이름 *</span>
-              <input type="text" value={form.leaderName} onChange={setField("leaderName")} maxLength={20} className={inputCls} />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className="leading-4 text-[var(--color-text-body)] text-xs">전화번호</span>
-              <input type="tel" value={form.contact} onChange={setField("contact")} placeholder="010-0000-0000" className={`${inputCls} placeholder:text-[var(--color-text-faint)]`} />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className="leading-4 text-[var(--color-text-body)] text-xs">인원</span>
-              <input type="text" inputMode="numeric" value={form.memberCount} onChange={setField("memberCount")} className={inputCls} />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className="leading-4 text-[var(--color-text-body)] text-xs">이메일 *</span>
-              <input type="email" autoComplete="username" value={form.leaderEmail} onChange={setField("leaderEmail")} className={inputCls} />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className="leading-4 text-[var(--color-text-body)] text-xs">작업 장소</span>
-              <input type="text" value={form.workLocation} onChange={setField("workLocation")} maxLength={50} className={inputCls} />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className="leading-4 text-[var(--color-text-body)] text-xs">초기 비밀번호 * (8자 이상)</span>
-              <input type="password" autoComplete="new-password" value={form.initialPassword} onChange={setField("initialPassword")} className={inputCls} />
-            </label>
-          </div>
-          <button
-            type="submit"
-            disabled={submitting}
-            className="bg-[var(--color-accent)] text-white text-sm font-medium h-9 px-4 rounded-lg hover:brightness-110 transition disabled:opacity-60"
+        <button type="button" onClick={() => setAdding(true)} className={`${btnPrimary} mt-6`}>팀 추가</button>
+
+        {adding && (
+          <ModalShell title="팀 추가" onClose={closeAdd} busy={submitting} maxWidth={600}
+            footer={<>
+              <button type="button" onClick={closeAdd} disabled={submitting} className={btnSecondary}>취소</button>
+              <button type="submit" form="add-team" disabled={submitting} className={btnPrimary}>{submitting ? "추가 중..." : "팀 추가"}</button>
+            </>}
           >
-            {submitting ? "추가 중..." : "팀 추가"}
-          </button>
-        </form>
+            <form id="add-team" onSubmit={handleAddTeam} noValidate>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+                <label className="flex flex-col gap-1.5">
+                  <span className="leading-4 text-[var(--color-text-body)] text-xs">이름 *</span>
+                  <input disabled={submitting} type="text" value={form.leaderName} onChange={setField("leaderName")} maxLength={20} className={inputCls} />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="leading-4 text-[var(--color-text-body)] text-xs">전화번호</span>
+                  <input disabled={submitting} type="tel" value={form.contact} onChange={setField("contact")} placeholder="010-0000-0000" className={`${inputCls} placeholder:text-[var(--color-text-faint)]`} />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="leading-4 text-[var(--color-text-body)] text-xs">인원</span>
+                  <input disabled={submitting} type="text" inputMode="numeric" value={form.memberCount} onChange={setField("memberCount")} className={inputCls} />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="leading-4 text-[var(--color-text-body)] text-xs">이메일 *</span>
+                  <input disabled={submitting} type="email" autoComplete="username" value={form.leaderEmail} onChange={setField("leaderEmail")} className={inputCls} />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="leading-4 text-[var(--color-text-body)] text-xs">작업 장소</span>
+                  <input disabled={submitting} type="text" value={form.workLocation} onChange={setField("workLocation")} maxLength={50} className={inputCls} />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="leading-4 text-[var(--color-text-body)] text-xs">초기 비밀번호 * (8자 이상)</span>
+                  <input disabled={submitting} type="password" autoComplete="new-password" value={form.initialPassword} onChange={setField("initialPassword")} className={inputCls} />
+                </label>
+              </div>
+            </form>
+          </ModalShell>
+        )}
       </div>
 
       {openTeam && (
