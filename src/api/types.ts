@@ -30,6 +30,7 @@ export interface SiteLoginResponse {
 }
 
 export interface SiteRegisterPayload {
+  verificationCode: string;
   companyName: string;
   managerName: string;
   siteName: string;
