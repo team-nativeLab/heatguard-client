@@ -98,6 +98,13 @@ export default function ScreenHQDashboard() {
   const glowColor = GLOW[top ? heatTone(top) : "none"];
   const weather = data?.weather;
   const topTemp = top?.temperature ?? weather?.temperature ?? null;
+  const weatherStatus = error
+    ? (data ? "갱신 실패" : "조회 실패")
+    : !data
+      ? "불러오는 중"
+      : top
+        ? (topTemp == null ? "온도 정보 없음" : heatLabel(top))
+        : "현장 없음";
   const visible = sites.filter((s) => s.name.includes(search.trim()));
 
   return (
@@ -132,7 +139,7 @@ export default function ScreenHQDashboard() {
           >
             <div className="relative flex items-center justify-between">
               <span className="rounded-full bg-[var(--color-danger-soft-bg)] px-2.5 py-1 text-xs font-medium leading-4 text-[var(--color-danger-text)]">
-                <span className="figma-emoji">☀</span> {top ? heatLabel(top) : "현장 없음"}
+                <span className="figma-emoji">☀</span> {weatherStatus}
               </span>
               {top && (
                 <button
