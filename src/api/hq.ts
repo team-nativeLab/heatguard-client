@@ -254,15 +254,11 @@ export interface SiteAppLink {
 }
 
 export function listSiteAppLinks(siteId: string) {
-  return apiFetch<{ status: "LINKED" | "UNLINKED"; items: SiteAppLink[] }>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}/app-links`);
+  return apiFetch<{ siteId: string; siteName: string; status: "LINKED" | "UNLINKED"; items: SiteAppLink[] }>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}/app-links`);
 }
 
 export function createSiteAppLink(siteId: string) {
-  return apiFetch<{ linkUrl: string; expiresAt: string }>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}/app-links`, { method: "POST", body: {} });
-}
-
-export function unlinkSiteAppAccount(siteId: string, userId: string) {
-  return apiFetch<void>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}/app-links/${encodeURIComponent(userId)}`, { method: "DELETE" });
+  return apiFetch<{ siteId: string; linkUrl: string; expiresAt: string }>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}/app-links`, { method: "POST" });
 }
 
 export interface HqRecordRow {
