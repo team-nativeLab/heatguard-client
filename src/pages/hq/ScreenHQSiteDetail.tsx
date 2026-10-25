@@ -6,6 +6,7 @@ import { ErrorBlock, LoadingBlock } from "../../components/hq/LoadState";
 import { hqApi, ApiError, errorMessage, type HqSiteDetail } from "../../api";
 import { HEAT_LABEL, HEAT_TONE } from "../../api/hq";
 import { doneText } from "../../lib/hqFormat";
+import AppSiteLinkPanel from "../../components/hq/AppSiteLinkPanel";
 
 export default function ScreenHQSiteDetail() {
   const { siteId = "" } = useParams();
@@ -54,8 +55,10 @@ export default function ScreenHQSiteDetail() {
               {!site.active && <span className="rounded bg-[var(--color-heat-none-bg)] px-2 py-0.5 text-[10px] text-[var(--color-heat-none-fg)]">비활성</span>}
             </div>
             {(site.managerName || site.managerEmail) && (
-              <p className="pt-1 text-sm text-[var(--color-text-body)]">{[site.managerName, site.managerEmail].filter(Boolean).join(" · ")}</p>
+              <p className="pt-1 text-sm text-[var(--color-text-body)]">{[site.managerName, site.managerPhone, site.managerEmail].filter(Boolean).join(" · ")}</p>
             )}
+
+            <AppSiteLinkPanel key={site.id} siteId={site.id} active={site.active} />
 
             <div className="flex flex-wrap gap-2 pt-6">
               {detail.teams.length === 0 && <span className="text-xs text-[var(--color-text-faint)]">등록된 팀이 없어요.</span>}

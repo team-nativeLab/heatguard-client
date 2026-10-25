@@ -121,6 +121,9 @@ export default function ScreenHQSites() {
                   <p className="pt-1 text-xs text-[var(--color-text-body)]">
                     {[site.managerName, site.managerPhone, site.managerEmail, site.teamCount != null ? `팀 ${site.teamCount}개` : ""].filter(Boolean).join(" · ") || "-"}
                   </p>
+                  {site.appLinkStatus && <p className="pt-1 text-xs text-[var(--color-text-body)]">
+                    앱 {site.appLinkStatus === "LINKED" ? "연동됨" : "미연동"}{site.linkedAppEmails?.length ? ` · ${site.linkedAppEmails.join(", ")}` : ""}
+                  </p>}
                 </div>
                 <SiteHeatBadge temperature={site.temperature} label={heatLabel(site)} tone={heatTone(site)} />
                 <p className="w-20 text-right font-['JetBrains_Mono',monospace] text-xs text-[var(--color-text-body)]">오늘 {site.todayRecordCount}건</p>
