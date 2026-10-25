@@ -123,6 +123,7 @@ export interface HqSite {
   managerName: string;
   managerEmail: string;
   heatLevel: HeatLevel;
+  managerPhone: string;
   /** 현재 현장 온도(°C). 미입력이면 null */
   temperature: number | null;
   checklistDone: number | null;
@@ -140,6 +141,7 @@ export function normalizeSite(raw: unknown): HqSite {
     name: str(r, "siteName", "name", "site.name") || "(이름 없음)",
     managerName: str(r, "managerName", "manager.name", "manager"),
     managerEmail: str(r, "managerEmail", "manager.email", "loginEmail", "email"),
+    managerPhone: str(r, "managerPhone", "manager.phone"),
     heatLevel: toHeatLevel(num(r, "heatLevel", "riskLevel", "heat.level")),
     temperature: num(r, "temperature", "currentTemperature", "maxTemperature", "weather.temperature", "manualWeather.temperature"),
     checklistDone: num(r, "checklistDone", "checklist.done", "checklistProgress.done", "completedCount"),
@@ -225,8 +227,9 @@ export async function listAllSites(params?: { heatLevel?: number; emergency?: bo
 export interface CreateHqSitePayload {
   siteName: string;
   managerName: string;
-  managerEmail: string;
-  initialPassword: string;
+  managerPhone: string;
+  managerEmail?: string;
+  initialPassword?: string;
 }
 
 export function createSite(payload: CreateHqSitePayload) {
@@ -287,7 +290,7 @@ export async function listRecords(params?: { date?: string; siteId?: string; cur
 }
 
 export interface HqSiteDetail {
-  site: { id: string; name: string; active: boolean; managerName: string; managerEmail: string; heatLevel: HeatLevel; temperature: number | null };
+  site: { id: string; name: string; active: boolean; managerName: string; managerEmail: string; managerPhone: string; heatLevel: HeatLevel; temperature: number | null };
   teams: { id: string; name: string; leaderName: string; workplace: string; memberCount: number | null; done: number | null; total: number | null }[];
   checklistItems: { id: string; text: string }[];
   todayRecords: HqRecordRow[];
@@ -305,6 +308,7 @@ export async function getSite(siteId: string): Promise<HqSiteDetail> {
       active: site.active,
       managerName: site.managerName,
       managerEmail: site.managerEmail,
+      managerPhone: site.managerPhone,
       heatLevel: site.heatLevel,
       temperature: site.temperature,
     },
