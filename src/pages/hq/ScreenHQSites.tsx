@@ -67,7 +67,7 @@ export default function ScreenHQSites() {
       setForm(EMPTY_FORM);
       setCreateWebAccount(false);
       setAdding(false);
-      showToast("현장을 만들었어요. 상세 화면에서 앱 연동 링크를 발급해 주세요.", "success");
+      showToast("현장을 만들었어요. 팀 등록 후 상세 화면에서 팀 초대 링크를 발급해 주세요.", "success");
       await load();
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
@@ -99,7 +99,7 @@ export default function ScreenHQSites() {
     <HQLayout>
       <HQContent>
         <h1 className="text-xl font-semibold text-[var(--color-text-heading)]">현장 관리</h1>
-        <p className="pt-1 text-sm text-[var(--color-text-body)]">현장 생성 및 앱 계정 연동 관리</p>
+        <p className="pt-1 text-sm text-[var(--color-text-body)]">현장 생성 및 앱 팀 초대</p>
 
         <div className="flex flex-col gap-2 pt-8">
           {error ? (
@@ -121,15 +121,12 @@ export default function ScreenHQSites() {
                   <p className="pt-1 text-xs text-[var(--color-text-body)]">
                     {[site.managerName, site.managerPhone, site.managerEmail, site.teamCount != null ? `팀 ${site.teamCount}개` : ""].filter(Boolean).join(" · ") || "-"}
                   </p>
-                  {site.appLinkStatus && <p className="pt-1 text-xs text-[var(--color-text-body)]">
-                    앱 {site.appLinkStatus === "LINKED" ? "연동됨" : "미연동"}{site.linkedAppEmails?.length ? ` · ${site.linkedAppEmails.join(", ")}` : ""}
-                  </p>}
                 </div>
                 <SiteHeatBadge temperature={site.temperature} label={heatLabel(site)} tone={heatTone(site)} />
                 <p className="w-20 text-right font-['JetBrains_Mono',monospace] text-xs text-[var(--color-text-body)]">오늘 {site.todayRecordCount}건</p>
                 <div className="flex gap-2">
                   <Link to={`/hq/sites/${encodeURIComponent(site.id)}`} className="rounded border border-[var(--color-checkbox-border)] px-3 py-1.5 text-xs text-[var(--color-text-label)]">
-                    상세 · 앱 연동
+                    상세 · 팀 초대
                   </Link>
                   <button type="button" onClick={() => setDeleting(site)} className="rounded border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-text-body)] transition hover:border-[var(--color-danger-border)] hover:text-[var(--color-danger-text)]">
                     삭제
@@ -160,7 +157,7 @@ export default function ScreenHQSites() {
                   <input disabled={creating} className={inputCls} value={form.managerName} onChange={setField("managerName")} autoComplete="off" />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs text-[var(--color-text-body)]">담당자 전화번호 (앱 연동 확인용)</span>
+                  <span className="text-xs text-[var(--color-text-body)]">담당자 전화번호</span>
                   <input disabled={creating} className={inputCls} type="tel" placeholder="010-1234-5678" value={form.managerPhone} onChange={setField("managerPhone")} />
                 </label>
                 <label className="flex items-center gap-2 text-sm text-[var(--color-text-body)]">

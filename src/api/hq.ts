@@ -124,8 +124,6 @@ export interface HqSite {
   managerEmail: string;
   heatLevel: HeatLevel;
   managerPhone: string;
-  appLinkStatus?: "LINKED" | "UNLINKED";
-  linkedAppEmails?: string[];
   /** 현재 현장 온도(°C). 미입력이면 null */
   temperature: number | null;
   checklistDone: number | null;
@@ -144,8 +142,6 @@ export function normalizeSite(raw: unknown): HqSite {
     managerName: str(r, "managerName", "manager.name", "manager"),
     managerEmail: str(r, "managerEmail", "manager.email", "loginEmail", "email"),
     managerPhone: str(r, "managerPhone", "manager.phone"),
-    appLinkStatus: r.appLinkStatus === "LINKED" ? "LINKED" : r.appLinkStatus === "UNLINKED" ? "UNLINKED" : undefined,
-    linkedAppEmails: Array.isArray(r.appLinks) ? r.appLinks.filter(isObj).filter((link) => link.status === "LINKED").map((link) => str(link, "email")).filter(Boolean) : [],
     heatLevel: toHeatLevel(num(r, "heatLevel", "riskLevel", "heat.level")),
     temperature: num(r, "temperature", "currentTemperature", "maxTemperature", "weather.temperature", "manualWeather.temperature"),
     checklistDone: num(r, "checklistDone", "checklist.done", "checklistProgress.done", "completedCount"),
@@ -247,18 +243,15 @@ export function deactivateSite(siteId: string) {
   return apiFetch<void>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}`, { method: "DELETE" });
 }
 
-export interface SiteAppLink {
-  userId: string;
-  email: string;
-  status: "LINKED" | "UNLINKED";
+export interface TeamInvitation {
+  inviteUrl: string;
 }
 
-export function listSiteAppLinks(siteId: string) {
-  return apiFetch<{ siteId: string; siteName: string; status: "LINKED" | "UNLINKED"; items: SiteAppLink[] }>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}/app-links`);
-}
-
-export function createSiteAppLink(siteId: string) {
-  return apiFetch<{ siteId: string; linkUrl: string; expiresAt: string }>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}/app-links`, { method: "POST" });
+export function createTeamInvitation(siteId: string, teamId: string) {
+  return apiFetch<TeamInvitation>(
+    `/api/v1/hq/sites/${encodeURIComponent(siteId)}/teams/${encodeURIComponent(teamId)}/invitations`,
+    { method: "POST" },
+  );
 }
 
 export interface HqRecordRow {
