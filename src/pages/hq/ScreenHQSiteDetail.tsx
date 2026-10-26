@@ -6,7 +6,7 @@ import { ErrorBlock, LoadingBlock } from "../../components/hq/LoadState";
 import { hqApi, ApiError, errorMessage, type HqSiteDetail } from "../../api";
 import { HEAT_LABEL, HEAT_TONE } from "../../api/hq";
 import { doneText } from "../../lib/hqFormat";
-import AppSiteLinkPanel from "../../components/hq/AppSiteLinkPanel";
+import TeamInvitationPanel from "../../components/hq/TeamInvitationPanel";
 
 export default function ScreenHQSiteDetail() {
   const { siteId = "" } = useParams();
@@ -58,7 +58,7 @@ export default function ScreenHQSiteDetail() {
               <p className="pt-1 text-sm text-[var(--color-text-body)]">{[site.managerName, site.managerPhone, site.managerEmail].filter(Boolean).join(" · ")}</p>
             )}
 
-            <AppSiteLinkPanel key={site.id} siteId={site.id} active={site.active} />
+            <TeamInvitationPanel key={site.id} siteId={site.id} active={site.active} teams={detail.teams} />
 
             <div className="flex flex-wrap gap-2 pt-6">
               {detail.teams.length === 0 && <span className="text-xs text-[var(--color-text-faint)]">등록된 팀이 없어요.</span>}
