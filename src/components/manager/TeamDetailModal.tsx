@@ -4,6 +4,9 @@ import { useEscapeKey } from "../../shared/ui/useEscapeKey";
 import { CloseIcon } from "../icons/Icons";
 import { teamsApi, isDemoFallback, errorMessage, type TeamSummary, type UpdateTeamPayload } from "../../api";
 import { validateTeamForm } from "../../lib/teamForm";
+import { getPasswordError } from "../../lib/passwordPolicy";
+import { NewPasswordInput } from "../auth/NewPasswordField";
+import { usePasswordComposition } from "../auth/usePasswordComposition";
 
 const inputCls =
   "bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg h-[36px] w-full px-3 text-sm text-[var(--color-text-heading)] outline-none focus:border-[var(--color-accent)] transition-colors";
@@ -22,6 +25,7 @@ export default function TeamDetailModal({
   const [saving, setSaving] = useState(false);
   const [editingCredentials, setEditingCredentials] = useState(false);
   const [savingCredentials, setSavingCredentials] = useState(false);
+  const passwordComposition = usePasswordComposition();
   const [form, setForm] = useState({
     leaderName: team.leaderName,
     workLocation: team.workLocation ?? "",
@@ -70,10 +74,12 @@ export default function TeamDetailModal({
   };
 
   const saveCredentials = async () => {
+    if (savingCredentials || passwordComposition.isComposing()) return;
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(credentials.leaderEmail.trim())) {
       return showToast("이메일을 확인해주세요.", "error");
     }
-    if (credentials.newPassword.length < 8) return showToast("새 비밀번호는 8자 이상이어야 해요.", "error");
+    const passwordError = getPasswordError(credentials.newPassword);
+    if (passwordError) return showToast(passwordError, "error");
     setSavingCredentials(true);
     try {
       const res = await teamsApi.updateTeamCredentials(team.id, {
@@ -145,12 +151,12 @@ export default function TeamDetailModal({
             </label>
             <label className="flex flex-col gap-1.5">
               <span className="text-[var(--color-text-body)] text-xs">새 비밀번호 * (8자 이상)</span>
-              <input
-                type="password"
-                autoComplete="new-password"
+              <NewPasswordInput
+                aria-label="새 비밀번호"
                 value={credentials.newPassword}
                 onChange={(e) => setCredentials((current) => ({ ...current, newPassword: e.target.value }))}
                 className={inputCls}
+                {...passwordComposition.inputProps}
               />
             </label>
           </div>

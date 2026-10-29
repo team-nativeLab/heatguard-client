@@ -9,6 +9,9 @@ import { TeamMemberIcon } from "../../components/icons/Icons";
 import { teamsApi, isDemoFallback, errorMessage, type TeamSummary } from "../../api";
 import { validateTeamForm, type TeamFormValues } from "../../lib/teamForm";
 import { LoadError, SkeletonList } from "../../shared/ui/Skeleton";
+import { getPasswordError } from "../../lib/passwordPolicy";
+import { NewPasswordInput } from "../../components/auth/NewPasswordField";
+import { usePasswordComposition } from "../../components/auth/usePasswordComposition";
 
 const FALLBACK_TEAMS: TeamSummary[] = [
   { id: "t1", name: "A팀", leaderName: "홍길동", workLocation: "3층 외벽", contact: "010-1234-5678", memberCount: 8, active: true, version: 1, loginEmail: "team-a@example.com" },
@@ -41,6 +44,7 @@ export default function SiteTeamsPage() {
   const [pendingDelete, setPendingDelete] = useState<TeamSummary | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const passwordComposition = usePasswordComposition();
   const [form, setForm] = useState<TeamFormValues>(EMPTY_FORM);
 
   const closeAdd = () => {
@@ -84,13 +88,14 @@ export default function SiteTeamsPage() {
 
   const handleAddTeam = async (e: FormEvent) => {
     e.preventDefault();
-    if (submitting) return;
+    if (submitting || passwordComposition.isComposing()) return;
     const error = validateTeamForm(form);
     if (error) return showToast(error, "error");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.leaderEmail.trim())) {
       return showToast("이메일을 확인해주세요.", "error");
     }
-    if (form.initialPassword.length < 8) return showToast("초기 비밀번호는 8자 이상이어야 해요.", "error");
+    const passwordError = getPasswordError(form.initialPassword);
+    if (passwordError) return showToast(passwordError, "error");
     setSubmitting(true);
     const payload = {
       name: `${form.leaderName.trim()} 팀`,
@@ -255,7 +260,14 @@ export default function SiteTeamsPage() {
                 </label>
                 <label className="flex flex-col gap-1.5">
                   <span className="leading-4 text-[var(--color-text-body)] text-xs">초기 비밀번호 * (8자 이상)</span>
-                  <input disabled={submitting} type="password" autoComplete="new-password" value={form.initialPassword} onChange={setField("initialPassword")} className={inputCls} />
+                  <NewPasswordInput
+                    aria-label="초기 비밀번호"
+                    disabled={submitting}
+                    value={form.initialPassword}
+                    onChange={setField("initialPassword")}
+                    className={inputCls}
+                    {...passwordComposition.inputProps}
+                  />
                 </label>
               </div>
             </form>

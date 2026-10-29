@@ -5,12 +5,14 @@ import { Link, useNavigate } from "react-router-dom";
 import AuthCardLayout from "../components/auth/AuthCardLayout";
 import AuthField from "../components/auth/AuthField";
 import AuthSubmitButton from "../components/auth/AuthSubmitButton";
-import { BuildingIcon, LockIcon, MailIcon, MapPinIcon, UserIcon, UsersIcon } from "../components/auth/AuthIcons";
+import { AnimatedLockIcon, BuildingIcon, MailIcon, MapPinIcon, UserIcon, UsersIcon } from "../components/auth/AuthIcons";
 import { useToast } from "../shared/ui/Toast";
 import { authApi, ApiError, errorMessage } from "../api";
+import { getPasswordConfirmationError, getPasswordError } from "../lib/passwordPolicy";
+import { NewPasswordAuthField } from "../components/auth/NewPasswordField";
+import { usePasswordComposition } from "../components/auth/usePasswordComposition";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MIN_PASSWORD = 8;
 const REQUIRED = "필수 항목입니다";
 
 const FEATURES = [
@@ -45,10 +47,10 @@ function validate(v: Values): Errors {
   if (!v.siteName.trim()) errors.siteName = REQUIRED;
   if (!v.email.trim()) errors.email = REQUIRED;
   else if (!EMAIL_RE.test(v.email.trim())) errors.email = "이메일 형식을 확인해주세요";
-  if (!v.password) errors.password = REQUIRED;
-  else if (v.password.length < MIN_PASSWORD) errors.password = `${MIN_PASSWORD}자 이상 입력해주세요`;
-  if (!v.passwordConfirm) errors.passwordConfirm = REQUIRED;
-  else if (v.password && v.password !== v.passwordConfirm) errors.passwordConfirm = "비밀번호가 일치하지 않아요";
+  const passwordError = getPasswordError(v.password);
+  const confirmationError = getPasswordConfirmationError(v.password, v.passwordConfirm);
+  if (passwordError) errors.password = passwordError;
+  if (confirmationError) errors.passwordConfirm = confirmationError;
   return errors;
 }
 
@@ -64,6 +66,8 @@ function pick(errors: Errors, keys: (keyof Values)[]): Errors {
 export default function SignupPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState<1 | 2>(1);
+  const [focusedPassword, setFocusedPassword] = useState("");
+  const [shakeKey, setShakeKey] = useState(0);
   const { showToast } = useToast();
 
   const [values, setValues] = useState<Values>({
@@ -78,6 +82,7 @@ export default function SignupPage() {
   const [codeError, setCodeError] = useState("");
   const [errors, setErrors] = useState<Errors>({});
   const [submitting, setSubmitting] = useState(false);
+  const passwordComposition = usePasswordComposition();
 
   const bind = (key: keyof Values) => ({
     value: values[key],
@@ -94,7 +99,7 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (submitting || verification.sending) return;
+    if (submitting || verification.sending || verification.verifying || passwordComposition.isComposing()) return;
 
     const all = validate(values);
 
@@ -102,7 +107,7 @@ export default function SignupPage() {
     if (step === 1) {
       const step1Errors = pick(all, STEP1_KEYS);
       setErrors(step1Errors);
-      if (Object.keys(step1Errors).length === 0) setStep(2);
+      if (Object.keys(step1Errors).length === 0 && await verification.verify()) setStep(2);
       return;
     }
 
@@ -115,11 +120,14 @@ export default function SignupPage() {
     }
     const step2Errors = pick(all, STEP2_KEYS);
     setErrors(step2Errors);
-    if (Object.keys(step2Errors).length > 0) return;
+    if (Object.keys(step2Errors).length > 0) { setShakeKey((prev) => prev + 1); return; }
 
-    const verificationError = verification.inputError();
-    setCodeError(verificationError ?? "");
-    if (verificationError) return;
+    const verificationToken = verification.getToken();
+    if (!verificationToken) {
+      setCodeError("이메일 인증이 만료됐어요. 다시 인증해주세요.");
+      setStep(1);
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -129,7 +137,8 @@ export default function SignupPage() {
         siteName: values.siteName.trim(),
         email: values.email.trim(),
         password: values.password,
-        verificationCode: verification.code,
+        confirmPassword: values.passwordConfirm,
+        verificationToken,
       });
       showToast("가입이 완료됐어요. 로그인해주세요.", "success");
       navigate("/auth/login", { state: { authFrom: "signup" } });
@@ -141,7 +150,9 @@ export default function SignupPage() {
       } else if (err instanceof ApiError && (err.code === "EMAIL_ALREADY_EXISTS" || (err.status === 409 && !err.code))) {
         setErrors({ email: "이미 가입된 이메일이에요" });
         setStep(1);
-      } else if (err instanceof ApiError && err.code === "INVALID_VERIFICATION_CODE") {
+      } else if (err instanceof ApiError && (err.code === "INVALID_VERIFICATION_CODE" || err.code === "INVALID_VERIFICATION_TOKEN")) {
+        verification.reset();
+        setStep(1);
         setCodeError("인증코드가 올바르지 않거나 만료됐어요. 확인 후 다시 입력하거나 재발송해주세요.");
       } else {
         showToast(errorMessage(err, "회원가입에 실패했어요."), "error");
@@ -171,23 +182,44 @@ export default function SignupPage() {
               <AuthField size="md" label="담당자 이름" icon={<UserIcon />} placeholder="홍길동" autoComplete="name" {...bind("managerName")} />
               <AuthField size="md" label="현장 이름" icon={<MapPinIcon size={18} />} placeholder="울산 석유화학 플랜트 증설" {...bind("siteName")} />
               <AuthField size="md" label="이메일" type="email" icon={<MailIcon />} placeholder="manager@example.com" autoComplete="username" {...bind("email")} />
+              <EmailVerification email={values.email} verification={verification} disabled={submitting} error={codeError} onEdit={() => setCodeError("")} />
             </>
           ) : (
             <>
-              <AuthField size="md" label="비밀번호" type="password" icon={<LockIcon />} placeholder="8자 이상 입력하세요" autoComplete="new-password" revealable {...bind("password")} />
-              <AuthField size="md" label="비밀번호 확인" type="password" icon={<LockIcon />} placeholder="비밀번호를 한 번 더 입력하세요" autoComplete="new-password" revealable {...bind("passwordConfirm")} />
-              <EmailVerification email={values.email} verification={verification} disabled={submitting} error={codeError} onEdit={() => setCodeError("")} />
+              <NewPasswordAuthField
+                size="md"
+                label="비밀번호"
+                icon={<AnimatedLockIcon key={`password-${shakeKey}`} open={focusedPassword === "password"} shake={!!errors.password} />}
+                placeholder="8자 이상 입력하세요"
+                revealable
+                {...bind("password")}
+                onFocus={() => setFocusedPassword("password")}
+                onBlur={() => setFocusedPassword("")}
+                {...passwordComposition.inputProps}
+              />
+              <NewPasswordAuthField
+                size="md"
+                label="비밀번호 확인"
+                icon={<AnimatedLockIcon key={`confirm-${shakeKey}`} open={focusedPassword === "confirm"} shake={!!errors.passwordConfirm} />}
+                placeholder="비밀번호를 한 번 더 입력하세요"
+                revealable
+                confirmation
+                {...bind("passwordConfirm")}
+                onFocus={() => setFocusedPassword("confirm")}
+                onBlur={() => setFocusedPassword("")}
+                {...passwordComposition.inputProps}
+              />
             </>
           )}
         </div>
 
         {step === 1 ? (
-          <AuthSubmitButton className="mt-6">다음</AuthSubmitButton>
+          <AuthSubmitButton className="mt-6" disabled={submitting || verification.sending || verification.verifying}>{verification.verifying ? "인증 확인 중..." : "인증하고 다음"}</AuthSubmitButton>
         ) : (
           <div className="mt-6 flex gap-3">
             <button
               type="button"
-              disabled={submitting || verification.sending}
+              disabled={submitting || verification.sending || verification.verifying}
               onClick={() => {
                 setErrors({});
                 setStep(1);
@@ -196,7 +228,7 @@ export default function SignupPage() {
             >
               이전
             </button>
-            <AuthSubmitButton className="mt-0" disabled={submitting || verification.sending}>{submitting ? "가입 중..." : "가입하기"}</AuthSubmitButton>
+            <AuthSubmitButton className="mt-0" disabled={submitting || verification.sending || verification.verifying}>{submitting ? "가입 중..." : "가입하기"}</AuthSubmitButton>
           </div>
         )}
       </form>

@@ -30,7 +30,8 @@ export interface SiteLoginResponse {
 }
 
 export interface SiteRegisterPayload {
-  verificationCode: string;
+  verificationToken: string;
+  confirmPassword: string;
   companyName: string;
   managerName: string;
   siteName: string;
