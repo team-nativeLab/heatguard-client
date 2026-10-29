@@ -2,7 +2,22 @@
 
 기준일: 2026-10-30 (Asia/Seoul)
 
-## 이번 작업
+## 최신 후속 작업: 가입 3단계 분리
+
+- 이슈: [#42](https://github.com/team-nativeLab/heatguard-client/issues/42)
+- 브랜치: `fix/#42-signup-three-step`
+- base: `main` / `7d47397f473ace0ce5bea03defb8dbf6879cfc78`
+- 기존 PR #41과 이슈 #40은 병합·종료 완료되어 해당 브랜치에 추가 게시하지 않고 새 후속 작업으로 분리했습니다.
+- 본사·현장관리자 가입을 **기본 정보 → 이메일 인증 → 비밀번호 설정**의 3단계로 나눴습니다. 이메일 단계에서 `인증 확인`을 실행하고 성공한 경우에만 `다음`이 활성화됩니다.
+- 이전 단계 이동과 인증 만료·중복 요청 방어는 유지하며, 단계 전환 시 입력 포커스와 스크린리더 상태 안내를 제공합니다. 비밀번호 정책·가입 API 계약은 기존 승인된 동작을 유지합니다.
+- 변경 파일은 `EmailVerification.tsx`, `SignupPage.tsx`, `ScreenHQSignup.tsx`와 이 인계 문서입니다.
+- 기존 세 파일의 미커밋 변경은 패치 백업 후, 기존 HEAD와 최신 main의 트리 동일성을 확인해 새 브랜치로 옮겼습니다. 이동 전후 각 파일의 SHA256이 일치합니다.
+- 게시 전 검증: `npm run build` 통과, `npm run lint` 종료 코드 0(기존 경고 32개), `node --test tests/password-policy.test.mjs` 31개 통과, `git diff --check` 통과.
+- 부모가 확인한 모의 브라우저 검증: 본사·현장 양쪽 가입 흐름 및 비밀번호 9개 회귀 경로 통과. 최종 reviewer 판정 CLEAN.
+- 실제 운영 서버·API 호출은 수행하지 않았습니다. 실제 CloudFront CORS·이메일 발송·가입 동작의 미검증 한계는 유지됩니다.
+- 새 PR은 Draft로 게시하며 최신 head의 CI 상태는 이슈 #42에 연결된 PR에서 확인합니다. Ready 전환·병합·배포는 이번 작업 범위에 포함하지 않습니다.
+
+## 이전 작업: 비밀번호 정책·이메일 인증 (#40 / PR #41)
 
 - 이슈: [#40](https://github.com/team-nativeLab/heatguard-client/issues/40)
 - 작업 브랜치: `fix/#40-password-policy`
