@@ -6,6 +6,9 @@ import { SiteHeatBadge } from "../../components/hq/RecordTable";
 import { EmptyBlock, ErrorBlock, LoadingBlock } from "../../components/hq/LoadState";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 import { useToast } from "../../shared/ui/Toast";
+import { getPasswordError } from "../../lib/passwordPolicy";
+import { NewPasswordInput } from "../../components/auth/NewPasswordField";
+import { usePasswordComposition } from "../../components/auth/usePasswordComposition";
 import { hqApi, ApiError, errorMessage, type HqSite } from "../../api";
 import { heatLabel, heatTone, sortByRisk } from "../../lib/hqFormat";
 
@@ -23,6 +26,7 @@ export default function ScreenHQSites() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [creating, setCreating] = useState(false);
   const [createWebAccount, setCreateWebAccount] = useState(false);
+  const passwordComposition = usePasswordComposition();
   const [deleting, setDeleting] = useState<HqSite | null>(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
 
@@ -51,14 +55,15 @@ export default function ScreenHQSites() {
 
   const handleCreate = async (e: FormEvent) => {
     e.preventDefault();
-    if (creating) return;
+    if (creating || (createWebAccount && passwordComposition.isComposing())) return;
     const v = { ...form, siteName: form.siteName.trim(), managerName: form.managerName.trim(), managerEmail: form.managerEmail.trim() };
     if (!v.siteName) return showToast("현장 이름을 입력해 주세요.", "error");
     if (!v.managerName) return showToast("현장관리자 이름을 입력해 주세요.", "error");
     const managerPhone = v.managerPhone.replace(/\D/g, "").replace(/^82/, "0");
     if (!/^0\d{8,10}$/.test(managerPhone)) return showToast("담당자 전화번호를 확인해 주세요.", "error");
     if (createWebAccount && !EMAIL_RE.test(v.managerEmail)) return showToast("이메일 형식을 확인해 주세요.", "error");
-    if (createWebAccount && v.initialPassword.length < 8) return showToast("초기 비밀번호는 8자 이상 입력해 주세요.", "error");
+    const passwordError = createWebAccount ? getPasswordError(v.initialPassword) : undefined;
+    if (passwordError) return showToast(passwordError, "error");
 
     setCreating(true);
     try {
@@ -171,7 +176,14 @@ export default function ScreenHQSites() {
                 </label>
                 <label className="flex flex-col gap-1.5">
                   <span className="text-xs text-[var(--color-text-body)]">초기 비밀번호 (8자 이상)</span>
-                  <input disabled={creating} className={inputCls} type="password" value={form.initialPassword} onChange={setField("initialPassword")} autoComplete="new-password" />
+                  <NewPasswordInput
+                    aria-label="초기 비밀번호"
+                    disabled={creating}
+                    className={inputCls}
+                    value={form.initialPassword}
+                    onChange={setField("initialPassword")}
+                    {...passwordComposition.inputProps}
+                  />
                 </label>
                 </>}
               </div>

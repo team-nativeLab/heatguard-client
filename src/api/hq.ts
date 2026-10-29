@@ -25,7 +25,8 @@ export interface HqLoginResponse {
 }
 
 export interface HqRegisterPayload {
-  verificationCode: string;
+  verificationToken: string;
+  confirmPassword: string;
   companyName: string;
   managerName: string;
   email: string;

@@ -7,7 +7,10 @@ import AuthField from "../../components/auth/AuthField";
 import AuthSubmitButton from "../../components/auth/AuthSubmitButton";
 import { hqApi, ApiError, errorMessage } from "../../api";
 import { useToast } from "../../shared/ui/Toast";
-import { BuildingIcon, LockIcon, MailIcon, MapPinIcon, UserIcon, UsersIcon } from "../../components/auth/AuthIcons";
+import { AnimatedLockIcon, BuildingIcon, MailIcon, MapPinIcon, UserIcon, UsersIcon } from "../../components/auth/AuthIcons";
+import { getPasswordConfirmationError, getPasswordError } from "../../lib/passwordPolicy";
+import { NewPasswordAuthField } from "../../components/auth/NewPasswordField";
+import { usePasswordComposition } from "../../components/auth/usePasswordComposition";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const REQUIRED = "필수 항목입니다";
@@ -41,10 +44,10 @@ function validate(v: Values): Partial<Record<keyof Values, string>> {
   if (!v.manager.trim()) errors.manager = REQUIRED;
   if (!v.email.trim()) errors.email = REQUIRED;
   else if (!EMAIL_RE.test(v.email.trim())) errors.email = "이메일 형식을 확인해주세요";
-  if (!v.password) errors.password = REQUIRED;
-  else if (v.password.length < 8) errors.password = "8자 이상 입력해주세요";
-  if (!v.confirm) errors.confirm = REQUIRED;
-  else if (v.password && v.confirm !== v.password) errors.confirm = "비밀번호가 일치하지 않아요";
+  const passwordError = getPasswordError(v.password);
+  const confirmationError = getPasswordConfirmationError(v.password, v.confirm);
+  if (passwordError) errors.password = passwordError;
+  if (confirmationError) errors.confirm = confirmationError;
   return errors;
 }
 
@@ -65,8 +68,11 @@ export default function ScreenHQSignup({ validation = false }: { validation?: bo
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [submitting, setSubmitting] = useState(false);
+  const passwordComposition = usePasswordComposition();
   const [values, setValues] = useState<Values>(EMPTY);
   const [step, setStep] = useState<1 | 2>(1);
+  const [focusedPassword, setFocusedPassword] = useState("");
+  const [shakeKey, setShakeKey] = useState(0);
   const verification = useEmailVerification(values.email);
   const [codeError, setCodeError] = useState("");
   const [errors, setErrors] = useState<Errors>(() => (validation ? pick(validate(EMPTY), STEP1_KEYS) : {}));
@@ -82,14 +88,14 @@ export default function ScreenHQSignup({ validation = false }: { validation?: bo
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (submitting || verification.sending) return;
+    if (submitting || verification.sending || verification.verifying || passwordComposition.isComposing()) return;
     const all = validate(values);
     const step1Errors = pick(all, STEP1_KEYS);
 
     // 1단계: 기본 정보 검증 후 다음 단계로
     if (step === 1) {
       setErrors(step1Errors);
-      if (Object.keys(step1Errors).length === 0) setStep(2);
+      if (Object.keys(step1Errors).length === 0 && await verification.verify()) setStep(2);
       return;
     }
 
@@ -101,11 +107,14 @@ export default function ScreenHQSignup({ validation = false }: { validation?: bo
     }
     const step2Errors = pick(all, STEP2_KEYS);
     setErrors(step2Errors);
-    if (Object.keys(step2Errors).length > 0) return;
+    if (Object.keys(step2Errors).length > 0) { setShakeKey((prev) => prev + 1); return; }
 
-    const verificationError = verification.inputError();
-    setCodeError(verificationError ?? "");
-    if (verificationError) return;
+    const verificationToken = verification.getToken();
+    if (!verificationToken) {
+      setCodeError("이메일 인증이 만료됐어요. 다시 인증해주세요.");
+      setStep(1);
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -114,7 +123,8 @@ export default function ScreenHQSignup({ validation = false }: { validation?: bo
         managerName: values.manager.trim(),
         email: values.email.trim(),
         password: values.password,
-        verificationCode: verification.code,
+        confirmPassword: values.confirm,
+        verificationToken,
       });
       showToast("가입이 완료됐어요. 로그인해주세요.", "success");
       navigate("/hq/login", { state: { authFrom: "signup" } });
@@ -125,7 +135,9 @@ export default function ScreenHQSignup({ validation = false }: { validation?: bo
       } else if (err instanceof ApiError && (err.code === "EMAIL_ALREADY_EXISTS" || (err.status === 409 && !err.code))) {
         setErrors({ email: "이미 가입된 이메일이에요" });
         setStep(1);
-      } else if (err instanceof ApiError && err.code === "INVALID_VERIFICATION_CODE") {
+      } else if (err instanceof ApiError && (err.code === "INVALID_VERIFICATION_CODE" || err.code === "INVALID_VERIFICATION_TOKEN")) {
+        verification.reset();
+        setStep(1);
         setCodeError("인증코드가 올바르지 않거나 만료됐어요. 확인 후 다시 입력하거나 재발송해주세요.");
       } else {
         showToast(errorMessage(err, "회원가입에 실패했어요."), "error");
@@ -153,23 +165,48 @@ export default function ScreenHQSignup({ validation = false }: { validation?: bo
               <AuthField size="md" label="본사(회사) 이름" icon={<BuildingIcon />} placeholder="탑세이프티컨설팅" autoComplete="organization" value={values.company} onChange={set("company")} error={errors.company} />
               <AuthField size="md" label="담당자 이름" icon={<UserIcon />} placeholder="홍길동" autoComplete="name" value={values.manager} onChange={set("manager")} error={errors.manager} />
               <AuthField size="md" label="이메일" type="email" icon={<MailIcon />} placeholder="hq@example.com" autoComplete="username" value={values.email} onChange={set("email")} error={errors.email} />
+              <EmailVerification email={values.email} verification={verification} disabled={submitting} error={codeError} onEdit={() => setCodeError("")} />
             </>
           ) : (
             <>
-              <AuthField size="md" label="비밀번호" type="password" icon={<LockIcon />} placeholder="8자 이상 입력하세요" autoComplete="new-password" revealable value={values.password} onChange={set("password")} error={errors.password} />
-              <AuthField size="md" label="비밀번호 확인" type="password" icon={<LockIcon />} placeholder="비밀번호를 한 번 더 입력하세요" autoComplete="new-password" revealable value={values.confirm} onChange={set("confirm")} error={errors.confirm} />
-              <EmailVerification email={values.email} verification={verification} disabled={submitting} error={codeError} onEdit={() => setCodeError("")} />
+              <NewPasswordAuthField
+                size="md"
+                label="비밀번호"
+                icon={<AnimatedLockIcon key={`password-${shakeKey}`} open={focusedPassword === "password"} shake={!!errors.password} />}
+                placeholder="8자 이상 입력하세요"
+                revealable
+                value={values.password}
+                onChange={set("password")}
+                error={errors.password}
+                onFocus={() => setFocusedPassword("password")}
+                onBlur={() => setFocusedPassword("")}
+                {...passwordComposition.inputProps}
+              />
+              <NewPasswordAuthField
+                size="md"
+                label="비밀번호 확인"
+                icon={<AnimatedLockIcon key={`confirm-${shakeKey}`} open={focusedPassword === "confirm"} shake={!!errors.confirm} />}
+                placeholder="비밀번호를 한 번 더 입력하세요"
+                revealable
+                confirmation
+                value={values.confirm}
+                onChange={set("confirm")}
+                error={errors.confirm}
+                onFocus={() => setFocusedPassword("confirm")}
+                onBlur={() => setFocusedPassword("")}
+                {...passwordComposition.inputProps}
+              />
             </>
           )}
         </div>
 
         {step === 1 ? (
-          <AuthSubmitButton className="mt-6">다음</AuthSubmitButton>
+          <AuthSubmitButton className="mt-6" disabled={submitting || verification.sending || verification.verifying}>{verification.verifying ? "인증 확인 중..." : "인증하고 다음"}</AuthSubmitButton>
         ) : (
           <div className="mt-6 flex gap-3">
             <button
               type="button"
-              disabled={submitting || verification.sending}
+              disabled={submitting || verification.sending || verification.verifying}
               onClick={() => {
                 setErrors({});
                 setStep(1);
@@ -178,7 +215,7 @@ export default function ScreenHQSignup({ validation = false }: { validation?: bo
             >
               이전
             </button>
-            <AuthSubmitButton className="mt-0" disabled={submitting || verification.sending}>{submitting ? "가입 중..." : "가입하기"}</AuthSubmitButton>
+            <AuthSubmitButton className="mt-0" disabled={submitting || verification.sending || verification.verifying}>{submitting ? "가입 중..." : "가입하기"}</AuthSubmitButton>
           </div>
         )}
       </form>

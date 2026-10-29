@@ -2,11 +2,13 @@
 
 ## 회원가입 이메일 인증
 
-본사·현장관리자 가입의 비밀번호 설정 화면에서 이메일 인증코드를 발송하고 입력합니다. 공통 `POST /api/v1/auth/email-codes`의 `{ email }` 요청으로 발송하며 응답의 `expiresAt`을 기준으로 남은 시간을 표시합니다. 재발송 간격은 60초입니다.
+본사·현장관리자 가입은 이메일 인증을 먼저 완료한 뒤 비밀번호를 설정합니다. 발송 요청은 `POST https://d2f845gr2v9cs2.cloudfront.net/api/v1/auth/team/email-codes`에 `{ "email": "user@example.com" }`을 보냅니다. `202`는 발송 접수만 뜻하며, 응답 본문이나 발송 성공만으로 인증 완료 처리하지 않습니다.
 
-기존 `/api/v1/auth/hq/register`·`/api/v1/auth/site/register`에 `verificationCode`를 함께 전달합니다. 별도 코드 확인 API는 없고, 가입 성공 응답으로 인증을 확인합니다. 이메일을 바꾸면 입력한 코드와 발송 상태를 초기화합니다.
+사용자가 입력한 코드는 같은 CloudFront origin의 `POST /api/v1/auth/team/email-codes/verify`에 `{ "email": "user@example.com", "verificationCode": "123456" }`으로 확인합니다. 로그인 토큰은 필요하지 않습니다. `200` 응답의 `data.verified`가 `true`이고, `verificationToken`이 있으며 `expiresAt`이 미래인 경우에만 비밀번호 단계로 이동합니다. 프론트는 코드 제한시간 10분과 재발송 간격 60초를 표시합니다. 이메일 또는 코드가 바뀌거나 다시 발송하면 이전 인증 결과가 무효화됩니다.
 
-이 프론트 변경을 사용하려면 서버에 공통 인증코드 API와 관리자 가입의 `verificationCode` 검증이 배포되어 있어야 합니다. 실제 이메일 수신에는 서버 SMTP 설정이 필요합니다. 프론트 검증은 브라우저의 테스트 응답으로 수행하며 실제 발송을 대체하지 않습니다.
+가입 완료 시 기존 역할별 경로를 사용합니다. 본사는 `POST /api/v1/auth/hq/register`, 현장관리자는 `POST /api/v1/auth/site/register`에 기존 회사·담당자·현장 정보를 포함해 `email`, `password`, `confirmPassword`, `verificationToken`을 보냅니다. 인증 토큰은 브라우저 메모리에만 보관됩니다.
+
+새 비밀번호는 프론트에서 8자 이상, ASCII `!`부터 `~`까지(공백 제외)의 영문·숫자·기호만 허용하며, 한글 등 Unicode 문자와 쉬운 반복·연속·흔한 비밀번호를 차단합니다. 이는 사용자 입력 안내와 브라우저 차단이며 서버의 동일 정책 적용 여부를 뜻하지 않습니다. 비밀번호 입력에는 기존 자물쇠 애니메이션을 사용합니다. 실제 CloudFront CORS 및 운영 API 동작은 이 저장소의 모의 브라우저 검증만으로 확인되지 않았습니다.
 
 ## 본사 앱 팀 초대
 

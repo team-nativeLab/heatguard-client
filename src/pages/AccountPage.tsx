@@ -4,8 +4,10 @@ import ModalShell, { btnPrimary, btnSecondary, inputCls } from "../components/ho
 import { useToast } from "../shared/ui/Toast";
 import { useSiteMe, patchSiteMeUser } from "../hooks/useSiteMe";
 import { authApi, siteApi, errorMessage } from "../api";
+import { getPasswordConfirmationError, getPasswordError } from "../lib/passwordPolicy";
+import { NewPasswordInput } from "../components/auth/NewPasswordField";
+import { usePasswordComposition } from "../components/auth/usePasswordComposition";
 
-const MIN_PASSWORD = 4;
 const PHONE_RE = /^0\d{1,2}-?\d{3,4}-?\d{4}$/;
 
 const smallBtn =
@@ -163,12 +165,16 @@ function PasswordModal({ onClose }: { onClose: () => void }) {
   const [confirmPw, setConfirmPw] = useState("");
   const [errors, setErrors] = useState<{ current?: string; next?: string; confirm?: string }>({});
   const [submitting, setSubmitting] = useState(false);
+  const passwordComposition = usePasswordComposition();
 
   const handleChange = async () => {
+    if (submitting || passwordComposition.isComposing()) return;
     const next: typeof errors = {};
     if (!currentPw) next.current = "현재 비밀번호를 입력해 주세요.";
-    if (newPw.length < MIN_PASSWORD) next.next = `새 비밀번호는 ${MIN_PASSWORD}자 이상이어야 해요.`;
-    if (newPw !== confirmPw) next.confirm = "새 비밀번호가 일치하지 않아요.";
+    const passwordError = getPasswordError(newPw);
+    const confirmationError = getPasswordConfirmationError(newPw, confirmPw);
+    if (passwordError) next.next = passwordError;
+    if (confirmationError) next.confirm = confirmationError;
     setErrors(next);
     if (Object.keys(next).length > 0 || submitting) return;
 
@@ -211,26 +217,39 @@ function PasswordModal({ onClose }: { onClose: () => void }) {
 
       <label className="flex flex-col gap-1.5">
         <span className={label}>새 비밀번호</span>
-        <input type="password" autoComplete="new-password" value={newPw} onChange={(e) => setNewPw(e.target.value)} placeholder="새 비밀번호 입력" className={inputCls} />
-        {errors.next ? (
-          <span className={errCls}>{errors.next}</span>
-        ) : (
-          <span className="text-[11px] leading-[1.45] text-[var(--color-text-body)]">{MIN_PASSWORD}자 이상 입력해 주세요.</span>
-        )}
+        <NewPasswordInput
+          aria-label="새 비밀번호"
+          value={newPw}
+          onChange={(e) => {
+            setNewPw(e.target.value);
+            setErrors((previous) => ({ ...previous, next: undefined }));
+          }}
+          placeholder="새 비밀번호 입력"
+          className={inputCls}
+          error={errors.next}
+          {...passwordComposition.inputProps}
+        />
       </label>
 
       <label className="flex flex-col gap-1.5">
         <span className={label}>새 비밀번호 확인</span>
-        <input
-          type="password"
-          autoComplete="new-password"
+        <NewPasswordInput
+          aria-label="새 비밀번호 확인"
+          confirmation
           value={confirmPw}
-          onChange={(e) => setConfirmPw(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleChange()}
+          onChange={(e) => {
+            setConfirmPw(e.target.value);
+            setErrors((previous) => ({ ...previous, confirm: undefined }));
+          }}
+          {...passwordComposition.inputProps}
+          onKeyDown={(e) => {
+            passwordComposition.inputProps.onKeyDown(e);
+            if (!e.defaultPrevented && e.key === "Enter") void handleChange();
+          }}
           placeholder="새 비밀번호 다시 입력"
           className={inputCls}
+          error={errors.confirm}
         />
-        {errors.confirm && <span className={errCls}>{errors.confirm}</span>}
       </label>
     </ModalShell>
   );
