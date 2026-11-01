@@ -175,7 +175,7 @@ export default function ScreenHQSites() {
                   <input disabled={creating} className={inputCls} type="email" value={form.managerEmail} onChange={setField("managerEmail")} autoComplete="off" />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs text-[var(--color-text-body)]">초기 비밀번호 (8자 이상)</span>
+                  <span className="text-xs text-[var(--color-text-body)]">초기 비밀번호 (10자 이상)</span>
                   <NewPasswordInput
                     aria-label="초기 비밀번호"
                     disabled={creating}

@@ -150,7 +150,7 @@ export default function TeamDetailModal({
               />
             </label>
             <label className="flex flex-col gap-1.5">
-              <span className="text-[var(--color-text-body)] text-xs">새 비밀번호 * (8자 이상)</span>
+              <span className="text-[var(--color-text-body)] text-xs">새 비밀번호 * (10자 이상)</span>
               <NewPasswordInput
                 aria-label="새 비밀번호"
                 value={credentials.newPassword}
