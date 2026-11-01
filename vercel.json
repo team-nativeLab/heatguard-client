@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://heatguard-temp.https.gsmsv.site/api/:path*"
+      "destination": "https://d2f845gr2v9cs2.cloudfront.net/api/:path*"
     },
     {
       "source": "/((?!api(?:/|$)).*)",
