@@ -259,7 +259,7 @@ export default function SiteTeamsPage() {
                   <input disabled={submitting} type="text" value={form.workLocation} onChange={setField("workLocation")} maxLength={50} className={inputCls} />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="leading-4 text-[var(--color-text-body)] text-xs">초기 비밀번호 * (10자 이상)</span>
+                  <span className="leading-4 text-[var(--color-text-body)] text-xs">초기 비밀번호 * (8자 이상)</span>
                   <NewPasswordInput
                     aria-label="초기 비밀번호"
                     disabled={submitting}

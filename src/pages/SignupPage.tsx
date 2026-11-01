@@ -210,7 +210,7 @@ export default function SignupPage() {
                 size="md"
                 label="비밀번호"
                 icon={<AnimatedLockIcon key={`password-${shakeKey}`} open={focusedPassword === "password"} shake={!!errors.password} />}
-                placeholder="10자 이상 입력하세요"
+                placeholder="8자 이상 입력하세요"
                 revealable
                 {...bind("password")}
                 onFocus={() => setFocusedPassword("password")}
