@@ -50,7 +50,7 @@ function Glows() {
 /**
  * 본사 로그인·회원가입 공통 레이아웃 (Figma 01_본사_로그인 / 02_본사_회원가입)
  * 좌측 소개 패널(600×673) 위로 우측 카드(500×673)가 50px 겹쳐지는 구조.
- * lg 미만에서는 소개 패널을 숨기고 카드만 보여준다.
+ * xl 미만에서는 소개 패널을 숨기고 카드만 보여준다.
  */
 export default function AuthCardLayout({
   side = "login",
@@ -86,7 +86,7 @@ export default function AuthCardLayout({
       <div className="relative z-10 flex w-full max-w-[1050px] items-stretch justify-center">
         {/* 좌측 소개 패널 */}
         <aside
-          className={`relative hidden min-h-[673px] w-[600px] shrink-0 overflow-hidden rounded-[28px] border backdrop-blur-xl lg:block ${slide} ${shown === "signup" ? "lg:translate-x-[450px]" : ""}`}
+          className={`relative hidden min-h-[673px] w-[600px] shrink-0 overflow-hidden rounded-[28px] border backdrop-blur-xl xl:block ${slide} ${shown === "signup" ? "xl:translate-x-[450px]" : ""}`}
           style={{
             background: "var(--auth-panel-bg)",
             borderColor: "var(--auth-panel-border)",
@@ -154,7 +154,7 @@ export default function AuthCardLayout({
 
         {/* 우측 카드 */}
         <main
-          className={`relative z-10 flex min-h-[673px] w-full max-w-[500px] flex-col justify-center rounded-[28px] border px-6 pb-8 pt-14 sm:px-14 lg:-ml-[50px] ${slide} ${shown === "signup" ? "lg:-translate-x-[550px]" : ""}`}
+          className={`relative z-10 flex min-h-[673px] w-full max-w-[500px] flex-col justify-center rounded-[28px] border px-6 pb-8 pt-14 sm:px-14 xl:-ml-[50px] ${slide} ${shown === "signup" ? "xl:-translate-x-[550px]" : ""}`}
           style={{
             background: "var(--auth-card-bg)",
             borderColor: "var(--auth-card-border)",
