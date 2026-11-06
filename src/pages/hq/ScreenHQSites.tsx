@@ -16,7 +16,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const inputCls =
   "h-[38px] rounded border border-[var(--color-border)] bg-[var(--color-bg-app)] px-3 text-sm text-[var(--color-text-heading)] outline-none focus:border-[var(--color-accent)]";
 
-const EMPTY_FORM = { siteName: "", managerName: "", managerPhone: "", managerEmail: "", initialPassword: "" };
+const EMPTY_FORM = { siteName: "", managerName: "", managerEmail: "", initialPassword: "" };
 
 export default function ScreenHQSites() {
   const { showToast } = useToast();
@@ -59,20 +59,18 @@ export default function ScreenHQSites() {
     const v = { ...form, siteName: form.siteName.trim(), managerName: form.managerName.trim(), managerEmail: form.managerEmail.trim() };
     if (!v.siteName) return showToast("현장 이름을 입력해 주세요.", "error");
     if (!v.managerName) return showToast("현장관리자 이름을 입력해 주세요.", "error");
-    const managerPhone = v.managerPhone.replace(/\D/g, "").replace(/^82/, "0");
-    if (!/^0\d{8,10}$/.test(managerPhone)) return showToast("담당자 전화번호를 확인해 주세요.", "error");
     if (createWebAccount && !EMAIL_RE.test(v.managerEmail)) return showToast("이메일 형식을 확인해 주세요.", "error");
     const passwordError = createWebAccount ? getPasswordError(v.initialPassword) : undefined;
     if (passwordError) return showToast(passwordError, "error");
 
     setCreating(true);
     try {
-      await hqApi.createSite({ siteName: v.siteName, managerName: v.managerName, managerPhone,
+      await hqApi.createSite({ siteName: v.siteName, managerName: v.managerName,
         ...(createWebAccount ? { managerEmail: v.managerEmail, initialPassword: form.initialPassword } : {}) });
       setForm(EMPTY_FORM);
       setCreateWebAccount(false);
       setAdding(false);
-      showToast("현장을 만들었어요. 현장관리자가 팀을 등록하고 앱 초대 링크를 발급할 수 있어요.", "success");
+      showToast(createWebAccount ? "현장과 현장관리자 계정을 만들었어요." : "현장을 만들었어요.", "success");
       await load();
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
@@ -161,13 +159,9 @@ export default function ScreenHQSites() {
                   <span className="text-xs text-[var(--color-text-body)]">현장관리자 이름</span>
                   <input disabled={creating} className={inputCls} value={form.managerName} onChange={setField("managerName")} autoComplete="off" />
                 </label>
-                <label className="flex flex-col gap-1.5">
-                  <span className="text-xs text-[var(--color-text-body)]">담당자 전화번호</span>
-                  <input disabled={creating} className={inputCls} type="tel" placeholder="010-1234-5678" value={form.managerPhone} onChange={setField("managerPhone")} />
-                </label>
                 <label className="flex items-center gap-2 text-sm text-[var(--color-text-body)]">
                   <input type="checkbox" disabled={creating} checked={createWebAccount} onChange={(e) => setCreateWebAccount(e.target.checked)} />
-                  웹 관리자 로그인 계정도 만들기 (선택)
+                  현장관리자 계정도 만들기 (선택)
                 </label>
                 {createWebAccount && <>
                 <label className="flex flex-col gap-1.5">
