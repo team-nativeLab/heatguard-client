@@ -248,7 +248,7 @@ export default function SiteTeamsPage() {
                   <input disabled={submitting} type="text" value={form.leaderName} onChange={setField("leaderName")} maxLength={20} className={inputCls} />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="leading-4 text-[var(--color-text-body)] text-xs">전화번호</span>
+                  <span className="leading-4 text-[var(--color-text-body)] text-xs">비상 연락처</span>
                   <input
                     disabled={submitting}
                     type="tel"
@@ -259,6 +259,7 @@ export default function SiteTeamsPage() {
                     placeholder="010-0000-0000"
                     className={`${inputCls} placeholder:text-[var(--color-text-faint)]`}
                   />
+                  <span className="text-xs leading-5 text-[var(--color-text-body)]">긴급 상황에서 현장관리자가 팀장에게 연락할 번호예요.</span>
                 </label>
                 <label className="flex flex-col gap-1.5">
                   <span className="leading-4 text-[var(--color-text-body)] text-xs">인원</span>
