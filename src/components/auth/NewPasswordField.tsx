@@ -6,9 +6,9 @@ import {
   PASSWORD_POLICY_HINT,
 } from "../../lib/passwordPolicy";
 
-function getDraftError(password: string, confirmation: boolean) {
+function getDraftError(password: string, confirmation: boolean, minimumLength?: number) {
   if (!password) return undefined;
-  return confirmation ? getPasswordCharacterError(password) : getPasswordError(password);
+  return confirmation ? getPasswordCharacterError(password) : getPasswordError(password, minimumLength);
 }
 
 type NewPasswordAuthFieldProps = Omit<ComponentProps<typeof AuthField>, "type" | "autoComplete" | "value"> & {
@@ -25,7 +25,7 @@ export function NewPasswordAuthField({
 }: NewPasswordAuthFieldProps) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
-  const draftError = getDraftError(value, confirmation) ?? error;
+  const draftError = getDraftError(value, confirmation, minimumLength) ?? error;
   const describedBy = [
     draftError ? `${inputId}-error` : "",
     !confirmation ? `${inputId}-policy` : "",
@@ -57,12 +57,16 @@ type NewPasswordInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type" 
   value: string;
   confirmation?: boolean;
   error?: string;
+  minimumLength?: number;
+  policyHint?: string;
 };
 
 export function NewPasswordInput({
   value,
   confirmation = false,
   error,
+  minimumLength,
+  policyHint = PASSWORD_POLICY_HINT,
   id,
   ...inputProps
 }: NewPasswordInputProps) {
@@ -94,7 +98,7 @@ export function NewPasswordInput({
       )}
       {!confirmation && (
         <span id={`${inputId}-policy`} className="text-xs leading-5 text-[var(--color-text-body)]">
-          {PASSWORD_POLICY_HINT}
+          {policyHint}
         </span>
       )}
     </>
