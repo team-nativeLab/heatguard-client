@@ -9,6 +9,7 @@ export default function ModalShell({
   footer,
   maxWidth = 520,
   busy = false,
+  backdropClassName = "bg-black/60",
 }: {
   title: string;
   onClose: () => void;
@@ -16,6 +17,7 @@ export default function ModalShell({
   footer: ReactNode;
   maxWidth?: number;
   busy?: boolean;
+  backdropClassName?: string;
 }) {
   useEscapeKey(busy ? undefined : onClose);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -54,7 +56,7 @@ export default function ModalShell({
       ref={dialogRef}
       aria-modal="true"
       aria-label={title}
-      className="fixed inset-0 z-[90] flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm animate-[fadeIn_0.15s_ease-out]"
+      className={`fixed inset-0 z-[90] flex items-center justify-center ${backdropClassName} px-4 backdrop-blur-sm animate-[fadeIn_0.15s_ease-out]`}
       onClick={(e) => {
         if (e.target === e.currentTarget && !busy) onClose();
       }}
