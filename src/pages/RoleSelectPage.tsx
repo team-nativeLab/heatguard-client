@@ -25,10 +25,10 @@ const COPY = {
     side: "login" as const,
     eyebrow: "본사 · 현장 통합 관리자 포털",
     titleLines: ["여러 팀을", "한눈에 관리하세요"],
-    heading: "어디로 로그인할까요?",
-    sub: "소속에 맞는 관리자 페이지로 이동해요.",
+    heading: "관리자 로그인",
+    sub: "로그인하면 계정 역할에 맞는 화면으로 이동해요.",
     cta: "로그인하기",
-    hq: { to: "/hq/login", desc: ["전체 현장 현황과", "계정을 관리해요"] },
+    hq: { to: "/auth/login", desc: ["본사 또는 현장 관리자", "계정으로 로그인해요"] },
     site: { to: "/auth/login", desc: ["담당 현장의 팀과", "체크리스트를 관리해요"] },
     footerText: "관리자 계정이 없으신가요?",
     footerLink: "회원가입",
@@ -126,9 +126,8 @@ export default function RoleSelectPage({ mode }: { mode: Mode }) {
         <p className="text-sm leading-[1.4] text-[var(--auth-text-muted)]">{c.sub}</p>
       </div>
 
-      <div className={mode === "signup" ? "mt-7 max-w-[310px]" : "mt-7 grid grid-cols-1 gap-3 min-[420px]:grid-cols-2"}>
-        <RoleCard to={c.hq.to} from={mode} tone="blue" icon={<BarChartIcon size={24} />} title="본사 관리자" desc={c.hq.desc} cta={c.cta} />
-        {mode === "login" && <RoleCard to={c.site.to} from={mode} tone="orange" icon={<FileTextIcon size={24} />} title="현장 관리자" desc={c.site.desc} cta={c.cta} />}
+      <div className={mode === "signup" ? "mt-7 max-w-[310px]" : "mt-7 max-w-[310px]"}>
+        <RoleCard to={c.hq.to} from={mode} tone="blue" icon={<BarChartIcon size={24} />} title={mode === "login" ? "관리자 로그인" : "본사 관리자"} desc={c.hq.desc} cta={c.cta} />
       </div>
 
       {mode === "signup" && (

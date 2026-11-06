@@ -57,6 +57,7 @@ export default function App() {
         {/* 현장 관리자 */}
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/signup" element={<Navigate to="/auth/select/signup" replace />} />
+        <Route path="/site-invitation" element={<SiteInvitationPage />} />
         <Route path="/auth/site/invitation" element={<SiteInvitationPage />} />
         <Route path="/manager" element={<Protected><DashboardPage /></Protected>} />
         <Route path="/manager/select-site" element={<Protected siteSelection><SiteSelectionPage /></Protected>} />
