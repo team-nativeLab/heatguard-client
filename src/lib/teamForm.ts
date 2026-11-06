@@ -20,7 +20,7 @@ export function formatTeamPhone(value: string): string {
   const subscriber = digits.slice(areaLength);
   const middle = subscriber.slice(0, 4);
   const last = subscriber.slice(4, 8);
-  return \`\${area}-\${middle}\${last ? \`-\${last}\` : ""}\`;
+  return `${area}-${middle}${last ? `-${last}` : ""}`;
 }
 
 /** 팀 추가/수정 폼 검증. 문제가 있으면 안내 문구를 돌려준다. */
