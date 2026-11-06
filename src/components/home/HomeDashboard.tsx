@@ -513,7 +513,48 @@ export default function HomeDashboard() {
         </div>
       </section>
 
-      <div className="flex items-center justify-between pt-7">
+      <section className="pt-8 pb-2">
+        <h2 className="text-sm font-medium leading-5 text-[var(--color-text-label)]">기록 조회</h2>
+        <div className="flex items-center gap-3 pt-4 flex-wrap">
+          <div className="flex items-center h-[37px] rounded-[14px] bg-[var(--home-date-pill-bg)] border border-[var(--home-card-border)] pl-5 pr-4">
+            <CalendarIcon className="size-[15px] text-[var(--color-text-body)]" />
+            <span className="ml-[9px]">
+              <DateField value={from} onChange={setFrom} label="조회 시작일" />
+            </span>
+            <span className="mx-3 sm:mx-[26px] text-sm text-[var(--home-date-sub)]">~</span>
+            <DateField value={to} onChange={setTo} label="조회 종료일" />
+            <ChevronDownIcon className="size-4 ml-3 sm:ml-[26px] text-[var(--home-date-sub)]" />
+          </div>
+          <div className="flex items-center gap-3 sm:ml-auto sm:mr-9">
+            <button
+              type="button"
+              onClick={runQuery}
+              disabled={querying}
+              className="flex items-center gap-2 h-9 px-4 rounded bg-[var(--home-btn-primary-bg)] text-white text-sm hover:brightness-110 transition disabled:opacity-60"
+            >
+              <SearchIcon className="size-3" />
+              {querying ? "조회 중..." : "조회"}
+            </button>
+            <button
+              type="button"
+              onClick={resetQuery}
+              className="h-[38px] px-3.5 rounded border border-[var(--home-btn-border)] text-sm text-[var(--color-text-body)] hover:brightness-95 transition"
+            >
+              초기화
+            </button>
+            <button
+              type="button"
+              onClick={openPrint}
+              title="시작일 기준 하루치 기록을 인쇄해요"
+              className="h-[38px] px-3.5 rounded border border-[var(--home-btn-border)] text-sm text-[var(--color-text-body)] hover:brightness-95 transition"
+            >
+              인쇄
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <div className="flex items-center justify-between pt-5">
         <h2 className="text-sm font-medium leading-5 text-[var(--color-text-label)]">
           {queriedRecords
             ? `${toDisplayDate(from)}${isRange ? ` ~ ${toDisplayDate(to)}` : ""} 기록`
@@ -613,46 +654,7 @@ export default function HomeDashboard() {
         </table>
       </div>
 
-      <section className="pt-8 pb-2">
-        <h2 className="text-sm font-medium leading-5 text-[var(--color-text-label)]">기록 조회</h2>
-        <div className="flex items-center gap-3 pt-4 flex-wrap">
-          <div className="flex items-center h-[37px] rounded-[14px] bg-[var(--home-date-pill-bg)] border border-[var(--home-card-border)] pl-5 pr-4">
-            <CalendarIcon className="size-[15px] text-[var(--color-text-body)]" />
-            <span className="ml-[9px]">
-              <DateField value={from} onChange={setFrom} label="조회 시작일" />
-            </span>
-            <span className="mx-3 sm:mx-[26px] text-sm text-[var(--home-date-sub)]">~</span>
-            <DateField value={to} onChange={setTo} label="조회 종료일" />
-            <ChevronDownIcon className="size-4 ml-3 sm:ml-[26px] text-[var(--home-date-sub)]" />
-          </div>
-          <div className="flex items-center gap-3 sm:ml-auto sm:mr-9">
-            <button
-              type="button"
-              onClick={runQuery}
-              disabled={querying}
-              className="flex items-center gap-2 h-9 px-4 rounded bg-[var(--home-btn-primary-bg)] text-white text-sm hover:brightness-110 transition disabled:opacity-60"
-            >
-              <SearchIcon className="size-3" />
-              {querying ? "조회 중..." : "조회"}
-            </button>
-            <button
-              type="button"
-              onClick={resetQuery}
-              className="h-[38px] px-3.5 rounded border border-[var(--home-btn-border)] text-sm text-[var(--color-text-body)] hover:brightness-95 transition"
-            >
-              초기화
-            </button>
-            <button
-              type="button"
-              onClick={openPrint}
-              title="시작일 기준 하루치 기록을 인쇄해요"
-              className="h-[38px] px-3.5 rounded border border-[var(--home-btn-border)] text-sm text-[var(--color-text-body)] hover:brightness-95 transition"
-            >
-              인쇄
-            </button>
-          </div>
-        </div>
-      </section>
+
 
       {lightbox && (
         <PhotoLightbox
