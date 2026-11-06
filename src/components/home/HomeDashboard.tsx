@@ -1,8 +1,11 @@
+Warning: truncated output (original token count: 7840)
+Total output lines: 692
+
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePolling } from "../../shared/hooks/usePolling";
 import { Skeleton, SkeletonTable } from "../../shared/ui/Skeleton";
 import { useNavigate } from "react-router-dom";
-import PhotoLightbox from "../../shared/ui/PhotoLightbox";
+import RecordDetailDialog from "../manager/RecordDetailDialog";
 import ThemeToggleButton from "../../shared/ui/ThemeToggleButton";
 import { useToast } from "../../shared/ui/Toast";
 import RecordThumb from "./RecordThumb";
@@ -298,161 +301,7 @@ export default function HomeDashboard() {
   const resetQuery = () => {
     const todayStr = toInputDate(new Date());
     setFrom(todayStr);
-    setTo(todayStr);
-    setQueriedRecords(null);
-    setTeamFilter("all");
-    setSearch("");
-    showToast("조회 조건을 초기화했어요.");
-  };
-
-  const runQuery = async () => {
-    if (querying) return;
-    if (!from || !to) return showToast("조회할 기간을 선택해주세요.", "error");
-    if (from > to) return showToast("시작일이 종료일보다 늦을 수 없어요.", "error");
-    if (to > toInputDate(new Date())) return showToast("미래 날짜는 조회할 수 없어요.", "error");
-    const dates = dateRange(from, to);
-    if (!dates) return showToast(`한 번에 최대 ${MAX_QUERY_DAYS}일까지 조회할 수 있어요.`, "error");
-
-    setQuerying(true);
-    try {
-      const pages = await Promise.all(
-        dates.map(async (date) => {
-          const items: QueriedRecord[] = [];
-          let cursor: string | undefined;
-          do {
-            const res = await recordsApi.listRecords({ date, cursor });
-            items.push(...res.items.map((r) => ({ ...r, date })));
-            cursor = res.page.nextCursor ?? undefined;
-          } while (cursor);
-          return items;
-        }),
-      );
-      const merged = pages.flat();
-      setQueriedRecords(merged);
-      setTeamFilter("all");
-      showToast(
-        merged.length
-          ? `${toDisplayDate(from)}${from !== to ? ` ~ ${toDisplayDate(to)}` : ""} 기록 ${merged.length}건을 불러왔어요.`
-          : "해당 기간의 기록이 없어요.",
-        merged.length ? "success" : "default",
-      );
-    } catch (err) {
-      showToast(
-        isNetworkError(err) ? "서버에 연결할 수 없어 기록을 조회하지 못했어요." : "기록을 불러오지 못했어요. 잠시 후 다시 시도해주세요.",
-        "error",
-      );
-    } finally {
-      setQuerying(false);
-    }
-  };
-
-  const openPrint = () => {
-    if (from > to) return showToast("시작일이 종료일보다 늦을 수 없어요.", "error");
-    window.open(`/manager/print?date=${from}`, "_blank", "noopener,noreferrer");
-  };
-
-  const header = (
-      <header className="flex flex-wrap items-start justify-between gap-4 min-h-[74px]">
-        <div>
-          <p className="text-[13px] text-[var(--color-text-body)]">안녕하세요, {me.user.name} 님</p>
-          <h1 className="font-bold text-[19px] leading-[1.4] text-[var(--color-text-heading)] whitespace-nowrap">
-            오늘도 안전한 현장을 만들어가요.
-          </h1>
-        </div>
-        <div className="flex w-full sm:w-auto items-center gap-3 pt-0.5">
-          <label className="relative flex items-center w-full sm:w-[260px] h-[38px] rounded-[10px] bg-[var(--home-search-bg)] border border-[var(--home-search-border)] focus-within:border-[var(--color-accent)] transition-colors">
-            <SearchIcon className="absolute left-3 size-[15px] text-[var(--color-text-body)]" />
-            <input
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="현장, 기록, 작업자를 검색하세요..."
-              className="w-full h-full bg-transparent pl-[35px] pr-2 text-[12.5px] text-[var(--color-text-heading)] placeholder:text-[var(--color-text-body)] outline-none"
-            />
-          </label>
-          <span className="hidden md:inline-flex">
-            <ThemeToggleButton />
-          </span>
-        </div>
-      </header>
-  );
-
-  if (!today) {
-    return (
-      <div className="w-full flex flex-col">
-        {header}
-        {loadFailed ? (
-          <div className="mt-6 rounded-xl border border-[var(--color-border)] bg-[var(--home-card-bg)] px-6 py-12 text-center">
-            <p className="text-sm text-[var(--color-text-heading)]">대시보드를 불러오지 못했어요.</p>
-            <p className="pt-1 text-xs text-[var(--color-text-body)]">잠시 후 자동으로 다시 시도해요.</p>
-          </div>
-        ) : (
-          <div role="status" aria-label="불러오는 중" className="flex flex-col gap-4 mt-0.5">
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-              <Skeleton className="h-[275px] rounded-xl" />
-              <Skeleton className="h-[275px] rounded-xl" />
-            </div>
-            <Skeleton className="h-4 w-24 mt-4" />
-            <SkeletonTable rows={4} />
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  const siteName = today.siteName || me.site.name;
-  const w = today.weather;
-  const glowColor = weatherGlowColor(w, now.getHours());
-
-  return (
-    <div className="w-full flex flex-col">
-      {header}
-
-      <section className="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-0.5">
-        <div
-          className="relative overflow-hidden rounded-xl border border-[var(--home-card-border)] p-5 min-h-[275px] flex flex-col"
-          style={{
-            background: `linear-gradient(110deg, color-mix(in srgb, ${glowColor} 32%, var(--home-card-bg)) 0%, var(--home-card-bg) 100%)`,
-          }}
-        >
-          <div className="relative flex items-center justify-between">
-            {w?.heatWarningLevel ? (
-              <span className="bg-[var(--color-heat-badge-bg)] text-[#ff6800] text-xs font-medium leading-4 px-2.5 py-1 rounded-full">
-                <span className="figma-emoji">☀</span> {w.heatWarningLevel}
-              </span>
-            ) : (
-              <span />
-            )}
-            <button
-              type="button"
-              onClick={() => navigate("/manager/sites")}
-              title="현장 관리로 이동"
-              className="flex items-center gap-1.5 h-[26px] pl-[11px] pr-2 rounded-full bg-[var(--home-pill-bg)] border border-[var(--home-pill-border)] text-[var(--home-pill-fg)] text-xs font-medium hover:brightness-95 transition"
-            >
-              <MapPinIcon className="size-3" />
-              {siteName}
-              <ChevronRightIcon className="size-[11px] ml-2.5" />
-            </button>
-          </div>
-
-          {/* 헤더와 하단 타일 사이의 정중앙에 온도 영역과 날씨 아이콘을 맞춘다 */}
-          <div className="relative flex flex-1 flex-col justify-center py-4">
-            {/* 날씨 아이콘 + 글로우: 한 묶음으로 두어 블러가 항상 아이콘 정중앙에 오도록 한다 */}
-            <div aria-hidden="true" className="pointer-events-none absolute right-[52px] top-1/2 z-10 w-[104px] -translate-y-1/2 select-none">
-              <span
-                className="absolute left-1/2 top-1/2 size-[120px] -translate-x-1/2 -translate-y-1/2 rounded-full"
-                style={{ background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)`, filter: "blur(14px)" }}
-              />
-              <img
-                src="/sun.png"
-                alt=""
-                draggable={false}
-                className="relative h-auto w-full object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.12)]"
-              />
-            </div>
-            <p className="relative text-[15px] font-medium leading-5 text-[var(--color-text-label)]">현재 온도</p>
-            <div className="relative flex items-end gap-3 pt-1 h-[64px]">
-              <span className="font-semibold text-[56px] leading-[56px] tracking-[-1.5px] text-[var(--color-text-heading)]">
+   …1840 tokens truncated…-[56px] tracking-[-1.5px] text-[var(--color-text-heading)]">
                 {w ? w.temperature.toFixed(1) : "—"}
               </span>
               <div className="flex items-center gap-2 pb-1.5">
@@ -615,7 +464,24 @@ export default function HomeDashboard() {
               </tr>
             )}
             {rows.map((r) => (
-              <tr key={r.id} className="border-[var(--home-table-border)] border-b last:border-b-0 h-10">
+              <tr
+                key={r.id}
+                role="button"
+                tabIndex={0}
+                aria-label={`${r.type}, ${r.place || "장소 미입력"}, ${r.time} 기록 상세 보기`}
+                onClick={(event) => {
+                  if ((event.target as HTMLElement).closest("button")) return;
+                  setLightbox(r);
+                }}
+                onKeyDown={(event) => {
+                  if (event.target !== event.currentTarget) return;
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setLightbox(r);
+                  }
+                }}
+                className="h-10 cursor-pointer border-[var(--home-table-border)] border-b last:border-b-0 hover:bg-[var(--home-table-bg)]/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-accent)]"
+              >
                 <td className="pl-4">
                   <RecordThumb src={r.photoUrl ?? undefined} onClick={() => setLightbox(r)} />
                 </td>
@@ -657,13 +523,19 @@ export default function HomeDashboard() {
 
 
       {lightbox && (
-        <PhotoLightbox
+        <RecordDetailDialog
+          type={lightbox.type}
+          place={lightbox.place}
+          temperature={lightbox.temperature}
+          humidity={lightbox.humidity}
+          apparentTemperature={lightbox.apparentTemperature}
           photoUrl={lightbox.photoUrl}
           takenAt={`${lightbox.date.replaceAll("-", ".")} ${lightbox.time}`}
-          siteName={`${siteName} · ${lightbox.place}`}
+          siteName={siteName}
           onClose={() => setLightbox(null)}
         />
       )}
     </div>
   );
 }
+
