@@ -65,7 +65,6 @@ export default function ScreenHQSites() {
     try {
       await hqApi.createSite({ siteName: v.siteName, managerName: v.managerName, managerEmail: v.managerEmail, initialPassword: form.initialPassword });
       setForm(EMPTY_FORM);
-      setCreateWebAccount(false);
       setAdding(false);
       showToast("현장과 현장관리자 계정을 만들었어요. 관리자에게 이메일과 초기 비밀번호를 전달해 주세요.", "success");
       await load();
