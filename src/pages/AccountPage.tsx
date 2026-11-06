@@ -1,9 +1,13 @@
 import { useState, type ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 import HomeLayout from "../components/home/HomeLayout";
 import ModalShell, { btnPrimary, btnSecondary, inputCls } from "../components/home/ModalShell";
+import ConfirmDialog from "../shared/ui/ConfirmDialog";
 import { useToast } from "../shared/ui/Toast";
 import { useSiteMe, patchSiteMeUser } from "../hooks/useSiteMe";
-import { authApi, siteApi, errorMessage } from "../api";
+import { authApi, siteApi, isDemoFallback, errorMessage } from "../api";
+import { markSignedOut } from "../shared/auth/RequireAuth";
+import { clearSiteMeCache } from "../hooks/useSiteMe";
 import { getPasswordConfirmationError, getPasswordError } from "../lib/passwordPolicy";
 import { NewPasswordInput } from "../components/auth/NewPasswordField";
 import { usePasswordComposition } from "../components/auth/usePasswordComposition";
@@ -41,9 +45,39 @@ function Row({ label, value, sub, action }: { label: string; value: ReactNode; s
 const fixedNote = <span className="shrink-0 text-xs leading-[1.45] text-[var(--color-text-faint)]">변경 불가</span>;
 
 export default function AccountPage() {
+  const navigate = useNavigate();
+  const { showToast } = useToast();
   const me = useSiteMe();
   const [changingPw, setChangingPw] = useState(false);
   const [editingPhone, setEditingPhone] = useState(false);
+  const [confirmingWithdrawal, setConfirmingWithdrawal] = useState(false);
+  const [withdrawalPassword, setWithdrawalPassword] = useState("");
+  const [withdrawing, setWithdrawing] = useState(false);
+
+  const withdraw = async () => {
+    if (withdrawing) return;
+    if (!withdrawalPassword) return showToast("현재 비밀번호를 입력해주세요.", "error");
+    setWithdrawing(true);
+    try {
+      await siteApi.withdraw({ currentPassword: withdrawalPassword });
+      clearSiteMeCache();
+      markSignedOut();
+      showToast("회원탈퇴가 처리됐어요.");
+      navigate("/auth/login", { replace: true });
+    } catch (err) {
+      if (isDemoFallback(err)) {
+        clearSiteMeCache();
+        markSignedOut();
+        showToast("회원탈퇴가 처리됐어요. (데모)");
+        navigate("/auth/login", { replace: true });
+        return;
+      }
+      showToast(errorMessage(err, "탈퇴 처리에 실패했어요."), "error");
+      setWithdrawalPassword("");
+    } finally {
+      setWithdrawing(false);
+    }
+  };
 
   return (
     <HomeLayout>
@@ -86,11 +120,41 @@ export default function AccountPage() {
               }
             />
           </Card>
+
+          <Card title="회원 탈퇴" description="탈퇴 시 계정·현장·팀은 비활성화되고, 기록·사진은 365일 보관 후 삭제됩니다.">
+            <div className="flex items-center justify-between gap-4 border-t border-[var(--home-card-border)] px-5 py-3.5">
+              <span className="text-xs text-[var(--color-text-body)]">탈퇴하려면 현재 비밀번호를 확인해야 합니다.</span>
+              <button type="button" onClick={() => setConfirmingWithdrawal(true)} className={`${smallBtn} border-[var(--color-modal-danger-border)] text-[var(--color-danger-text)]`}>
+                회원 탈퇴
+              </button>
+            </div>
+          </Card>
         </div>
       </div>
 
       {changingPw && <PasswordModal onClose={() => setChangingPw(false)} />}
       {editingPhone && <PhoneModal initial={me.user.phone ?? ""} onClose={() => setEditingPhone(false)} />}
+      {confirmingWithdrawal && (
+        <ConfirmDialog
+          title="정말 탈퇴할까요?"
+          description="현재 비밀번호를 확인해야 탈퇴가 진행됩니다. 기록·사진은 365일간 보관 후 완전삭제돼요."
+          confirmLabel={withdrawing ? "처리 중..." : "탈퇴"}
+          destructive
+          busy={withdrawing}
+          onCancel={() => { setConfirmingWithdrawal(false); setWithdrawalPassword(""); }}
+          onConfirm={withdraw}
+        >
+          <input
+            type="password"
+            autoFocus
+            value={withdrawalPassword}
+            onChange={(event) => setWithdrawalPassword(event.target.value)}
+            onKeyDown={(event) => event.key === "Enter" && void withdraw()}
+            placeholder="현재 비밀번호"
+            className="bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-lg h-[38px] w-full px-3 text-sm text-[var(--color-text-heading)] placeholder:text-[var(--color-text-faint)] outline-none focus:border-[var(--color-accent)] transition-colors mt-3"
+          />
+        </ConfirmDialog>
+      )}
     </HomeLayout>
   );
 }
@@ -254,3 +318,4 @@ function PasswordModal({ onClose }: { onClose: () => void }) {
     </ModalShell>
   );
 }
+
