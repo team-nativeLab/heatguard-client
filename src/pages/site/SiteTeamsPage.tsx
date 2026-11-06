@@ -3,6 +3,7 @@ import HomeLayout from "../../components/home/HomeLayout";
 import ModalShell, { btnPrimary, btnSecondary } from "../../components/home/ModalShell";
 import SiteManagementHeader from "../../components/manager/SiteManagementHeader";
 import TeamDetailModal from "../../components/manager/TeamDetailModal";
+import SiteTeamInvitationModal from "../../components/manager/SiteTeamInvitationModal";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 import { useToast } from "../../shared/ui/Toast";
 import { TeamMemberIcon } from "../../components/icons/Icons";
@@ -41,6 +42,7 @@ export default function SiteTeamsPage() {
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [openTeamId, setOpenTeamId] = useState<string | null>(null);
+  const [inviteTeam, setInviteTeam] = useState<TeamSummary | null>(null);
   const [pendingDelete, setPendingDelete] = useState<TeamSummary | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -209,6 +211,9 @@ export default function SiteTeamsPage() {
               </div>
 
               <div className="flex gap-2 shrink-0">
+                <button type="button" onClick={() => setInviteTeam(team)} className={ghostBtn}>
+                  앱 초대
+                </button>
                 <button type="button" onClick={() => setOpenTeamId(team.id)} className={ghostBtn}>
                   정보·계정
                 </button>
@@ -283,6 +288,10 @@ export default function SiteTeamsPage() {
           onClose={() => setOpenTeamId(null)}
           onUpdated={(updated) => setTeams((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))}
         />
+      )}
+
+      {inviteTeam && (
+        <SiteTeamInvitationModal team={inviteTeam} onClose={() => setInviteTeam(null)} />
       )}
 
       {pendingDelete && (
