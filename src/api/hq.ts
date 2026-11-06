@@ -355,3 +355,27 @@ export async function listActiveEmergencyCalls() {
   const page = await apiFetch<Page<unknown>>("/api/v1/hq/emergency-calls/active");
   return (page?.items ?? []).map(normalizeCall);
 }
+
+export type HqWeatherAvailability = "AVAILABLE" | "CACHED" | "UNAVAILABLE" | "LOCATION_REQUIRED" | string;
+export interface HqSiteWeather {
+  temperature: number | null;
+  humidity: number | null;
+  apparentTemperature: number | null;
+  skyStatus: string | null;
+  observedAt: string | null;
+  availability: HqWeatherAvailability;
+  isStale: boolean;
+  errorCode: string | null;
+  weatherMode: string | null;
+  weatherLocation: { nx: number; ny: number } | null;
+}
+export async function getSiteWeather(siteId: string): Promise<HqSiteWeather> {
+  return apiFetch<HqSiteWeather>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}/weather`);
+}
+export async function updateSiteWeatherLocation(siteId: string, payload: {
+  version: number;
+  weatherMode: string;
+  weatherLocation: { nx: number; ny: number };
+}) {
+  return apiFetch<unknown>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}/weather-location`, { method: "PATCH", body: payload });
+}
