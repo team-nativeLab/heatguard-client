@@ -25,7 +25,6 @@ export default function ScreenHQSites() {
   const [error, setError] = useState("");
   const [form, setForm] = useState(EMPTY_FORM);
   const [creating, setCreating] = useState(false);
-  const [createWebAccount, setCreateWebAccount] = useState(false);
   const passwordComposition = usePasswordComposition();
   const [deleting, setDeleting] = useState<HqSite | null>(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
@@ -34,7 +33,6 @@ export default function ScreenHQSites() {
     if (creating) return;
     setAdding(false);
     setForm(EMPTY_FORM);
-    setCreateWebAccount(false);
   };
 
   const load = useCallback(async () => {
@@ -55,22 +53,21 @@ export default function ScreenHQSites() {
 
   const handleCreate = async (e: FormEvent) => {
     e.preventDefault();
-    if (creating || (createWebAccount && passwordComposition.isComposing())) return;
+    if (creating || passwordComposition.isComposing()) return;
     const v = { ...form, siteName: form.siteName.trim(), managerName: form.managerName.trim(), managerEmail: form.managerEmail.trim() };
     if (!v.siteName) return showToast("현장 이름을 입력해 주세요.", "error");
     if (!v.managerName) return showToast("현장관리자 이름을 입력해 주세요.", "error");
-    if (createWebAccount && !EMAIL_RE.test(v.managerEmail)) return showToast("이메일 형식을 확인해 주세요.", "error");
-    const passwordError = createWebAccount ? getPasswordError(v.initialPassword) : undefined;
+    if (!EMAIL_RE.test(v.managerEmail)) return showToast("이메일 형식을 확인해 주세요.", "error");
+    const passwordError = getPasswordError(v.initialPassword);
     if (passwordError) return showToast(passwordError, "error");
 
     setCreating(true);
     try {
-      await hqApi.createSite({ siteName: v.siteName, managerName: v.managerName,
-        ...(createWebAccount ? { managerEmail: v.managerEmail, initialPassword: form.initialPassword } : {}) });
+      await hqApi.createSite({ siteName: v.siteName, managerName: v.managerName, managerEmail: v.managerEmail, initialPassword: form.initialPassword });
       setForm(EMPTY_FORM);
       setCreateWebAccount(false);
       setAdding(false);
-      showToast(createWebAccount ? "현장과 현장관리자 계정을 만들었어요." : "현장을 만들었어요.", "success");
+      showToast("현장과 현장관리자 계정을 만들었어요. 관리자에게 이메일과 초기 비밀번호를 전달해 주세요.", "success");
       await load();
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
@@ -150,26 +147,22 @@ export default function ScreenHQSites() {
             </>}
           >
             <form id="add-site" onSubmit={handleCreate} noValidate>
+              <p className="mb-4 text-xs leading-5 text-[var(--color-text-body)]">현장과 현장관리자 계정을 함께 만듭니다. 생성 후 관리자에게 이메일과 초기 비밀번호를 전달해 주세요.</p>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs text-[var(--color-text-body)]">현장 이름</span>
+                  <span className="text-xs text-[var(--color-text-body)]">현장 이름 *</span>
                   <input disabled={creating} className={inputCls} value={form.siteName} onChange={setField("siteName")} />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs text-[var(--color-text-body)]">현장관리자 이름</span>
+                  <span className="text-xs text-[var(--color-text-body)]">현장관리자 이름 *</span>
                   <input disabled={creating} className={inputCls} value={form.managerName} onChange={setField("managerName")} autoComplete="off" />
                 </label>
-                <label className="flex items-center gap-2 text-sm text-[var(--color-text-body)]">
-                  <input type="checkbox" disabled={creating} checked={createWebAccount} onChange={(e) => setCreateWebAccount(e.target.checked)} />
-                  현장관리자 계정도 만들기 (선택)
-                </label>
-                {createWebAccount && <>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs text-[var(--color-text-body)]">이메일</span>
-                  <input disabled={creating} className={inputCls} type="email" value={form.managerEmail} onChange={setField("managerEmail")} autoComplete="off" />
+                  <span className="text-xs text-[var(--color-text-body)]">현장관리자 이메일 *</span>
+                  <input disabled={creating} className={inputCls} type="email" value={form.managerEmail} onChange={setField("managerEmail")} autoComplete="off" required />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs text-[var(--color-text-body)]">초기 비밀번호 (10자 이상)</span>
+                  <span className="text-xs text-[var(--color-text-body)]">초기 비밀번호 * (8자 이상)</span>
                   <NewPasswordInput
                     aria-label="초기 비밀번호"
                     disabled={creating}
@@ -179,7 +172,6 @@ export default function ScreenHQSites() {
                     {...passwordComposition.inputProps}
                   />
                 </label>
-                </>}
               </div>
             </form>
           </ModalShell>
