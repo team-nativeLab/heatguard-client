@@ -1,20 +1,22 @@
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { errorMessage, teamsApi } from "../../api";
 import type { TeamSummary } from "../../api";
 import { useToast } from "../../shared/ui/Toast";
 import ModalShell, { btnPrimary, btnSecondary, inputCls } from "../home/ModalShell";
 
-export default function SiteTeamInvitationModal({ team, onClose }: {
+export default function SiteTeamInvitationModal({ team, onClose, autoGenerate = false }: {
   team: TeamSummary;
   onClose: () => void;
+  autoGenerate?: boolean;
 }) {
   const { showToast } = useToast();
   const [inviteUrl, setInviteUrl] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const generating = useRef(false);
+  const autoStarted = useRef(false);
 
-  async function generate() {
+  const generate = useCallback(async () => {
     if (generating.current || busy) return;
     generating.current = true;
     setBusy(true);
@@ -34,7 +36,13 @@ export default function SiteTeamInvitationModal({ team, onClose }: {
       generating.current = false;
       setBusy(false);
     }
-  }
+  }, [busy, showToast, team.id, team.name]);
+
+  useEffect(() => {
+    if (!autoGenerate || autoStarted.current) return;
+    autoStarted.current = true;
+    void generate();
+  }, [autoGenerate, generate]);
 
   async function copy() {
     if (!inviteUrl) return;
@@ -66,6 +74,9 @@ export default function SiteTeamInvitationModal({ team, onClose }: {
     >
       <p className="leading-6 text-sm text-[var(--color-text-body)]">
         초대 링크를 발급해 팀원에게 전달해 주세요. 팀원이 앱에서 초대를 수락하면 이 팀에 참여합니다.
+      </p>
+      <p className="text-xs leading-5 text-[var(--color-text-body)]">
+        초대 링크는 앱 계정을 만드는 링크가 아니에요. 앱 계정이 없다면 먼저 앱에서 가입한 뒤 초대를 수락해야 합니다.
       </p>
       <button type="button" className={btnPrimary} disabled={busy} onClick={() => void generate()}>
         {busy ? "발급 중..." : inviteUrl ? "새 링크 발급" : "초대 링크 발급"}
