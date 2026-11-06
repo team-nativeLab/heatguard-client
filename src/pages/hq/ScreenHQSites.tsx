@@ -23,6 +23,7 @@ export default function ScreenHQSites() {
   const [adding, setAdding] = useState(false);
   const [sites, setSites] = useState<HqSite[] | null>(null);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
   const [form, setForm] = useState(EMPTY_FORM);
   const [creating, setCreating] = useState(false);
   const passwordComposition = usePasswordComposition();
@@ -50,6 +51,11 @@ export default function ScreenHQSites() {
 
   const setField = (key: keyof typeof EMPTY_FORM) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
+
+  const normalizedSearch = search.trim().toLocaleLowerCase();
+  const visibleSites = (sites ?? []).filter((site) =>
+    !normalizedSearch || [site.name, site.managerName, site.managerEmail].some((value) => value.toLocaleLowerCase().includes(normalizedSearch)),
+  );
 
   const handleCreate = async (e: FormEvent) => {
     e.preventDefault();
@@ -84,7 +90,7 @@ export default function ScreenHQSites() {
     setDeleteBusy(true);
     try {
       await hqApi.deactivateSite(deleting.id);
-      showToast(`'${deleting.name}' 현장을 비활성화했어요.`, "success");
+      showToast(`'${deleting.name}' 현장을 비활성화했어요. 기존 기록은 보존됩니다.`, "success");
       setDeleting(null);
       await load();
     } catch (err) {
@@ -100,6 +106,19 @@ export default function ScreenHQSites() {
         <h1 className="text-xl font-semibold text-[var(--color-text-heading)]">현장 관리</h1>
         <p className="pt-1 text-sm text-[var(--color-text-body)]">현장을 등록하고 앱 연동 상태를 확인합니다.</p>
 
+        {sites && sites.length > 0 && (
+          <label className="mt-6 block max-w-md">
+            <span className="sr-only">현장 검색</span>
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="현장·관리자 검색"
+              className={`${inputCls} w-full`}
+            />
+          </label>
+        )}
+
         <div className="flex flex-col gap-2 pt-8">
           {error ? (
             <ErrorBlock message={error} onRetry={load} />
@@ -107,12 +126,17 @@ export default function ScreenHQSites() {
             <LoadingBlock />
           ) : sites.length === 0 ? (
             <EmptyBlock>등록된 현장이 없어요. 현장 추가 버튼으로 현장을 등록해 주세요.</EmptyBlock>
+          ) : visibleSites.length === 0 ? (
+            <EmptyBlock>검색 조건에 맞는 현장이 없어요.</EmptyBlock>
           ) : (
-            sites.map((site) => (
+            visibleSites.map((site) => (
               <div key={site.id} className="flex min-h-[74px] items-center gap-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-5 py-4">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <p className="whitespace-nowrap text-sm font-medium text-[var(--color-text-heading)]">{site.name}</p>
+                    {!site.active && (
+                      <span className="rounded bg-[var(--color-heat-none-bg)] px-1.5 py-0.5 text-[10px] text-[var(--color-heat-none-fg)]">비활성</span>
+                    )}
                     {(site.emergency || site.heatLevel === 3) && (
                       <span className="rounded border border-[var(--color-danger-border)] bg-[var(--color-danger-soft-bg)] px-1.5 py-0.5 text-[10px] text-[var(--color-danger-text)]">긴급</span>
                     )}
@@ -127,8 +151,8 @@ export default function ScreenHQSites() {
                   <Link to={`/hq/sites/${encodeURIComponent(site.id)}`} className="rounded border border-[var(--color-checkbox-border)] px-3 py-1.5 text-xs text-[var(--color-text-label)]">
                     상세 · 연동 상태
                   </Link>
-                  <button type="button" onClick={() => setDeleting(site)} className="rounded border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-text-body)] transition hover:border-[var(--color-danger-border)] hover:text-[var(--color-danger-text)]">
-                    삭제
+                  <button type="button" onClick={() => setDeleting(site)} disabled={!site.active} className="rounded border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-text-body)] transition hover:border-[var(--color-danger-border)] hover:text-[var(--color-danger-text)] disabled:cursor-not-allowed disabled:opacity-50">
+                    비활성화
                   </button>
                 </div>
               </div>
@@ -179,7 +203,7 @@ export default function ScreenHQSites() {
 
       {deleting && (
         <ConfirmDialog
-          title="현장을 삭제할까요?"
+          title="현장을 비활성화할까요?"
           description={`'${deleting.name}' 현장이 비활성화돼요. 기존 기록은 그대로 보존돼요.`}
           confirmLabel="삭제"
           destructive
@@ -191,3 +215,4 @@ export default function ScreenHQSites() {
     </HQLayout>
   );
 }
+
