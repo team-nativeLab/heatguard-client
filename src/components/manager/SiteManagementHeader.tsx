@@ -1,13 +1,14 @@
 import { Link } from "react-router-dom";
 import { useSiteMe } from "../../hooks/useSiteMe";
 
-export type SiteTab = "today" | "team" | "checklist" | "schedule" | "withdrawn";
+export type SiteTab = "today" | "team" | "checklist" | "schedule" | "weather" | "withdrawn";
 
 const TABS: { key: SiteTab; label: string; to: string }[] = [
   { key: "today", label: "오늘 현황", to: "/manager/sites" },
   { key: "team", label: "팀 관리", to: "/manager/sites/team" },
   { key: "checklist", label: "체크리스트", to: "/manager/sites/checklist" },
   { key: "schedule", label: "시간 설정", to: "/manager/sites/schedule" },
+  { key: "weather", label: "날씨 설정", to: "/manager/sites/weather" },
   { key: "withdrawn", label: "탈퇴 회원", to: "/manager/sites/withdrawn" },
 ];
 
@@ -38,3 +39,4 @@ export default function SiteManagementHeader({ active, siteName }: { active: Sit
     </div>
   );
 }
+
