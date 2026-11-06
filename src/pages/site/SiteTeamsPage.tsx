@@ -265,7 +265,7 @@ export default function SiteTeamsPage() {
                   <input disabled={submitting} type="text" inputMode="numeric" value={form.memberCount} onChange={setField("memberCount")} className={inputCls} />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="leading-4 text-[var(--color-text-body)] text-xs">이메일 *</span>
+                  <span className="leading-4 text-[var(--color-text-body)] text-xs">팀장 로그인 이메일 *</span>
                   <input disabled={submitting} type="email" autoComplete="username" value={form.leaderEmail} onChange={setField("leaderEmail")} className={inputCls} />
                 </label>
                 <label className="flex flex-col gap-1.5">
@@ -284,6 +284,7 @@ export default function SiteTeamsPage() {
                     className={inputCls}
                     {...passwordComposition.inputProps}
                   />
+                  <span className="text-xs leading-5 text-[var(--color-text-body)]">팀 생성 요청에 전달되는 초기 비밀번호예요. 앱 초대 링크는 팀 생성 후 별도로 발급합니다.</span>
                 </label>
               </div>
             </form>

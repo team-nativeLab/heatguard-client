@@ -38,3 +38,4 @@ export default function SiteManagementHeader({ active, siteName }: { active: Sit
     </div>
   );
 }
+
