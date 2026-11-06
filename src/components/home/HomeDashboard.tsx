@@ -574,7 +574,20 @@ export default function HomeDashboard() {
               </tr>
             )}
             {rows.map((r) => (
-              <tr key={r.id} className="border-[var(--home-table-border)] border-b last:border-b-0 h-10">
+              <tr
+                key={r.id}
+                tabIndex={0}
+                aria-label={`${r.type}, ${r.place}, ${r.temperature ?? "-"}도, ${r.humidity ?? "-"}% 기록 상세 보기`}
+                title="기록 상세 보기"
+                onClick={() => setLightbox(r)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setLightbox(r);
+                  }
+                }}
+                className="h-10 cursor-pointer border-[var(--home-table-border)] border-b last:border-b-0 hover:bg-[var(--home-table-bg)]/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
+              >
                 <td className="pl-4">
                   <RecordThumb src={r.photoUrl ?? undefined} onClick={() => setLightbox(r)} />
                 </td>
@@ -656,9 +669,17 @@ export default function HomeDashboard() {
 
       {lightbox && (
         <PhotoLightbox
+          key={lightbox.id}
           photoUrl={lightbox.photoUrl}
           takenAt={`${lightbox.date.replaceAll("-", ".")} ${lightbox.time}`}
           siteName={`${siteName} · ${lightbox.place}`}
+          details={[
+            { label: "유형", value: lightbox.type },
+            { label: "장소", value: lightbox.place || "-" },
+            { label: "온도", value: lightbox.temperature != null ? `${lightbox.temperature}°` : "-" },
+            { label: "습도", value: lightbox.humidity != null ? `${lightbox.humidity}%` : "-" },
+            { label: "체감온도", value: lightbox.apparentTemperature != null ? `${lightbox.apparentTemperature.toFixed(1)}°C` : "-" },
+          ]}
           onClose={() => setLightbox(null)}
         />
       )}

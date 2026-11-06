@@ -16,11 +16,11 @@ export interface RecordRow {
 
 export default function RecordsTable({
   rows,
-  onPhotoClick,
+  onRecordClick,
   emptyText = "기록이 없어요.",
 }: {
   rows: RecordRow[];
-  onPhotoClick?: (row: RecordRow) => void;
+  onRecordClick?: (row: RecordRow) => void;
   emptyText?: string;
 }) {
   return (
@@ -39,24 +39,28 @@ export default function RecordsTable({
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.id} className="border-[var(--color-border)] border-b last:border-b-0 hover:bg-[var(--color-bg-tile)]/40 transition-colors">
+            <tr
+              key={row.id}
+              tabIndex={0}
+              aria-label={`${row.type}, ${row.place}, ${row.temp}, ${row.humidity}. 기록 상세 보기`}
+              title="기록 상세 보기"
+              onClick={() => onRecordClick?.(row)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onRecordClick?.(row);
+                }
+              }}
+              className="cursor-pointer border-[var(--color-border)] border-b last:border-b-0 hover:bg-[var(--color-bg-tile)]/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] transition-colors"
+            >
               <td className="px-4 py-3">
-                <button
-                  type="button"
-                  onClick={() => onPhotoClick?.(row)}
-                  aria-label="사진 크게 보기"
-                  className={`flex items-center justify-center rounded-md size-8 overflow-hidden border border-[var(--color-border)] transition ${
-                    row.photoUrl
-                      ? "hover:border-[var(--color-accent)]"
-                      : "bg-[var(--color-bg-tile)] text-[var(--color-text-faint)] hover:text-[var(--color-text-body)]"
-                  }`}
-                >
+                <span aria-hidden="true" className="flex items-center justify-center size-8 rounded-md overflow-hidden shrink-0 border border-[var(--color-border)] text-[var(--color-text-faint)]">
                   {row.photoUrl ? (
                     <img src={row.photoUrl} alt="" className="size-full object-cover" />
                   ) : (
                     <RowViewIcon className="size-3.5" />
                   )}
-                </button>
+                </span>
               </td>
               <td className="px-4 py-3 text-[var(--color-text-label)] text-xs">{row.type}</td>
               <td className="px-4 py-3 text-[var(--color-text-label)] text-xs">

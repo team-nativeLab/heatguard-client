@@ -267,16 +267,24 @@ export default function SiteTodayPage() {
             {selectedTeam ? `${selectedTeam.teamName} 기록` : "오늘 기록 전체"} <span className="ml-1 text-xs text-[var(--color-text-faint)]">{visibleRows.length}건</span>
           </h2>
           <div className="pt-3">
-            <RecordsTable rows={visibleRows} onPhotoClick={setLightbox} emptyText="이 현장의 오늘 기록이 없어요." />
+            <RecordsTable rows={visibleRows} onRecordClick={setLightbox} emptyText="이 현장의 오늘 기록이 없어요." />
           </div>
         </div>
       </div>
 
       {lightbox && (
         <PhotoLightbox
+          key={lightbox.id}
           photoUrl={lightbox.photoUrl}
           takenAt={`${todayStr().replaceAll("-", ".")} ${lightbox.time}`}
           siteName={`${me.site.name} · ${lightbox.place}`}
+          details={[
+            { label: "유형", value: lightbox.type },
+            { label: "장소", value: lightbox.place || "-" },
+            { label: "온도", value: lightbox.temp },
+            { label: "습도", value: lightbox.humidity },
+            { label: "체감온도", value: lightbox.feels },
+          ]}
           onClose={() => setLightbox(null)}
         />
       )}
