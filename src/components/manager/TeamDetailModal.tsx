@@ -29,7 +29,6 @@ export default function TeamDetailModal({
   const [form, setForm] = useState({
     leaderName: team.leaderName,
     workLocation: team.workLocation ?? "",
-    contact: team.contact ?? "",
     memberCount: team.memberCount ? String(team.memberCount) : "",
   });
   const [credentials, setCredentials] = useState({ leaderEmail: team.loginEmail ?? "", newPassword: "" });
@@ -43,7 +42,6 @@ export default function TeamDetailModal({
       name: team.name,
       workplace: form.workLocation.trim(),
       leaderName: form.leaderName.trim(),
-      leaderPhone: form.contact.trim(),
       workerCount: form.memberCount.trim() ? Number(form.memberCount) : team.memberCount,
       version: team.version,
     };
@@ -60,7 +58,6 @@ export default function TeamDetailModal({
           name: payload.name ?? team.name,
           workLocation: payload.workplace ?? team.workLocation,
           leaderName: payload.leaderName ?? team.leaderName,
-          contact: payload.leaderPhone ?? team.contact,
           memberCount: payload.workerCount ?? team.memberCount,
         });
         showToast("팀 정보를 저장했어요. (데모)", "success");
@@ -106,7 +103,6 @@ export default function TeamDetailModal({
 
   const rows = [
     { key: "leaderName", label: "이름", value: team.leaderName },
-    { key: "contact", label: "전화번호", value: team.contact || "-" },
     { key: "memberCount", label: "인원", value: team.memberCount ? `${team.memberCount}명` : "-" },
     { key: "loginEmail", label: "이메일", value: team.loginEmail || "계정 미등록" },
     { key: "workLocation", label: "작업 장소", value: team.workLocation || "미지정" },
@@ -165,7 +161,6 @@ export default function TeamDetailModal({
             {(
               [
                 ["leaderName", "이름 *", "text"],
-                ["contact", "전화번호", "tel"],
                 ["memberCount", "인원", "text"],
                 ["workLocation", "작업 장소", "text"],
               ] as const

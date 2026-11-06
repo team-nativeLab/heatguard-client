@@ -8,22 +8,21 @@ import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 import { useToast } from "../../shared/ui/Toast";
 import { TeamMemberIcon } from "../../components/icons/Icons";
 import { teamsApi, isDemoFallback, errorMessage, type TeamSummary } from "../../api";
-import { formatTeamPhone, validateTeamForm, type TeamFormValues } from "../../lib/teamForm";
+import { validateTeamForm, type TeamFormValues } from "../../lib/teamForm";
 import { LoadError, SkeletonList } from "../../shared/ui/Skeleton";
 import { getPasswordError } from "../../lib/passwordPolicy";
 import { NewPasswordInput } from "../../components/auth/NewPasswordField";
 import { usePasswordComposition } from "../../components/auth/usePasswordComposition";
 
 const FALLBACK_TEAMS: TeamSummary[] = [
-  { id: "t1", name: "A팀", leaderName: "홍길동", workLocation: "3층 외벽", contact: "010-1234-5678", memberCount: 8, active: true, version: 1, loginEmail: "team-a@example.com" },
-  { id: "t2", name: "B팀", leaderName: "김영희", workLocation: "지하 1층 배관", contact: "010-9876-5432", memberCount: 6, active: true, version: 1, loginEmail: "team-b@example.com" },
-  { id: "t3", name: "C팀", leaderName: "이철호", workLocation: "옥상 방수", contact: "010-5555-7777", memberCount: 4, active: true, version: 1, loginEmail: "team-c@example.com" },
+  { id: "t1", name: "A팀", leaderName: "홍길동", workLocation: "3층 외벽", memberCount: 8, active: true, version: 1, loginEmail: "team-a@example.com" },
+  { id: "t2", name: "B팀", leaderName: "김영희", workLocation: "지하 1층 배관", memberCount: 6, active: true, version: 1, loginEmail: "team-b@example.com" },
+  { id: "t3", name: "C팀", leaderName: "이철호", workLocation: "옥상 방수", memberCount: 4, active: true, version: 1, loginEmail: "team-c@example.com" },
 ];
 
 const EMPTY_FORM: TeamFormValues = {
   leaderName: "",
   workLocation: "",
-  contact: "",
   memberCount: "",
   leaderEmail: "",
   initialPassword: "",
@@ -103,7 +102,6 @@ export default function SiteTeamsPage() {
       name: `${form.leaderName.trim()} 팀`,
       workplace: form.workLocation.trim(),
       leaderName: form.leaderName.trim(),
-      leaderPhone: form.contact.trim(),
       leaderEmail: form.leaderEmail.trim(),
       initialPassword: form.initialPassword,
       workerCount: form.memberCount.trim() ? Number(form.memberCount.trim()) : 0,
@@ -123,7 +121,6 @@ export default function SiteTeamsPage() {
             name: `${payload.leaderName} 팀`,
             leaderName: payload.leaderName,
             workLocation: payload.workplace,
-            contact: payload.leaderPhone,
             memberCount: payload.workerCount,
             active: true,
             version: 1,
@@ -176,9 +173,8 @@ export default function SiteTeamsPage() {
           {teams.length > 0 && (
             <div className="hidden md:flex gap-4 px-5 text-xs text-[var(--color-text-faint)]">
               <span className="size-8 shrink-0" aria-hidden="true" />
-              <div className="grid grid-cols-4 gap-x-4 flex-1 min-w-0">
+              <div className="grid grid-cols-3 gap-x-4 flex-1 min-w-0">
                 <span>이름</span>
-                <span>전화번호</span>
                 <span>인원</span>
                 <span>이메일</span>
               </div>
@@ -194,15 +190,12 @@ export default function SiteTeamsPage() {
                 <TeamMemberIcon className="size-4" />
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 flex-1 min-w-0 w-full">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2 flex-1 min-w-0 w-full">
                 <div>
                   <p className="font-medium leading-5 text-sm text-[var(--color-text-heading)]">{team.leaderName}</p>
                   <p className="leading-4 text-[var(--color-text-body)] text-xs">{team.workLocation || "미지정"}</p>
                 </div>
-                <p className="font-['JetBrains_Mono',monospace] leading-4 text-[var(--color-text-label)] text-xs self-center">
-                  {team.contact || "-"}
-                </p>
-                <p className="leading-4 text-[var(--color-text-label)] text-xs self-center">
+                                <p className="leading-4 text-[var(--color-text-label)] text-xs self-center">
                   {team.memberCount ? `${team.memberCount}명` : "-"}
                 </p>
                 <p className="font-['JetBrains_Mono',monospace] leading-4 text-[var(--color-text-body)] text-[11px] self-center truncate" title={team.loginEmail ?? undefined}>
@@ -247,19 +240,7 @@ export default function SiteTeamsPage() {
                   <span className="leading-4 text-[var(--color-text-body)] text-xs">이름 *</span>
                   <input disabled={submitting} type="text" value={form.leaderName} onChange={setField("leaderName")} maxLength={20} className={inputCls} />
                 </label>
-                <label className="flex flex-col gap-1.5">
-                  <span className="leading-4 text-[var(--color-text-body)] text-xs">전화번호</span>
-                  <input
-                    disabled={submitting}
-                    type="tel"
-                    inputMode="numeric"
-                    autoComplete="tel"
-                    value={form.contact}
-                    onChange={(event) => setForm((current) => ({ ...current, contact: formatTeamPhone(event.target.value) }))}
-                    placeholder="010-0000-0000"
-                    className={`${inputCls} placeholder:text-[var(--color-text-faint)]`}
-                  />
-                </label>
+
                 <label className="flex flex-col gap-1.5">
                   <span className="leading-4 text-[var(--color-text-body)] text-xs">인원</span>
                   <input disabled={submitting} type="text" inputMode="numeric" value={form.memberCount} onChange={setField("memberCount")} className={inputCls} />

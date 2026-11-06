@@ -162,7 +162,6 @@ export interface TeamSummary {
   name: string;
   leaderName: string;
   workLocation: string;
-  contact: string;
   memberCount: number;
   active: boolean;
   version: number;
@@ -174,7 +173,6 @@ export interface CreateTeamPayload {
   name: string;
   workplace: string;
   leaderName: string;
-  leaderPhone: string;
   leaderEmail: string;
   initialPassword: string;
   workerCount: number;
@@ -184,7 +182,6 @@ export interface UpdateTeamPayload {
   name?: string;
   workplace?: string;
   leaderName?: string;
-  leaderPhone?: string;
   workerCount?: number;
   version?: number;
 }
