@@ -5,7 +5,7 @@ export type SiteTab = "today" | "team" | "checklist" | "schedule" | "withdrawn";
 
 const TABS: { key: SiteTab; label: string; to: string }[] = [
   { key: "today", label: "오늘 현황", to: "/manager/sites" },
-  { key: "team", label: "팀 관리", to: "/manager/sites/team" },
+  { key: "team", label: "현장", to: "/manager/sites/team" },
   { key: "checklist", label: "체크리스트", to: "/manager/sites/checklist" },
   { key: "schedule", label: "시간 설정", to: "/manager/sites/schedule" },
   { key: "withdrawn", label: "탈퇴 회원", to: "/manager/sites/withdrawn" },
