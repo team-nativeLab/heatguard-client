@@ -143,7 +143,7 @@ export default function ScreenHQSites() {
         <button type="button" onClick={() => setAdding(true)} className={`${btnPrimary} mt-6`}>현장 추가</button>
 
         {adding && (
-          <ModalShell title="현장 추가" onClose={closeAdd} busy={creating} maxWidth={600}
+          <ModalShell title="현장 추가" onClose={closeAdd} busy={creating} maxWidth={600} backdropClassName="bg-black/30"
             footer={<>
               <button type="button" onClick={closeAdd} disabled={creating} className={btnSecondary}>취소</button>
               <button type="submit" form="add-site" disabled={creating} className={btnPrimary}>{creating ? "추가 중..." : "현장 추가"}</button>
