@@ -94,7 +94,7 @@ export default function SiteTeamsPage() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.leaderEmail.trim())) {
       return showToast("이메일을 확인해주세요.", "error");
     }
-    const passwordError = getPasswordError(form.initialPassword);
+    const passwordError = getPasswordError(form.initialPassword, 10);
     if (passwordError) return showToast(passwordError, "error");
     setSubmitting(true);
     const payload = {
@@ -263,6 +263,8 @@ export default function SiteTeamsPage() {
                   <NewPasswordInput
                     aria-label="초기 비밀번호"
                     disabled={submitting}
+                    minimumLength={10}
+                    policyHint="영문·숫자·특수문자로 10자 이상 입력해 주세요. 한글과 공백은 사용할 수 없어요."
                     value={form.initialPassword}
                     onChange={setField("initialPassword")}
                     className={inputCls}
