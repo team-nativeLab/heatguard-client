@@ -244,15 +244,15 @@ export function deactivateSite(siteId: string) {
   return apiFetch<void>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}`, { method: "DELETE" });
 }
 
-export interface TeamInvitation {
-  inviteUrl: string;
+export interface HqSiteAppLinks {
+  siteId: string;
+  siteName: string;
+  status: "LINKED" | "UNLINKED" | string;
+  items: { userId: string; email: string; status: string }[];
 }
 
-export function createTeamInvitation(siteId: string, teamId: string) {
-  return apiFetch<TeamInvitation>(
-    `/api/v1/hq/sites/${encodeURIComponent(siteId)}/teams/${encodeURIComponent(teamId)}/invitations`,
-    { method: "POST" },
-  );
+export function getSiteAppLinks(siteId: string) {
+  return apiFetch<HqSiteAppLinks>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}/app-links`);
 }
 
 export interface HqRecordRow {
