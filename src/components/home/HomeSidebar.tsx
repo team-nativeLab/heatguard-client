@@ -130,18 +130,7 @@ export default function HomeSidebar() {
             <p className="leading-[16.5px] text-[var(--color-text-faint)] text-[11px] pt-px truncate">{me.site.name}</p>
           </div>
         </Link>
-        <div className="flex items-center gap-2 pt-2">
-          <Link
-            to="/manager/account"
-            className={`leading-[16.5px] text-[11px] transition-colors hover:text-[var(--color-text-body)] ${
-              accountActive ? "text-[var(--home-nav-active-fg)]" : "text-[var(--color-text-faint)]"
-            }`}
-          >
-            계정 설정
-          </Link>
-          <span className="text-[var(--color-text-faint)] text-[11px]" aria-hidden="true">
-            |
-          </span>
+        <div className="flex items-center pt-2">
           <button
             type="button"
             onClick={() => setConfirmingLogout(true)}
@@ -164,3 +153,4 @@ export default function HomeSidebar() {
     </aside>
   );
 }
+
