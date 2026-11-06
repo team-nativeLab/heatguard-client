@@ -1,6 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
 import DashboardPage from "./pages/DashboardPage";
 import SiteTodayPage from "./pages/site/SiteTodayPage";
 import SiteTeamsPage from "./pages/site/SiteTeamsPage";
@@ -54,7 +53,7 @@ export default function App() {
 
         {/* 현장 관리자 */}
         <Route path="/auth/login" element={<LoginPage />} />
-        <Route path="/auth/signup" element={<SignupPage />} />
+        <Route path="/auth/signup" element={<Navigate to="/auth/select/signup" replace />} />
         <Route path="/manager" element={<Protected><DashboardPage /></Protected>} />
         <Route path="/manager/sites" element={<Protected><SiteTodayPage /></Protected>} />
         <Route path="/manager/sites/team" element={<Protected><SiteTeamsPage /></Protected>} />
