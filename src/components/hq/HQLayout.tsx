@@ -2,7 +2,7 @@ import { useCallback, useState, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
 import sidebarWave from "../../assets/images/sidebar-wave.png";
-import { DashboardIcon, SiteManageIcon, ContactIcon, PrintIcon } from "../icons/Icons";
+import { DashboardIcon, SiteManageIcon, ContactIcon, PrintIcon, DefaultProfileAvatar } from "../icons/Icons";
 import ThemeToggleButton from "../../shared/ui/ThemeToggleButton";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 import { useToast } from "../../shared/ui/Toast";
@@ -110,7 +110,7 @@ function HQSidebar({ onLogout }: { onLogout: () => void }) {
             accountActive ? "bg-[var(--home-nav-active-bg)]" : "hover:bg-[var(--home-nav-active-bg)]"
           }`}
         >
-          <span className="size-8 shrink-0 rounded-full bg-[var(--home-avatar-bg)]" aria-hidden="true" />
+          <DefaultProfileAvatar className="size-8 shrink-0" />
           <div className="flex min-w-0 flex-1 flex-col">
             <p className="text-xs leading-4 text-[var(--color-text-body)]">{me ? `${me.user.name} 님` : " "}</p>
             <p className="truncate pt-px text-[11px] leading-[16.5px] text-[var(--color-text-faint)]">{me?.company.companyName ?? " "}</p>
