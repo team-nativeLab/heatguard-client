@@ -30,7 +30,7 @@ export default function SiteAppLinkStatusPanel({ siteId }: { siteId: string }) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="font-semibold text-[var(--color-text-heading)]">앱 연동 상태</h2>
-          <p className="pt-1 leading-6">현장관리자가 발급한 팀 초대 링크의 연결 상태를 확인합니다. 초대 링크 발급은 현장관리자가 팀 관리에서 진행합니다.</p>
+          <p className="pt-1 leading-6">현장관리자가 발급한 팀 초대 링크의 연결 상태를 확인합니다. 초대 링크 발급은 현장관리자가 현장 메뉴에서 진행합니다.</p>
         </div>
         <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${isLinked ? "bg-emerald-100 text-emerald-700" : "bg-[var(--color-bg-tile)] text-[var(--color-text-label)]"}`}>
           {loading ? "조회 중" : isLinked ? "연동됨" : "미연동"}
@@ -59,3 +59,4 @@ export default function SiteAppLinkStatusPanel({ siteId }: { siteId: string }) {
     </section>
   );
 }
+
