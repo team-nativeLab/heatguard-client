@@ -37,9 +37,9 @@ const COPY = {
   signup: {
     side: "signup" as const,
     eyebrow: "관리자 회원가입",
-    titleLines: ["소속을 고르고", "바로 시작하세요"],
-    heading: "어떤 계정으로 가입할까요?",
-    sub: "소속에 따라 가입 절차가 달라요.",
+    titleLines: ["본사 계정부터", "가입해 주세요"],
+    heading: "본사 관리자부터 가입하세요",
+    sub: "가입 후 현장과 현장관리자 계정을 함께 만들 수 있어요.",
     cta: "가입하기",
     hq: { to: "/hq/signup", desc: ["관리자 발급 코드로", "가입해요"] },
     site: { to: "/auth/signup", desc: ["담당 현장 정보로", "가입해요"] },
@@ -126,10 +126,16 @@ export default function RoleSelectPage({ mode }: { mode: Mode }) {
         <p className="text-sm leading-[1.4] text-[var(--auth-text-muted)]">{c.sub}</p>
       </div>
 
-      <div className="mt-7 grid grid-cols-1 gap-3 min-[420px]:grid-cols-2">
+      <div className={mode === "signup" ? "mt-7 max-w-[310px]" : "mt-7 grid grid-cols-1 gap-3 min-[420px]:grid-cols-2"}>
         <RoleCard to={c.hq.to} from={mode} tone="blue" icon={<BarChartIcon size={24} />} title="본사 관리자" desc={c.hq.desc} cta={c.cta} />
-        <RoleCard to={c.site.to} from={mode} tone="orange" icon={<FileTextIcon size={24} />} title="현장 관리자" desc={c.site.desc} cta={c.cta} />
+        {mode === "login" && <RoleCard to={c.site.to} from={mode} tone="orange" icon={<FileTextIcon size={24} />} title="현장 관리자" desc={c.site.desc} cta={c.cta} />}
       </div>
+
+      {mode === "signup" && (
+        <p className="mt-4 max-w-[310px] text-xs leading-5 text-[var(--auth-text-muted)]">
+          현장관리자 계정은 본사 가입 후 현장 관리에서 현장과 함께 생성해 주세요.
+        </p>
+      )}
 
       <p className="mt-7 flex justify-center gap-3 text-sm leading-[1.4]">
         <span className="text-[var(--auth-text-muted)]">{c.footerText}</span>
