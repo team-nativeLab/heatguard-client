@@ -115,6 +115,7 @@ export default function ScreenHQRecords() {
           </label>
         </div>
 
+        {sitesLoading && <p role="status" className="pt-3 text-xs text-[var(--color-text-faint)]">현장 목록 불러오는 중</p>}
         {sitesError && <div className="pt-3"><ErrorBlock message={sitesError} onRetry={loadSites} /></div>}
 
         <div className="flex flex-col gap-10 pt-8">
