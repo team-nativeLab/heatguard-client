@@ -46,11 +46,11 @@ function RecordPhotoButton({ row, onPhotoClick }: { row: RecordRow; onPhotoClick
 
 export default function RecordsTable({
   rows,
-  onPhotoClick,
+  onRecordClick,
   emptyText = "기록이 없어요.",
 }: {
   rows: RecordRow[];
-  onPhotoClick?: (row: RecordRow) => void;
+  onRecordClick?: (row: RecordRow) => void;
   emptyText?: string;
 }) {
   return (
@@ -69,8 +69,25 @@ export default function RecordsTable({
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.id} className="border-[var(--color-border)] border-b last:border-b-0 hover:bg-[var(--color-bg-tile)]/40 transition-colors">
-              <td className="px-4 py-3"><RecordPhotoButton row={row} onPhotoClick={onPhotoClick} /></td>
+            <tr
+              key={row.id}
+              role={onRecordClick ? "button" : undefined}
+              tabIndex={onRecordClick ? 0 : undefined}
+              aria-label={onRecordClick ? `${row.type}, ${row.place || "장소 미입력"}, ${row.time} 기록 상세 보기` : undefined}
+              onClick={(event) => {
+                if ((event.target as HTMLElement).closest("button")) return;
+                onRecordClick?.(row);
+              }}
+              onKeyDown={(event) => {
+                if (event.target !== event.currentTarget) return;
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onRecordClick?.(row);
+                }
+              }}
+              className={`border-[var(--color-border)] border-b last:border-b-0 hover:bg-[var(--color-bg-tile)]/40 transition-colors ${onRecordClick ? "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-accent)]" : ""}`}
+            >
+              <td className="px-4 py-3"><RecordPhotoButton row={row} onPhotoClick={onRecordClick} /></td>
               <td className="px-4 py-3 text-[var(--color-text-label)] text-xs">{row.type}</td>
               <td className="px-4 py-3 text-[var(--color-text-label)] text-xs">
                 {row.place}
@@ -101,4 +118,5 @@ export const DEFAULT_RECORDS: RecordRow[] = [
   { id: "d3", type: "휴식사진", place: "옥상 그늘막", temp: "38°", humidity: "80%", feels: "38.7°C", feelsColor: "text-[#dc2626]", time: "12:05" },
   { id: "d4", type: "온도계", place: "3층 외벽", temp: "35°", humidity: "60%", feels: "35.1°C", feelsColor: "text-[#ea580c]", time: "14:00" },
 ];
+
 
