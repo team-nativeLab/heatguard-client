@@ -1,3 +1,4 @@
+Warning: gunzipSync was declared with const; use let for reassignable variables.
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import ModalShell, { btnPrimary, btnSecondary } from "../../components/home/ModalShell";
@@ -6,27 +7,35 @@ import { SiteHeatBadge } from "../../components/hq/RecordTable";
 import { EmptyBlock, ErrorBlock, LoadingBlock } from "../../components/hq/LoadState";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 import { useToast } from "../../shared/ui/Toast";
-import { getPasswordError } from "../../lib/passwordPolicy";
-import { NewPasswordInput } from "../../components/auth/NewPasswordField";
-import { usePasswordComposition } from "../../components/auth/usePasswordComposition";
 import { hqApi, ApiError, errorMessage, type HqSite } from "../../api";
 import { heatLabel, heatTone, sortByRisk } from "../../lib/hqFormat";
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const inputCls =
   "h-[38px] rounded border border-[var(--color-border)] bg-[var(--color-bg-app)] px-3 text-sm text-[var(--color-text-heading)] outline-none focus:border-[var(--color-accent)]";
 
-const EMPTY_FORM = { siteName: "", managerName: "", managerEmail: "", initialPassword: "" };
+const EMPTY_FORM = { siteName: "", managerName: "" };
+
+function makeInvitationUrl(invitationId: string) {
+  const url = new URL("/auth/site/invitation", window.location.origin);
+  url.searchParams.set("invitationId", invitationId);
+  return url.toString();
+}
+
+function formatExpiry(value?: string) {
+  if (!value) return "발급 후 7일 동안 사용할 수 있어요.";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "발급 후 7일 동안 사용할 수 있어요." : `만료 시각: ${new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeStyle: "short" }).format(date)}`;
+}
 
 export default function ScreenHQSites() {
   const { showToast } = useToast();
   const [adding, setAdding] = useState(false);
   const [sites, setSites] = useState<HqSite[] | null>(null);
   const [error, setError] = useState("");
-  const [search, setSearch] = useState("");
   const [form, setForm] = useState(EMPTY_FORM);
   const [creating, setCreating] = useState(false);
-  const passwordComposition = usePasswordComposition();
+  const [invitation, setInvitation] = useState<{ siteId: string; siteName: string; invitationId: string; expiresAt?: string } | null>(null);
+  const [invitationBusyId, setInvitationBusyId] = useState("");
   const [deleting, setDeleting] = useState<HqSite | null>(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
 
@@ -52,27 +61,25 @@ export default function ScreenHQSites() {
   const setField = (key: keyof typeof EMPTY_FORM) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
 
-  const normalizedSearch = search.trim().toLocaleLowerCase();
-  const visibleSites = (sites ?? []).filter((site) =>
-    !normalizedSearch || [site.name, site.managerName, site.managerEmail].some((value) => value.toLocaleLowerCase().includes(normalizedSearch)),
-  );
-
   const handleCreate = async (e: FormEvent) => {
     e.preventDefault();
-    if (creating || passwordComposition.isComposing()) return;
-    const v = { ...form, siteName: form.siteName.trim(), managerName: form.managerName.trim(), managerEmail: form.managerEmail.trim() };
+    if (creating) return;
+    const v = { ...form, siteName: form.siteName.trim(), managerName: form.managerName.trim() };
     if (!v.siteName) return showToast("현장 이름을 입력해 주세요.", "error");
     if (!v.managerName) return showToast("현장관리자 이름을 입력해 주세요.", "error");
-    if (!EMAIL_RE.test(v.managerEmail)) return showToast("이메일 형식을 확인해 주세요.", "error");
-    const passwordError = getPasswordError(v.initialPassword);
-    if (passwordError) return showToast(passwordError, "error");
 
     setCreating(true);
     try {
-      await hqApi.createSite({ siteName: v.siteName, managerName: v.managerName, managerEmail: v.managerEmail, initialPassword: form.initialPassword });
+      const result = await hqApi.createSite({ siteName: v.siteName, managerName: v.managerName });
       setForm(EMPTY_FORM);
       setAdding(false);
-      showToast("현장과 현장관리자 계정을 만들었어요. 관리자에게 이메일과 초기 비밀번호를 전달해 주세요.", "success");
+      const invitationId = result.managerInvitationId || result.invitationId;
+      if (invitationId) {
+        setInvitation({ siteId: result.siteId, siteName: v.siteName, invitationId, expiresAt: result.expiresAt });
+        showToast("현장을 만들고 현장관리자 초대 링크를 발급했어요.", "success");
+      } else {
+        showToast("현장은 만들었지만 초대 ID를 받지 못했어요. 현장 목록에서 초대 링크를 다시 발급해주세요.", "error");
+      }
       await load();
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
@@ -85,12 +92,42 @@ export default function ScreenHQSites() {
     }
   };
 
+  const handleReissueInvitation = async (site: Pick<HqSite, "id" | "name">) => {
+    if (invitationBusyId) return;
+    setInvitationBusyId(site.id);
+    try {
+      const result = await hqApi.createManagerInvitation(site.id);
+      const invitationId = result.managerInvitationId || result.invitationId;
+      if (!invitationId) throw new Error("초대 ID가 응답에 없어요.");
+      setInvitation({ siteId: site.id, siteName: site.name, invitationId, expiresAt: result.expiresAt });
+      showToast("새 현장관리자 초대 링크를 발급했어요.", "success");
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 409) {
+        showToast("이미 현장관리자가 연결된 현장이에요.", "error");
+      } else {
+        showToast(errorMessage(err, "초대 링크를 발급하지 못했어요."), "error");
+      }
+    } finally {
+      setInvitationBusyId("");
+    }
+  };
+
+  const copyInvitation = async () => {
+    if (!invitation) return;
+    try {
+      await navigator.clipboard.writeText(makeInvitationUrl(invitation.invitationId));
+      showToast("초대 링크를 복사했어요.", "success");
+    } catch {
+      showToast("초대 링크를 선택해 직접 복사해주세요.", "error");
+    }
+  };
+
   const handleDelete = async () => {
     if (!deleting || deleteBusy) return;
     setDeleteBusy(true);
     try {
       await hqApi.deactivateSite(deleting.id);
-      showToast(`'${deleting.name}' 현장을 비활성화했어요. 기존 기록은 보존됩니다.`, "success");
+      showToast(`'${deleting.name}' 현장을 비활성화했어요.`, "success");
       setDeleting(null);
       await load();
     } catch (err) {
@@ -106,19 +143,6 @@ export default function ScreenHQSites() {
         <h1 className="text-xl font-semibold text-[var(--color-text-heading)]">현장 관리</h1>
         <p className="pt-1 text-sm text-[var(--color-text-body)]">현장을 등록하고 앱 연동 상태를 확인합니다.</p>
 
-        {sites && sites.length > 0 && (
-          <label className="mt-6 block max-w-md">
-            <span className="sr-only">현장 검색</span>
-            <input
-              type="search"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="현장·관리자 검색"
-              className={`${inputCls} w-full`}
-            />
-          </label>
-        )}
-
         <div className="flex flex-col gap-2 pt-8">
           {error ? (
             <ErrorBlock message={error} onRetry={load} />
@@ -126,17 +150,12 @@ export default function ScreenHQSites() {
             <LoadingBlock />
           ) : sites.length === 0 ? (
             <EmptyBlock>등록된 현장이 없어요. 현장 추가 버튼으로 현장을 등록해 주세요.</EmptyBlock>
-          ) : visibleSites.length === 0 ? (
-            <EmptyBlock>검색 조건에 맞는 현장이 없어요.</EmptyBlock>
           ) : (
-            visibleSites.map((site) => (
+            sites.map((site) => (
               <div key={site.id} className="flex min-h-[74px] items-center gap-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-5 py-4">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <p className="whitespace-nowrap text-sm font-medium text-[var(--color-text-heading)]">{site.name}</p>
-                    {!site.active && (
-                      <span className="rounded bg-[var(--color-heat-none-bg)] px-1.5 py-0.5 text-[10px] text-[var(--color-heat-none-fg)]">비활성</span>
-                    )}
                     {(site.emergency || site.heatLevel === 3) && (
                       <span className="rounded border border-[var(--color-danger-border)] bg-[var(--color-danger-soft-bg)] px-1.5 py-0.5 text-[10px] text-[var(--color-danger-text)]">긴급</span>
                     )}
@@ -147,12 +166,13 @@ export default function ScreenHQSites() {
                 </div>
                 <SiteHeatBadge temperature={site.temperature} label={heatLabel(site)} tone={heatTone(site)} />
                 <p className="w-20 text-right font-['JetBrains_Mono',monospace] text-xs text-[var(--color-text-body)]">오늘 {site.todayRecordCount}건</p>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap justify-end gap-2">
+                  {!site.managerEmail && <button type="button" disabled={invitationBusyId === site.id} onClick={() => handleReissueInvitation(site)} className="rounded border border-[var(--color-accent)] px-3 py-1.5 text-xs text-[var(--color-accent)] disabled:opacity-60">{invitationBusyId === site.id ? "발급 중..." : "관리자 초대"}</button>}
                   <Link to={`/hq/sites/${encodeURIComponent(site.id)}`} className="rounded border border-[var(--color-checkbox-border)] px-3 py-1.5 text-xs text-[var(--color-text-label)]">
                     상세 · 연동 상태
                   </Link>
-                  <button type="button" onClick={() => setDeleting(site)} disabled={!site.active} className="rounded border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-text-body)] transition hover:border-[var(--color-danger-border)] hover:text-[var(--color-danger-text)] disabled:cursor-not-allowed disabled:opacity-50">
-                    비활성화
+                  <button type="button" onClick={() => setDeleting(site)} className="rounded border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-text-body)] transition hover:border-[var(--color-danger-border)] hover:text-[var(--color-danger-text)]">
+                    삭제
                   </button>
                 </div>
               </div>
@@ -170,7 +190,7 @@ export default function ScreenHQSites() {
             </>}
           >
             <form id="add-site" onSubmit={handleCreate} noValidate>
-              <p className="mb-4 text-xs leading-5 text-[var(--color-text-body)]">현장과 현장관리자 계정을 함께 만듭니다. 생성 후 관리자에게 이메일과 초기 비밀번호를 전달해 주세요.</p>
+              <p className="mb-4 text-xs leading-5 text-[var(--color-text-body)]">현장을 만든 뒤 현장관리자 초대 링크를 발급합니다. 초대받은 관리자가 링크에서 이메일과 비밀번호를 설정해 현장에 연결합니다.</p>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <label className="flex flex-col gap-1.5">
                   <span className="text-xs text-[var(--color-text-body)]">현장 이름 *</span>
@@ -180,30 +200,32 @@ export default function ScreenHQSites() {
                   <span className="text-xs text-[var(--color-text-body)]">현장관리자 이름 *</span>
                   <input disabled={creating} className={inputCls} value={form.managerName} onChange={setField("managerName")} autoComplete="off" />
                 </label>
-                <label className="flex flex-col gap-1.5">
-                  <span className="text-xs text-[var(--color-text-body)]">현장관리자 이메일 *</span>
-                  <input disabled={creating} className={inputCls} type="email" value={form.managerEmail} onChange={setField("managerEmail")} autoComplete="off" required />
-                </label>
-                <label className="flex flex-col gap-1.5">
-                  <span className="text-xs text-[var(--color-text-body)]">초기 비밀번호 * (8자 이상)</span>
-                  <NewPasswordInput
-                    aria-label="초기 비밀번호"
-                    disabled={creating}
-                    className={inputCls}
-                    value={form.initialPassword}
-                    onChange={setField("initialPassword")}
-                    {...passwordComposition.inputProps}
-                  />
-                </label>
               </div>
             </form>
+          </ModalShell>
+        )}
+
+        {invitation && (
+          <ModalShell title={`${invitation.siteName} 현장관리자 초대`} onClose={() => setInvitation(null)} maxWidth={600} backdropClassName="bg-black/30"
+            footer={<button type="button" onClick={() => setInvitation(null)} className={btnSecondary}>닫기</button>}
+          >
+            <p className="text-sm leading-6 text-[var(--color-text-body)]">이 링크를 현장관리자에게 전달해주세요. 초대를 수락하면 기존 현장이 연결되고 새 현장은 생성되지 않습니다.</p>
+            <p className="text-xs text-[var(--color-text-faint)]">{formatExpiry(invitation.expiresAt)}</p>
+            <label className="flex flex-col gap-1.5">
+              <span className="text-xs text-[var(--color-text-body)]">초대 링크</span>
+              <input readOnly className={`${inputCls} w-full`} value={makeInvitationUrl(invitation.invitationId)} onFocus={(event) => event.currentTarget.select()} />
+            </label>
+            <div className="flex gap-2">
+              <button type="button" onClick={copyInvitation} className={btnPrimary}>링크 복사</button>
+              <button type="button" onClick={() => { const site = sites?.find((item) => item.id === invitation.siteId); if (site) void handleReissueInvitation(site); }} className={btnSecondary}>새 링크 발급</button>
+            </div>
           </ModalShell>
         )}
       </HQContent>
 
       {deleting && (
         <ConfirmDialog
-          title="현장을 비활성화할까요?"
+          title="현장을 삭제할까요?"
           description={`'${deleting.name}' 현장이 비활성화돼요. 기존 기록은 그대로 보존돼요.`}
           confirmLabel="삭제"
           destructive
@@ -215,4 +237,3 @@ export default function ScreenHQSites() {
     </HQLayout>
   );
 }
-

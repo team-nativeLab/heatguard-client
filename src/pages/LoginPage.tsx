@@ -1,3 +1,4 @@
+Warning: gunzipSync was declared with const; use let for reassignable variables.
 import { useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthCardLayout from "../components/auth/AuthCardLayout";
@@ -8,6 +9,7 @@ import { useToast } from "../shared/ui/Toast";
 import { markSignedIn } from "../shared/auth/RequireAuth";
 import { clearSiteMeCache } from "../hooks/useSiteMe";
 import { authApi, ApiError, errorMessage } from "../api";
+import { clearSelectedSiteId } from "../lib/siteSelection";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -31,8 +33,9 @@ export default function LoginPage() {
   const location = useLocation();
   // 로그인 가드가 보낸 경우 원래 보던 화면으로 돌아간다.
   const redirectTo = (location.state as { from?: string } | null)?.from ?? "/manager";
+  const invitedEmail = (location.state as { email?: string } | null)?.email ?? "";
   const { showToast } = useToast();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(invitedEmail);
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -64,6 +67,8 @@ export default function LoginPage() {
     try {
       await authApi.login({ email: email.trim(), password });
       clearSiteMeCache();
+      authApi.clearManagedSitesCache();
+      clearSelectedSiteId();
       markSignedIn();
       // 성공: 자물쇠가 열리는 모습을 잠깐 보여준 뒤 이동한다.
       setUnlocked(true);

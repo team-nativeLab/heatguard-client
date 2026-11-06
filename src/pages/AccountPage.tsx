@@ -1,3 +1,4 @@
+Warning: gunzipSync was declared with const; use let for reassignable variables.
 import { useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import HomeLayout from "../components/home/HomeLayout";
@@ -109,7 +110,7 @@ export default function AccountPage() {
                 </button>
               }
             />
-            <Row label="현재 연결 현장" value={me.site.name || "-"} sub="현장 관리자 계정에는 현재 한 현장이 연결돼 있어요." action={fixedNote} />
+            <Row label="현재 선택 현장" value={me.site.name || "-"} sub="여러 현장을 관리하는 경우 왼쪽 메뉴에서 전환할 수 있어요." action={fixedNote} />
           </Card>
 
           <Card title="로그인 보안" description="주기적으로 비밀번호를 바꾸면 계정을 안전하게 지킬 수 있어요.">

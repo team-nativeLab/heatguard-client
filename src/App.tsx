@@ -19,15 +19,18 @@ import ScreenHQRecords from "./pages/hq/ScreenHQRecords";
 import ScreenHQAccount from "./pages/hq/ScreenHQAccount";
 import ScreenHQContact from "./pages/hq/ScreenHQContact";
 import SessionGuard from "./components/auth/SessionGuard";
+import SiteScopeGuard from "./components/auth/SiteScopeGuard";
+import SiteSelectionPage from "./pages/site/SiteSelectionPage";
+import SiteInvitationPage from "./pages/site/SiteInvitationPage";
 import RequireAuth from "./shared/auth/RequireAuth";
 import { authApi, hqApi } from "./api";
 import type { ReactNode } from "react";
 
 // 로그인해야 볼 수 있는 화면
-function Protected({ children }: { children: ReactNode }) {
+function Protected({ children, siteSelection = false }: { children: ReactNode; siteSelection?: boolean }) {
   return (
     <RequireAuth check={authApi.me} loginPath="/auth/login">
-      {children}
+      {siteSelection ? children : <SiteScopeGuard>{children}</SiteScopeGuard>}
     </RequireAuth>
   );
 }
@@ -54,7 +57,9 @@ export default function App() {
         {/* 현장 관리자 */}
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/signup" element={<Navigate to="/auth/select/signup" replace />} />
+        <Route path="/auth/site/invitation" element={<SiteInvitationPage />} />
         <Route path="/manager" element={<Protected><DashboardPage /></Protected>} />
+        <Route path="/manager/select-site" element={<Protected siteSelection><SiteSelectionPage /></Protected>} />
         <Route path="/manager/sites" element={<Protected><SiteTodayPage /></Protected>} />
         <Route path="/manager/sites/team" element={<Protected><SiteTeamsPage /></Protected>} />
         <Route path="/manager/sites/checklist" element={<Protected><SiteChecklistPage /></Protected>} />
