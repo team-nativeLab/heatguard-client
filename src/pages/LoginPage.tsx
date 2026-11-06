@@ -64,7 +64,9 @@ export default function LoginPage() {
 
     setSubmitting(true);
     try {
-      await authApi.login({ email: email.trim(), password });
+      const session = await authApi.adminLogin({ email: email.trim(), password });
+      const role = session.user?.role;
+      if (role !== "HQ_MANAGER" && role !== "SITE_MANAGER") throw new Error("관리자 계정이 아닙니다.");
       clearSiteMeCache();
       authApi.clearManagedSitesCache();
       clearSelectedSiteId();
