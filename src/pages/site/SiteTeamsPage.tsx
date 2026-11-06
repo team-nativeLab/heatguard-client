@@ -8,7 +8,7 @@ import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 import { useToast } from "../../shared/ui/Toast";
 import { TeamMemberIcon } from "../../components/icons/Icons";
 import { teamsApi, isDemoFallback, errorMessage, type TeamSummary } from "../../api";
-import { validateTeamForm, type TeamFormValues } from "../../lib/teamForm";
+import { formatTeamPhone, validateTeamForm, type TeamFormValues } from "../../lib/teamForm";
 import { LoadError, SkeletonList } from "../../shared/ui/Skeleton";
 import { getPasswordError } from "../../lib/passwordPolicy";
 import { NewPasswordInput } from "../../components/auth/NewPasswordField";
@@ -249,7 +249,16 @@ export default function SiteTeamsPage() {
                 </label>
                 <label className="flex flex-col gap-1.5">
                   <span className="leading-4 text-[var(--color-text-body)] text-xs">전화번호</span>
-                  <input disabled={submitting} type="tel" value={form.contact} onChange={setField("contact")} placeholder="010-0000-0000" className={`${inputCls} placeholder:text-[var(--color-text-faint)]`} />
+                  <input
+                    disabled={submitting}
+                    type="tel"
+                    inputMode="numeric"
+                    autoComplete="tel"
+                    value={form.contact}
+                    onChange={(event) => setForm((current) => ({ ...current, contact: formatTeamPhone(event.target.value) }))}
+                    placeholder="010-0000-0000"
+                    className={`${inputCls} placeholder:text-[var(--color-text-faint)]`}
+                  />
                 </label>
                 <label className="flex flex-col gap-1.5">
                   <span className="leading-4 text-[var(--color-text-body)] text-xs">인원</span>

@@ -9,6 +9,20 @@ export interface TeamFormValues {
 
 const PHONE_RE = /^0\d{1,2}-?\d{3,4}-?\d{4}$/;
 
+export function formatTeamPhone(value: string): string {
+  let digits = value.replace(/\D/g, "");
+  const isSeoulNumber = digits.startsWith("02");
+  const areaLength = isSeoulNumber ? 2 : 3;
+  digits = digits.slice(0, isSeoulNumber ? 10 : 11);
+  if (digits.length <= areaLength) return digits;
+
+  const area = digits.slice(0, areaLength);
+  const subscriber = digits.slice(areaLength);
+  const middle = subscriber.slice(0, 4);
+  const last = subscriber.slice(4, 8);
+  return `${area}-${middle}${last ? `-${last}` : ""}`;
+}
+
 /** 팀 추가/수정 폼 검증. 문제가 있으면 안내 문구를 돌려준다. */
 export function validateTeamForm(v: Pick<TeamFormValues, "leaderName" | "workLocation" | "contact" | "memberCount">): string | null {
   if (!v.leaderName.trim()) return "이름은 필수예요.";
