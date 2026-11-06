@@ -325,7 +325,7 @@ export async function getSite(siteId: string): Promise<HqSiteDetail> {
       id: site.id || siteId,
       name: site.name,
       active: site.active,
-      version: num(isObj(r.site) ? r.site : r, "version") ?? 1,
+      version: num(r, "site.version", "version") ?? 1,
       managerName: site.managerName,
       managerEmail: site.managerEmail,
       managerPhone: site.managerPhone,
