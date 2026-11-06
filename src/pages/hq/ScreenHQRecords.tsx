@@ -14,14 +14,28 @@ export default function ScreenHQRecords() {
   const [date, setDate] = useState(todayKst);
   const [siteId, setSiteId] = useState("");
   const [sites, setSites] = useState<HqSite[]>([]);
+  const [sitesLoading, setSitesLoading] = useState(true);
+  const [sitesError, setSitesError] = useState("");
   const [records, setRecords] = useState<HqRecordRow[] | null>(null);
   const [cursor, setCursor] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [loadingMore, setLoadingMore] = useState(false);
 
-  useEffect(() => {
-    hqApi.listAllSites().then(setSites).catch(() => {});
+  const loadSites = useCallback(async () => {
+    setSitesError("");
+    setSitesLoading(true);
+    try {
+      setSites(await hqApi.listAllSites());
+    } catch (err) {
+      setSitesError(errorMessage(err, "현장 목록을 불러오지 못했어요."));
+    } finally {
+      setSitesLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadSites();
+  }, [loadSites]);
 
   // 필터가 바뀌면 커서를 지우고 첫 페이지부터 다시 조회한다.
   const load = useCallback(async () => {
@@ -62,8 +76,14 @@ export default function ScreenHQRecords() {
       if (!map.has(key)) map.set(key, { siteId: r.siteId, name: r.siteName || "(현장 미상)", rows: [] });
       map.get(key)!.rows.push(r);
     }
-    return [...map.values()];
-  }, [records]);
+    return [...map.values()].sort((a, b) => {
+      const siteA = sites.find((site) => site.id === a.siteId);
+      const siteB = sites.find((site) => site.id === b.siteId);
+      if (!siteA) return siteB ? 1 : 0;
+      if (!siteB) return -1;
+      return siteB.heatLevel - siteA.heatLevel || (siteB.temperature ?? -1) - (siteA.temperature ?? -1);
+    });
+  }, [records, sites]);
 
   const siteOf = (g: { siteId: string; name: string }) => sites.find((s) => (g.siteId && s.id === g.siteId) || s.name === g.name);
 
@@ -79,11 +99,14 @@ export default function ScreenHQRecords() {
             <option value="">전체 현장</option>
             {sites.map((s) => (
               <option key={s.id} value={s.id}>
-                {s.name}
+                {s.active ? s.name : `${s.name} (비활성 · 기록 보존)`}
               </option>
             ))}
           </select>
+          {sitesLoading && <span className="text-xs text-[var(--color-text-faint)]">현장 목록 불러오는 중</span>}
         </div>
+
+        {sitesError && <div className="pt-3"><ErrorBlock message={sitesError} onRetry={loadSites} /></div>}
 
         <div className="flex flex-col gap-10 pt-8">
           {error ? (
@@ -99,8 +122,9 @@ export default function ScreenHQRecords() {
                 <section key={g.siteId || g.name}>
                   <div className="flex items-center gap-3">
                     <h2 className="text-sm font-medium text-[var(--color-text-heading)]">{g.name}</h2>
+                    {site && !site.active && <span className="rounded bg-[var(--color-heat-none-bg)] px-1.5 py-0.5 text-[10px] text-[var(--color-heat-none-fg)]">비활성 · 기록 보존</span>}
                     {site && <SiteHeatBadge temperature={site.temperature} label={heatLabel(site)} tone={heatTone(site)} />}
-                    <span className="font-['JetBrains_Mono',monospace] text-xs text-[var(--color-text-faint)]">{g.rows.length}건</span>
+                    <span className="font-['JetBrains_Mono',monospace] text-xs text-[var(--color-text-faint)]">{g.rows.length}건 표시</span>
                   </div>
                   <div className="pt-3">
                     <RecordTable records={g.rows} />
@@ -119,3 +143,4 @@ export default function ScreenHQRecords() {
     </HQLayout>
   );
 }
+
