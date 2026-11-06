@@ -54,3 +54,14 @@ export function updateTeamCredentials(teamId: string, payload: TeamCredentialsPa
     { method: "PUT", body: payload },
   );
 }
+
+export interface TeamInvitation {
+  inviteUrl: string;
+}
+
+export function createTeamInvitation(teamId: string) {
+  return apiFetch<TeamInvitation>(
+    `/api/v1/site/teams/${encodeURIComponent(teamId)}/invitations`,
+    { method: "POST" },
+  );
+}
