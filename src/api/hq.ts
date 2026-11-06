@@ -228,8 +228,8 @@ export async function listAllSites(params?: { heatLevel?: number; emergency?: bo
 export interface CreateHqSitePayload {
   siteName: string;
   managerName: string;
-  managerEmail?: string;
-  initialPassword?: string;
+  managerEmail: string;
+  initialPassword: string;
 }
 
 export function createSite(payload: CreateHqSitePayload) {
