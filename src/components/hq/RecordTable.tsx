@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { HqRecordRow, HeatTone } from "../../api";
 
 function toneClass(tone: string) {
@@ -25,12 +26,30 @@ function valueTone(tone: string) {
 
 const COLS = "grid-cols-[142px_127px_150px_90px_90px_126px_1fr]";
 
+function PhotoThumbnail({ url, label }: { url: string; label: string }) {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [url]);
+  if (failed) {
+    return (
+      <span
+        role="img"
+        aria-label={`${label} 사진을 불러오지 못했어요`}
+        title="사진을 불러오지 못했어요"
+        className="flex size-8 items-center justify-center rounded bg-[var(--color-danger-soft-bg)] text-xs text-[var(--color-danger-text)]"
+      >
+        !
+      </span>
+    );
+  }
+  return <img src={url} alt={`${label} 사진`} title={`${label} 사진`} className="size-8 rounded object-cover" onError={() => setFailed(true)} />;
+}
+
 function Photos({ row }: { row: HqRecordRow }) {
   if (row.photoUrls.length > 0) {
     return (
       <div className="flex gap-2">
-        {row.photoUrls.slice(0, 2).map((url) => (
-          <img key={url} src={url} alt="" className="size-8 rounded object-cover" />
+        {row.photoUrls.slice(0, 2).map((url, index) => (
+          <PhotoThumbnail key={`${url}-${index}`} url={url} label={`${row.type} ${index + 1}`} />
         ))}
       </div>
     );
@@ -39,14 +58,14 @@ function Photos({ row }: { row: HqRecordRow }) {
     return (
       <div className="flex gap-2">
         {Array.from({ length: Math.min(row.photoCount, 2) }).map((_, i) => (
-          <div key={i} className="flex size-8 items-center justify-center rounded bg-[var(--color-bg-tile)] text-[var(--color-text-faint)]">
+          <div key={i} role="img" aria-label="사진 URL을 받지 못했어요" title="사진 URL을 받지 못했어요" className="flex size-8 items-center justify-center rounded bg-[var(--color-bg-tile)] text-[var(--color-text-faint)]">
             ▧
           </div>
         ))}
       </div>
     );
   }
-  return <span className="text-[var(--color-text-faint)]">-</span>;
+  return <span aria-label="사진 없음" className="text-[var(--color-text-faint)]">없음</span>;
 }
 
 export default function RecordTable({ records }: { records: HqRecordRow[] }) {
@@ -102,3 +121,4 @@ export function SiteHeatBadge({ temperature, label, tone }: { temperature: numbe
   }
   return <HeatBadge temp={temperature != null ? `${temperature.toFixed(1)}°C` : ""} status={label} tone={tone} />;
 }
+

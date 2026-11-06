@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePolling } from "../../shared/hooks/usePolling";
 import { Skeleton, SkeletonTable } from "../../shared/ui/Skeleton";
 import { useNavigate } from "react-router-dom";
-import PhotoLightbox from "../../shared/ui/PhotoLightbox";
+import RecordDetailDialog from "../manager/RecordDetailDialog";
 import ThemeToggleButton from "../../shared/ui/ThemeToggleButton";
 import { useToast } from "../../shared/ui/Toast";
 import RecordThumb from "./RecordThumb";
@@ -615,7 +615,24 @@ export default function HomeDashboard() {
               </tr>
             )}
             {rows.map((r) => (
-              <tr key={r.id} className="border-[var(--home-table-border)] border-b last:border-b-0 h-10">
+              <tr
+                key={r.id}
+                role="button"
+                tabIndex={0}
+                aria-label={`${r.type}, ${r.place || "장소 미입력"}, ${r.time} 기록 상세 보기`}
+                onClick={(event) => {
+                  if ((event.target as HTMLElement).closest("button")) return;
+                  setLightbox(r);
+                }}
+                onKeyDown={(event) => {
+                  if (event.target !== event.currentTarget) return;
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setLightbox(r);
+                  }
+                }}
+                className="h-10 cursor-pointer border-[var(--home-table-border)] border-b last:border-b-0 hover:bg-[var(--home-table-bg)]/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-accent)]"
+              >
                 <td className="pl-4">
                   <RecordThumb src={r.photoUrl ?? undefined} onClick={() => setLightbox(r)} />
                 </td>
@@ -657,10 +674,15 @@ export default function HomeDashboard() {
 
 
       {lightbox && (
-        <PhotoLightbox
+        <RecordDetailDialog
+          type={lightbox.type}
+          place={lightbox.place}
+          temperature={lightbox.temperature}
+          humidity={lightbox.humidity}
+          apparentTemperature={lightbox.apparentTemperature}
           photoUrl={lightbox.photoUrl}
           takenAt={`${lightbox.date.replaceAll("-", ".")} ${lightbox.time}`}
-          siteName={`${siteName} · ${lightbox.place}`}
+          siteName={siteName}
           onClose={() => setLightbox(null)}
         />
       )}
