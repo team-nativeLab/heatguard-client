@@ -1,4 +1,3 @@
-Warning: gunzipSync was declared with const; use let for reassignable variables.
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import HomeLayout from "../../components/home/HomeLayout";

@@ -1,4 +1,3 @@
-Warning: gunzipSync was declared with const; use let for reassignable variables.
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { authApi, ApiError, errorMessage, type ManagedSite } from "../../api";

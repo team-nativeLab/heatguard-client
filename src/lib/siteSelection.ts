@@ -1,4 +1,3 @@
-Warning: gunzipSync was declared with const; use let for reassignable variables.
 const STORAGE_KEY = "heatguard.selectedSiteId";
 export const SITE_SELECTION_EVENT = "heatguard:site-selection";
 

@@ -1,4 +1,3 @@
-Warning: gunzipSync was declared with const; use let for reassignable variables.
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import ModalShell, { btnPrimary, btnSecondary } from "../../components/home/ModalShell";
