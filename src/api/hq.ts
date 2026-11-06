@@ -309,7 +309,7 @@ export async function listRecords(params?: { date?: string; siteId?: string; cur
 }
 
 export interface HqSiteDetail {
-  site: { id: string; name: string; active: boolean; managerName: string; managerEmail: string; managerPhone: string; heatLevel: HeatLevel; temperature: number | null };
+  site: { id: string; name: string; active: boolean; version: number; managerName: string; managerEmail: string; managerPhone: string; heatLevel: HeatLevel; temperature: number | null };
   teams: { id: string; name: string; leaderName: string; workplace: string; memberCount: number | null; done: number | null; total: number | null }[];
   checklistItems: { id: string; text: string }[];
   todayRecords: HqRecordRow[];

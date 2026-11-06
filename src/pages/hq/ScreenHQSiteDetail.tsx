@@ -60,7 +60,7 @@ export default function ScreenHQSiteDetail() {
             )}
 
             <SiteAppLinkStatusPanel key={site.id} siteId={site.id} />
-            <SiteWeatherPanel siteId={site.id} version={Number((detail as unknown as { version?: number }).version ?? 1)} active={site.active} />
+            <SiteWeatherPanel siteId={site.id} version={site.version} active={site.active} />
 
             <div className="flex flex-wrap gap-2 pt-6">
               {detail.teams.length === 0 && <span className="text-xs text-[var(--color-text-faint)]">등록된 팀이 없어요.</span>}
