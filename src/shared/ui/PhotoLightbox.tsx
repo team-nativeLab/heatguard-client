@@ -31,11 +31,13 @@ export default function PhotoLightbox({
   takenAt,
   siteName,
   photoUrl,
+  details,
   onClose,
 }: {
   takenAt: string;
   siteName: string;
   photoUrl?: string | null;
+  details?: { label: string; value: string }[];
   onClose?: () => void;
 }) {
   const { showToast } = useToast();
@@ -71,7 +73,7 @@ export default function PhotoLightbox({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="사진 크게 보기"
+      aria-label="기록 상세"
       className="fixed inset-0 backdrop-blur-sm bg-black/70 flex items-center justify-center z-50 px-4 animate-[fadeIn_0.15s_ease-out]"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose?.();
@@ -105,6 +107,17 @@ export default function PhotoLightbox({
               </div>
             )}
           </div>
+
+          {details?.length ? (
+            <dl className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {details.map(({ label, value }) => (
+                <div key={label} className="min-w-0 rounded-lg bg-[var(--color-bg-tile)] px-3 py-2">
+                  <dt className="text-[11px] leading-4 text-[var(--color-text-body)]">{label}</dt>
+                  <dd className="pt-0.5 text-sm font-medium text-[var(--color-text-value)] truncate" title={value}>{value}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : null}
 
           <div className="flex items-center justify-between flex-wrap gap-3">
             <p className="leading-5 text-[var(--color-text-label)] text-sm">현장명 : {siteName}</p>
