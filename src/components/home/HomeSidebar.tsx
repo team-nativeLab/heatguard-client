@@ -2,7 +2,7 @@ import { useState, type ComponentType } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
 import sidebarWave from "../../assets/images/sidebar-wave.png";
-import { DashboardIcon, SiteManageIcon, ContactIcon } from "../icons/Icons";
+import { DashboardIcon, SiteManageIcon, ContactIcon, DefaultProfileAvatar } from "../icons/Icons";
 import { useToast } from "../../shared/ui/Toast";
 import { useSiteMe, clearSiteMeCache } from "../../hooks/useSiteMe";
 import { markSignedOut } from "../../shared/auth/RequireAuth";
@@ -124,7 +124,7 @@ export default function HomeSidebar() {
             accountActive ? "bg-[var(--home-nav-active-bg)]" : "hover:bg-[var(--home-nav-active-bg)]"
           }`}
         >
-          <span className="bg-[var(--home-avatar-bg)] rounded-full shrink-0 size-8" aria-hidden="true" />
+          <DefaultProfileAvatar className="shrink-0 size-8" />
           <div className="flex flex-col min-w-0 flex-1">
             <p className="leading-4 text-[var(--color-text-body)] text-xs">{me.user.name} 님</p>
             <p className="leading-[16.5px] text-[var(--color-text-faint)] text-[11px] pt-px truncate">{me.site.name}</p>
