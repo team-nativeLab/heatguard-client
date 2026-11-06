@@ -111,9 +111,9 @@ export default function SiteTeamsPage() {
     try {
       const created = await teamsApi.createTeam(payload);
       setTeams((prev) => [...prev, created]);
-      showToast(`${created.leaderName} 팀을 추가했어요.`, "success");
       setForm(EMPTY_FORM);
       setAdding(false);
+      setInviteTeam(created);
     } catch (err) {
       if (isDemoFallback(err)) {
         setTeams((prev) => [
@@ -291,7 +291,11 @@ export default function SiteTeamsPage() {
       )}
 
       {inviteTeam && (
-        <SiteTeamInvitationModal team={inviteTeam} onClose={() => setInviteTeam(null)} />
+        <SiteTeamInvitationModal
+          team={inviteTeam}
+          autoGenerate
+          onClose={() => setInviteTeam(null)}
+        />
       )}
 
       {pendingDelete && (
