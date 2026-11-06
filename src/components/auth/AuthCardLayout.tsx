@@ -94,8 +94,8 @@ export default function AuthCardLayout({
           }}
         >
           <div className={`absolute top-[35px] flex items-center gap-2.5 ${shown === "signup" ? "left-[95px]" : "left-[45px]"}`}>
-            <img alt="" src={logo} className="size-[30px] object-contain" />
-            <p className="text-[20px] font-bold leading-[1.4] text-[var(--auth-text-strong)]">폭염가드</p>
+            <img alt="" src={logo} className="size-9 object-contain" />
+            <p className="text-[22px] font-bold leading-[1.4] text-[var(--auth-text-strong)]">폭염가드</p>
           </div>
 
           <div className={`auth-fade-in absolute bottom-[76px] top-[120px] flex flex-col justify-center gap-[38px] ${shown === "signup" ? "left-[95px] right-[45px]" : "inset-x-[45px]"}`}>
@@ -177,10 +177,10 @@ export default function AuthCardLayout({
 
           <div className="auth-fade-in mx-auto w-full max-w-[388px]">
             {!hideCardHeader && (
-              <div className="flex items-center gap-3.5">
-                <img alt="폭염가드 로고" src={logo} className="size-10 shrink-0 object-contain" />
+              <div className={`flex items-center ${side === "signup" ? "gap-4" : "gap-3.5"}`}>
+                <img alt="폭염가드 로고" src={logo} className={`${side === "signup" ? "size-12" : "size-10"} shrink-0 object-contain`} />
                 <div className="flex flex-col gap-0.5 leading-[1.4]">
-                  <h1 className="text-[24px] font-bold text-[var(--auth-text-strong)]">{cardTitle}</h1>
+                  <h1 className={`${side === "signup" ? "text-[26px]" : "text-[24px]"} font-bold text-[var(--auth-text-strong)]`}>{cardTitle}</h1>
                   <p className="text-sm text-[var(--auth-text-body)]">{cardSubtitle}</p>
                 </div>
               </div>
