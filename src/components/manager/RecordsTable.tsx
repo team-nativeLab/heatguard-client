@@ -2,6 +2,7 @@ import { RowViewIcon } from "../icons/Icons";
 
 export interface RecordRow {
   id: string;
+  teamId?: string | null;
   photoUrl?: string | null;
   teamName?: string;
   type: string;

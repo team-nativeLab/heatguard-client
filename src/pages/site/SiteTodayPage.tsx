@@ -102,7 +102,7 @@ function buildTeamStatus(team: TeamSummary, records: RecordItem[], checkTimes: s
   const thermoTimes = mine.filter((r) => r.type === "온도계").map((r) => toMinutes(r.time));
   return {
     teamId: team.id,
-    teamName: `${team.leaderName} 팀`,
+    teamName: team.workLocation || team.name || `${team.leaderName} 팀`,
     leaderName: team.leaderName,
     workLocation: team.workLocation || "미지정",
     feelsLike,
@@ -122,6 +122,7 @@ export default function SiteTodayPage() {
   const [lightbox, setLightbox] = useState<RecordRow | null>(null);
   const [teams, setTeams] = useState<TeamStatusToday[] | null>(null);
   const [rows, setRows] = useState<RecordRow[] | null>(null);
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
@@ -184,6 +185,9 @@ export default function SiteTodayPage() {
     );
   }
 
+  const selectedTeam = teams.find((team) => team.teamId === selectedTeamId);
+  const visibleRows = selectedTeamId ? rows.filter((row) => row.teamId === selectedTeamId) : rows;
+
   return (
     <HomeLayout>
       <div className="w-full flex flex-col items-start">
@@ -193,15 +197,22 @@ export default function SiteTodayPage() {
           {teams.map((team) => {
             const badge = heatBadgeClass(team.heatLevel);
             return (
-              <div
+              <button
+                type="button"
                 key={team.teamId}
-                className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg p-4 flex flex-col"
+                aria-pressed={selectedTeamId === team.teamId}
+                onClick={() => setSelectedTeamId((current) => current === team.teamId ? null : team.teamId)}
+                className={`text-left bg-[var(--color-bg-card)] border rounded-lg p-4 flex flex-col transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] ${
+                  selectedTeamId === team.teamId
+                    ? "border-[var(--color-accent)] ring-1 ring-[var(--color-accent)]"
+                    : "border-[var(--color-border)] hover:border-[var(--color-accent)]/60"
+                }`}
               >
                 <div className="flex items-start justify-between w-full gap-2">
                   <div>
                     <p className="font-medium leading-5 text-sm text-[var(--color-text-heading)]">{team.teamName}</p>
                     <p className="leading-4 text-[var(--color-text-body)] text-xs pt-0.5">
-                      {team.leaderName} · {team.workLocation}
+                      {team.leaderName}
                     </p>
                   </div>
                   <span
@@ -241,7 +252,7 @@ export default function SiteTodayPage() {
                 <p className="font-['JetBrains_Mono',monospace] leading-[16.5px] text-[var(--color-text-body)] text-[11px] pt-3">
                   체크리스트 {team.checklistDone ?? "-"}/{team.checklistTotal ?? "-"}
                 </p>
-              </div>
+              </button>
             );
           })}
           {teams.length === 0 && (
@@ -253,10 +264,10 @@ export default function SiteTodayPage() {
 
         <div className="w-full pt-8">
           <h2 className="text-[var(--color-text-label)] text-sm font-medium">
-            오늘 기록 전체 <span className="ml-1 text-xs text-[var(--color-text-faint)]">{rows.length}건</span>
+            {selectedTeam ? `${selectedTeam.teamName} 기록` : "오늘 기록 전체"} <span className="ml-1 text-xs text-[var(--color-text-faint)]">{visibleRows.length}건</span>
           </h2>
           <div className="pt-3">
-            <RecordsTable rows={rows} onPhotoClick={setLightbox} emptyText="오늘 등록된 기록이 없어요." />
+            <RecordsTable rows={visibleRows} onPhotoClick={setLightbox} emptyText="이 현장의 오늘 기록이 없어요." />
           </div>
         </div>
       </div>
