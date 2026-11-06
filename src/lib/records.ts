@@ -12,6 +12,7 @@ export function toRecordRow(item: RecordItem): RecordRow {
   const apparent = item.apparentTemperature ?? 0;
   return {
     id: item.id,
+    teamId: item.teamId,
     photoUrl: item.photoUrl ?? null,
     teamName: item.teamName,
     type: item.type,
