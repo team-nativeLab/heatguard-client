@@ -6,7 +6,6 @@ import SiteTodayPage from "./pages/site/SiteTodayPage";
 import SiteTeamsPage from "./pages/site/SiteTeamsPage";
 import SiteChecklistPage from "./pages/site/SiteChecklistPage";
 import SiteSettingsPage from "./pages/site/SiteSettingsPage";
-import SiteWeatherSettingsPage from "./pages/site/SiteWeatherSettingsPage";
 import SiteWithdrawnPage from "./pages/site/SiteWithdrawnPage";
 import AccountPage from "./pages/AccountPage";
 import ContactPage from "./pages/ContactPage";
@@ -61,7 +60,6 @@ export default function App() {
         <Route path="/manager/sites/team" element={<Protected><SiteTeamsPage /></Protected>} />
         <Route path="/manager/sites/checklist" element={<Protected><SiteChecklistPage /></Protected>} />
         <Route path="/manager/sites/schedule" element={<Protected><SiteSettingsPage /></Protected>} />
-        <Route path="/manager/sites/weather" element={<Protected><SiteWeatherSettingsPage /></Protected>} />
         <Route path="/manager/sites/withdrawn" element={<Protected><SiteWithdrawnPage /></Protected>} />
         <Route path="/manager/account" element={<Protected><AccountPage /></Protected>} />
         <Route path="/manager/contact" element={<Protected><ContactPage /></Protected>} />
