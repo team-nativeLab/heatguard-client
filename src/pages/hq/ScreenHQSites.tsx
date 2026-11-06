@@ -72,7 +72,7 @@ export default function ScreenHQSites() {
       setForm(EMPTY_FORM);
       setCreateWebAccount(false);
       setAdding(false);
-      showToast("현장을 만들었어요. 팀 등록 후 상세 화면에서 팀 초대 링크를 발급해 주세요.", "success");
+      showToast("현장을 만들었어요. 현장관리자가 팀을 등록하고 앱 초대 링크를 발급할 수 있어요.", "success");
       await load();
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
@@ -104,7 +104,7 @@ export default function ScreenHQSites() {
     <HQLayout>
       <HQContent>
         <h1 className="text-xl font-semibold text-[var(--color-text-heading)]">현장 관리</h1>
-        <p className="pt-1 text-sm text-[var(--color-text-body)]">현장 생성 및 앱 팀 초대</p>
+        <p className="pt-1 text-sm text-[var(--color-text-body)]">현장을 등록하고 앱 연동 상태를 확인합니다.</p>
 
         <div className="flex flex-col gap-2 pt-8">
           {error ? (
@@ -131,7 +131,7 @@ export default function ScreenHQSites() {
                 <p className="w-20 text-right font-['JetBrains_Mono',monospace] text-xs text-[var(--color-text-body)]">오늘 {site.todayRecordCount}건</p>
                 <div className="flex gap-2">
                   <Link to={`/hq/sites/${encodeURIComponent(site.id)}`} className="rounded border border-[var(--color-checkbox-border)] px-3 py-1.5 text-xs text-[var(--color-text-label)]">
-                    상세 · 팀 초대
+                    상세 · 연동 상태
                   </Link>
                   <button type="button" onClick={() => setDeleting(site)} className="rounded border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-text-body)] transition hover:border-[var(--color-danger-border)] hover:text-[var(--color-danger-text)]">
                     삭제
