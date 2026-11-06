@@ -25,7 +25,7 @@ export function NewPasswordAuthField({
 }: NewPasswordAuthFieldProps) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
-  const draftError = getDraftError(value, confirmation, minimumLength) ?? error;
+  const draftError = getDraftError(value, confirmation) ?? error;
   const describedBy = [
     draftError ? `${inputId}-error` : "",
     !confirmation ? `${inputId}-policy` : "",
