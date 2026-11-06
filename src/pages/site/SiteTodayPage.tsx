@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import HomeLayout from "../../components/home/HomeLayout";
 import SiteManagementHeader from "../../components/manager/SiteManagementHeader";
 import RecordsTable, { DEFAULT_RECORDS, type RecordRow } from "../../components/manager/RecordsTable";
-import PhotoLightbox from "../../shared/ui/PhotoLightbox";
+import RecordDetailDialog from "../../components/manager/RecordDetailDialog";
 import { useSiteMe } from "../../hooks/useSiteMe";
 import { teamsApi, recordsApi, settingsApi, checklistsApi, isDemoFallback, type RecordItem, type TeamSummary } from "../../api";
 import { toRecordRow } from "../../lib/records";
@@ -257,7 +257,7 @@ export default function SiteTodayPage() {
           })}
           {teams.length === 0 && (
             <p className="md:col-span-3 text-[var(--color-text-faint)] text-sm py-6">
-              등록된 팀이 없어요. ‘팀 관리’ 탭에서 팀을 추가해주세요.
+              등록된 팀이 없어요. ‘현장’ 탭에서 팀을 추가해주세요.
             </p>
           )}
         </div>
@@ -267,19 +267,25 @@ export default function SiteTodayPage() {
             {selectedTeam ? `${selectedTeam.teamName} 기록` : "오늘 기록 전체"} <span className="ml-1 text-xs text-[var(--color-text-faint)]">{visibleRows.length}건</span>
           </h2>
           <div className="pt-3">
-            <RecordsTable rows={visibleRows} onPhotoClick={setLightbox} emptyText="이 현장의 오늘 기록이 없어요." />
+            <RecordsTable rows={visibleRows} onRecordClick={setLightbox} emptyText="이 현장의 오늘 기록이 없어요." />
           </div>
         </div>
       </div>
 
       {lightbox && (
-        <PhotoLightbox
+        <RecordDetailDialog
+          type={lightbox.type}
+          place={lightbox.place}
+          temperature={lightbox.temp}
+          humidity={lightbox.humidity}
+          apparentTemperature={lightbox.feels}
           photoUrl={lightbox.photoUrl}
           takenAt={`${todayStr().replaceAll("-", ".")} ${lightbox.time}`}
-          siteName={`${me.site.name} · ${lightbox.place}`}
+          siteName={me.site.name}
           onClose={() => setLightbox(null)}
         />
       )}
     </HomeLayout>
   );
 }
+

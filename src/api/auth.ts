@@ -13,6 +13,59 @@ export function register(payload: SiteRegisterPayload) {
   return apiFetch<SiteRegisterResponse>("/api/v1/auth/site/register", { method: "POST", body: payload });
 }
 
+export interface ManagedSite {
+  siteId: string;
+  siteName: string;
+  active: boolean;
+}
+
+function normalizeManagedSites(raw: unknown): ManagedSite[] {
+  const root = raw && typeof raw === "object" ? raw as Record<string, unknown> : {};
+  const values = Array.isArray(raw) ? raw : Array.isArray(root.sites) ? root.sites : Array.isArray(root.items) ? root.items : [];
+  return values.flatMap((value) => {
+    if (!value || typeof value !== "object") return [];
+    const item = value as Record<string, unknown>;
+    const siteId = typeof item.siteId === "string" ? item.siteId : typeof item.id === "string" ? item.id : "";
+    if (!siteId) return [];
+    return [{
+      siteId,
+      siteName: typeof item.siteName === "string" ? item.siteName : typeof item.name === "string" ? item.name : "이름 없는 현장",
+      active: item.active !== false,
+    }];
+  }).filter((site) => site.active);
+}
+
+let managedSitesCache: ManagedSite[] | null = null;
+let managedSitesRequest: Promise<ManagedSite[]> | null = null;
+
+export function clearManagedSitesCache() {
+  managedSitesCache = null;
+  managedSitesRequest = null;
+}
+
+export function listManagedSites({ refresh = false }: { refresh?: boolean } = {}) {
+  if (refresh) clearManagedSitesCache();
+  if (managedSitesCache) return Promise.resolve(managedSitesCache);
+  if (!managedSitesRequest) {
+    managedSitesRequest = apiFetch<unknown>("/api/v1/auth/site/sites")
+      .then((raw) => {
+        managedSitesCache = normalizeManagedSites(raw);
+        return managedSitesCache;
+      })
+      .finally(() => { managedSitesRequest = null; });
+  }
+  return managedSitesRequest;
+}
+
+export function acceptSiteInvitation(payload: {
+  invitationId: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}) {
+  return apiFetch<unknown>("/api/v1/auth/site/invitations/accept", { method: "POST", body: payload });
+}
+
 export function login(payload: LoginPayload) {
   return apiFetch<SiteLoginResponse>("/api/v1/auth/site/login", { method: "POST", body: payload });
 }

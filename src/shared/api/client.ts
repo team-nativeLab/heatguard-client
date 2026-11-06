@@ -52,6 +52,9 @@ interface RequestOptions {
   params?: Record<string, string | number | boolean | undefined>;
 }
 
+const SITE_SCOPED_PATH = /^\/api\/v1\/(?:site|team)\//;
+const SITE_SELECTION_KEY = "heatguard.selectedSiteId";
+
 /** 서버 연결 상태가 바뀔 때 발생하는 이벤트. detail: { online: boolean } */
 export const CONNECTION_EVENT = "heatguard:connection";
 /** 로그인 세션이 만료(401)됐을 때 발생하는 이벤트 */
@@ -125,12 +128,19 @@ function extractCode(data: unknown): string | undefined {
 export async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = "GET", body, params } = options;
 
+  const headers: Record<string, string> = {};
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+  if (SITE_SCOPED_PATH.test(path) && typeof window !== "undefined") {
+    const siteId = window.localStorage.getItem(SITE_SELECTION_KEY);
+    if (siteId) headers["X-Site-Id"] = siteId;
+  }
+
   let res: Response;
   try {
     res = await fetch(buildPath(path, params), {
       method,
       credentials: "include",
-      headers: body !== undefined ? { "Content-Type": "application/json" } : undefined,
+      headers: Object.keys(headers).length ? headers : undefined,
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch {

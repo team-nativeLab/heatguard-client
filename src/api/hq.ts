@@ -228,15 +228,23 @@ export async function listAllSites(params?: { heatLevel?: number; emergency?: bo
 export interface CreateHqSitePayload {
   siteName: string;
   managerName: string;
-  managerEmail: string;
-  initialPassword: string;
 }
 
 export function createSite(payload: CreateHqSitePayload) {
-  return apiFetch<{ siteId: string; managerUserId?: string; defaultTeamId?: string }>("/api/v1/hq/sites", {
+  return apiFetch<{ siteId: string; managerInvitationId?: string; invitationId?: string; expiresAt?: string }>("/api/v1/hq/sites", {
     method: "POST",
     body: payload,
   });
+}
+
+export interface SiteManagerInvitation {
+  managerInvitationId?: string;
+  invitationId?: string;
+  expiresAt?: string;
+}
+
+export function createManagerInvitation(siteId: string) {
+  return apiFetch<SiteManagerInvitation>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}/manager-invitations`, { method: "POST" });
 }
 
 export function deactivateSite(siteId: string) {

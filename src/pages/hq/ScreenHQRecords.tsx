@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import HQLayout, { HQContent } from "../../components/hq/HQLayout";
 import RecordTable, { SiteHeatBadge } from "../../components/hq/RecordTable";
 import { EmptyBlock, ErrorBlock, LoadingBlock } from "../../components/hq/LoadState";
+import { ChevronDownIcon } from "../../components/home/HomeIcons";
 import { hqApi, errorMessage, type HqRecordRow, type HqSite } from "../../api";
 import { heatLabel, heatTone } from "../../lib/hqFormat";
 
@@ -95,15 +96,23 @@ export default function ScreenHQRecords() {
 
         <div className="flex flex-wrap items-center gap-2 pt-5">
           <input type="date" value={date} max={todayKst()} onChange={(e) => setDate(e.target.value)} className={filterCls} aria-label="날짜" />
-          <select value={siteId} onChange={(e) => setSiteId(e.target.value)} className={filterCls} aria-label="현장">
-            <option value="">전체 현장</option>
-            {sites.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.active ? s.name : `${s.name} (비활성 · 기록 보존)`}
-              </option>
-            ))}
-          </select>
-          {sitesLoading && <span className="text-xs text-[var(--color-text-faint)]">현장 목록 불러오는 중</span>}
+          <label className="relative inline-flex items-center">
+            <span className="sr-only">현장 필터</span>
+            <select
+              value={siteId}
+              onChange={(e) => setSiteId(e.target.value)}
+              className={`${filterCls} appearance-none pr-8`}
+              aria-label="현장"
+            >
+              <option value="">전체 현장</option>
+              {sites.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.active ? s.name : `${s.name} (비활성 · 기록 보존)`}
+                </option>
+              ))}
+            </select>
+            <ChevronDownIcon className="pointer-events-none absolute right-2 size-3.5 text-[var(--color-text-body)]" />
+          </label>
         </div>
 
         {sitesError && <div className="pt-3"><ErrorBlock message={sitesError} onRetry={loadSites} /></div>}

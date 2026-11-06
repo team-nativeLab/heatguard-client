@@ -1,4 +1,4 @@
-import { useState, type ComponentType } from "react";
+import { useEffect, useState, type ComponentType } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
 import sidebarWave from "../../assets/images/sidebar-wave.png";
@@ -7,7 +7,8 @@ import { useToast } from "../../shared/ui/Toast";
 import { useSiteMe, clearSiteMeCache } from "../../hooks/useSiteMe";
 import { markSignedOut } from "../../shared/auth/RequireAuth";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
-import { authApi, isNetworkError } from "../../api";
+import { authApi, isNetworkError, type ManagedSite } from "../../api";
+import { clearSelectedSiteId, getSelectedSiteId, setSelectedSiteId, SITE_SELECTION_EVENT } from "../../lib/siteSelection";
 
 type NavItem = {
   label: string;
@@ -28,7 +29,22 @@ export default function HomeSidebar() {
   const me = useSiteMe();
   const [confirmingLogout, setConfirmingLogout] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [managedSites, setManagedSites] = useState<ManagedSite[]>([]);
+  const [selectedSiteId, setSelectedId] = useState(getSelectedSiteId());
   const accountActive = location.pathname.startsWith("/manager/account");
+
+  useEffect(() => {
+    let alive = true;
+    authApi.listManagedSites().then((items) => {
+      if (alive) setManagedSites(items);
+    }).catch(() => { /* 상단 현장 전환을 사용할 수 없는 경우 기존 소속 표기를 유지한다. */ });
+    const onSelection = (event: Event) => setSelectedId((event as CustomEvent<{ siteId: string }>).detail.siteId);
+    window.addEventListener(SITE_SELECTION_EVENT, onSelection);
+    return () => {
+      alive = false;
+      window.removeEventListener(SITE_SELECTION_EVENT, onSelection);
+    };
+  }, []);
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -40,6 +56,8 @@ export default function HomeSidebar() {
       }
     } finally {
       clearSiteMeCache();
+      authApi.clearManagedSitesCache();
+      clearSelectedSiteId();
       markSignedOut();
       setLoggingOut(false);
       setConfirmingLogout(false);
@@ -60,9 +78,27 @@ export default function HomeSidebar() {
           </div>
           <p className="font-semibold leading-5 text-sm text-[var(--color-text-heading)] whitespace-nowrap">폭염가드</p>
         </div>
-        <p className="font-['JetBrains_Mono',monospace] leading-[15px] pl-8 pt-0.5 text-[var(--color-text-body)] text-[10px] tracking-[0.5px] whitespace-nowrap">
-          현장
-        </p>
+        {managedSites.length > 1 ? (
+          <label className="mt-2 block w-full pl-8">
+            <span className="sr-only">관리할 현장 선택</span>
+            <select
+              aria-label="관리할 현장 선택"
+              value={selectedSiteId}
+              onChange={(event) => {
+                const siteId = event.target.value;
+                setSelectedSiteId(siteId);
+                window.location.reload();
+              }}
+              className="w-full cursor-pointer truncate rounded-md border border-[var(--color-border)] bg-[var(--home-sidebar-bg)] px-2 py-1 text-[11px] text-[var(--color-text-body)] outline-none focus:border-[var(--color-accent)]"
+            >
+              {managedSites.map((site) => <option key={site.siteId} value={site.siteId}>{site.siteName}</option>)}
+            </select>
+          </label>
+        ) : (
+          <p className="font-['JetBrains_Mono',monospace] leading-[15px] pl-8 pt-0.5 text-[var(--color-text-body)] text-[10px] tracking-[0.5px] whitespace-nowrap">
+            {managedSites[0]?.siteName || "현장"}
+          </p>
+        )}
       </div>
 
       <nav className="relative z-10 flex flex-col gap-0.5 px-3 py-4 w-full">

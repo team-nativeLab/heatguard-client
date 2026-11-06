@@ -8,6 +8,8 @@ configureApiClient({ authPaths: [
     "/api/v1/auth/team/email-codes/verify",
     "/api/v1/auth/site/login",
     "/api/v1/auth/site/register",
+    "/api/v1/auth/site/sites",
+    "/api/v1/auth/site/invitations/accept",
     "/api/v1/auth/hq/login",
     "/api/v1/auth/hq/register",
   ] });
