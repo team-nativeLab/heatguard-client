@@ -1,5 +1,15 @@
 type IconProps = { className?: string };
 
+export function DefaultProfileAvatar({ className }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 40 40" fill="none" aria-hidden="true">
+      <circle cx="20" cy="20" r="20" fill="var(--home-avatar-bg)" />
+      <circle cx="20" cy="14.5" r="6.25" fill="var(--color-text-faint)" />
+      <path d="M7.25 34.25c1.6-6.05 6.55-9.5 12.75-9.5s11.15 3.45 12.75 9.5A19.9 19.9 0 0 1 20 40a19.9 19.9 0 0 1-12.75-5.75Z" fill="var(--color-text-faint)" />
+    </svg>
+  );
+}
+
 export function DashboardIcon({ className }: IconProps) {
   return (
     <svg className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
