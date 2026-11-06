@@ -9,7 +9,7 @@ export function feelsLikeColorClass(temp: number): string {
 }
 
 export function toRecordRow(item: RecordItem): RecordRow {
-  const apparent = item.apparentTemperature ?? 0;
+  const apparent = item.apparentTemperature;
   return {
     id: item.id,
     teamId: item.teamId,
@@ -19,8 +19,9 @@ export function toRecordRow(item: RecordItem): RecordRow {
     place: item.place,
     temp: item.temperature != null ? `${item.temperature}°` : "-",
     humidity: item.humidity != null ? `${item.humidity}%` : "-",
-    feels: `${apparent.toFixed(1)}°C`,
-    feelsColor: feelsLikeColorClass(apparent),
+    feels: apparent == null ? "-" : `${apparent.toFixed(1)}°C`,
+    feelsColor: apparent == null ? "text-[var(--color-text-faint)]" : feelsLikeColorClass(apparent),
     time: item.time,
   };
 }
+
