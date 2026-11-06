@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { RowViewIcon } from "../icons/Icons";
 
 export interface RecordRow {
@@ -12,6 +13,35 @@ export interface RecordRow {
   feels: string;
   feelsColor: string;
   time: string;
+}
+
+function RecordPhotoButton({ row, onPhotoClick }: { row: RecordRow; onPhotoClick?: (row: RecordRow) => void }) {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [row.photoUrl]);
+  const available = Boolean(row.photoUrl) && !failed;
+
+  return (
+    <button
+      type="button"
+      onClick={() => available && onPhotoClick?.(row)}
+      disabled={!available}
+      aria-label={available ? "사진 크게 보기" : failed ? "사진을 불러오지 못했어요" : "사진 없음"}
+      title={failed ? "사진을 불러오지 못했어요" : undefined}
+      className={`flex items-center justify-center rounded-md size-8 overflow-hidden border border-[var(--color-border)] transition ${
+        available
+          ? "hover:border-[var(--color-accent)]"
+          : "bg-[var(--color-bg-tile)] text-[var(--color-text-faint)] disabled:cursor-default"
+      }`}
+    >
+      {available ? (
+        <img src={row.photoUrl!} alt="" className="size-full object-cover" onError={() => setFailed(true)} />
+      ) : failed ? (
+        <span aria-hidden="true" className="text-[10px] text-[var(--color-danger-text)]">!</span>
+      ) : (
+        <RowViewIcon className="size-3.5" />
+      )}
+    </button>
+  );
 }
 
 export default function RecordsTable({
@@ -40,24 +70,7 @@ export default function RecordsTable({
         <tbody>
           {rows.map((row) => (
             <tr key={row.id} className="border-[var(--color-border)] border-b last:border-b-0 hover:bg-[var(--color-bg-tile)]/40 transition-colors">
-              <td className="px-4 py-3">
-                <button
-                  type="button"
-                  onClick={() => onPhotoClick?.(row)}
-                  aria-label="사진 크게 보기"
-                  className={`flex items-center justify-center rounded-md size-8 overflow-hidden border border-[var(--color-border)] transition ${
-                    row.photoUrl
-                      ? "hover:border-[var(--color-accent)]"
-                      : "bg-[var(--color-bg-tile)] text-[var(--color-text-faint)] hover:text-[var(--color-text-body)]"
-                  }`}
-                >
-                  {row.photoUrl ? (
-                    <img src={row.photoUrl} alt="" className="size-full object-cover" />
-                  ) : (
-                    <RowViewIcon className="size-3.5" />
-                  )}
-                </button>
-              </td>
+              <td className="px-4 py-3"><RecordPhotoButton row={row} onPhotoClick={onPhotoClick} /></td>
               <td className="px-4 py-3 text-[var(--color-text-label)] text-xs">{row.type}</td>
               <td className="px-4 py-3 text-[var(--color-text-label)] text-xs">
                 {row.place}
@@ -88,3 +101,4 @@ export const DEFAULT_RECORDS: RecordRow[] = [
   { id: "d3", type: "휴식사진", place: "옥상 그늘막", temp: "38°", humidity: "80%", feels: "38.7°C", feelsColor: "text-[#dc2626]", time: "12:05" },
   { id: "d4", type: "온도계", place: "3층 외벽", temp: "35°", humidity: "60%", feels: "35.1°C", feelsColor: "text-[#ea580c]", time: "14:00" },
 ];
+
