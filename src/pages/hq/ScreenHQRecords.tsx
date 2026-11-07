@@ -115,7 +115,6 @@ export default function ScreenHQRecords() {
               <ChevronDownIcon className="pointer-events-none absolute right-2 size-3.5 text-[var(--color-text-body)]" />
             </label>
           </div>
-          </div>
           <div className="ml-auto flex items-center gap-2">
             <button type="button" onClick={load} className="h-[34px] rounded-md bg-[var(--color-text-heading)] px-3.5 text-xs font-medium text-[var(--color-bg-card)] transition hover:opacity-90">조회</button>
             <button type="button" onClick={() => { setDate(todayKst()); setSiteId(""); }} className="h-[34px] rounded-md border border-[var(--color-border)] px-3 text-xs text-[var(--color-text-body)] transition hover:bg-[var(--color-bg-tile)]">초기화</button>
