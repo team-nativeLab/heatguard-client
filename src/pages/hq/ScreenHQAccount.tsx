@@ -1,9 +1,12 @@
 import { useState, type ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 import HQLayout, { HQContent } from "../../components/hq/HQLayout";
 import ModalShell, { btnPrimary, btnSecondary, inputCls } from "../../components/hq/ModalShell";
+import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 import { useToast } from "../../shared/ui/Toast";
 import { hqApi, ApiError, errorMessage } from "../../api";
-import { patchHqCompany, useHqMe } from "../../hooks/useHqMe";
+import { clearHqMeCache, patchHqCompany, useHqMe } from "../../hooks/useHqMe";
+import { markSignedOut } from "../../shared/auth/RequireAuth";
 import { getPasswordConfirmationError, getPasswordError } from "../../lib/passwordPolicy";
 import { NewPasswordInput } from "../../components/auth/NewPasswordField";
 import { usePasswordComposition } from "../../components/auth/usePasswordComposition";
@@ -45,6 +48,9 @@ export default function ScreenHQAccount() {
   const [editingPhone, setEditingPhone] = useState(false);
   const me = useHqMe();
   const phone = me?.company.phone ?? "";
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+  const [confirmingLogout, setConfirmingLogout] = useState(false);
 
   return (
     <HQLayout>
@@ -81,11 +87,42 @@ export default function ScreenHQAccount() {
               }
             />
           </Card>
+
+          <Card title="계정" description="계정에서 로그아웃할 수 있어요.">
+            <div className="flex justify-end border-t border-[var(--home-card-border)] px-5 py-4">
+              <button
+                type="button"
+                onClick={() => setConfirmingLogout(true)}
+                className="rounded border border-[var(--color-danger-border)] bg-transparent px-3.5 py-1.5 text-[13px] text-[var(--color-danger-text)] transition hover:bg-[var(--color-danger-soft-bg)]"
+              >
+                로그아웃
+              </button>
+            </div>
+          </Card>
         </div>
       </HQContent>
 
       {changingPw && <PasswordModal onClose={() => setChangingPw(false)} />}
       {editingPhone && <PhoneModal initial={phone} onClose={() => setEditingPhone(false)} />}
+      {confirmingLogout && (
+        <ConfirmDialog
+          title="로그아웃할까요?"
+          confirmLabel="로그아웃"
+          onCancel={() => setConfirmingLogout(false)}
+          onConfirm={async () => {
+            setConfirmingLogout(false);
+            try {
+              await hqApi.logout();
+            } catch {
+              // 서버 세션이 이미 끝났어도 클라이언트 로그아웃을 마칩니다.
+            }
+            clearHqMeCache();
+            markSignedOut("hq");
+            showToast("로그아웃했어요.");
+            navigate("/hq/login", { replace: true });
+          }}
+        />
+      )}
     </HQLayout>
   );
 }
