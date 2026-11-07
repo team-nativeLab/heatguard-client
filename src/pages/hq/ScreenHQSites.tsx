@@ -163,8 +163,10 @@ export default function ScreenHQSites() {
                     {[site.managerName, site.managerPhone, site.managerEmail, site.teamCount != null ? `팀 ${site.teamCount}개` : ""].filter(Boolean).join(" · ") || "-"}
                   </p>
                 </div>
-                <SiteHeatBadge temperature={site.temperature} label={heatLabel(site)} tone={heatTone(site)} />
-                <p className="w-20 text-right font-['JetBrains_Mono',monospace] text-xs text-[var(--color-text-body)]">오늘 {site.todayRecordCount}건</p>
+                <div className="flex shrink-0 items-center gap-2">
+                  <SiteHeatBadge temperature={site.temperature} label={heatLabel(site)} tone={heatTone(site)} />
+                  <p className="w-20 text-right font-['JetBrains_Mono',monospace] text-xs text-[var(--color-text-body)]">오늘 {site.todayRecordCount}건</p>
+                </div>
                 <div className="flex flex-wrap justify-end gap-2">
                   {!site.managerEmail && <button type="button" disabled={invitationBusyId === site.id} onClick={() => handleReissueInvitation(site)} className="rounded border border-[var(--color-accent)] px-3 py-1.5 text-xs text-[var(--color-accent)] disabled:opacity-60">{invitationBusyId === site.id ? "발급 중..." : "관리자 초대"}</button>}
                   <Link to={`/hq/sites/${encodeURIComponent(site.id)}`} className="rounded border border-[var(--color-checkbox-border)] px-3 py-1.5 text-xs text-[var(--color-text-label)]">
