@@ -106,11 +106,7 @@ function HQSidebar({ onLogout }: { onLogout: () => void }) {
           to="/hq/account"
           aria-current={accountActive ? "page" : undefined}
           title="계정 설정"
-          className={`flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors ${
-            accountActive
-              ? "border-[var(--color-border)] bg-[var(--home-nav-active-bg)]"
-              : "border-transparent hover:border-[var(--color-border)] hover:bg-[var(--home-nav-active-bg)]"
-          }`}
+          className="flex w-full items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left transition-colors hover:border-[var(--color-border)] hover:bg-[var(--home-nav-active-bg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
         >
           <DefaultProfileAvatar className="size-9 shrink-0" />
           <div className="flex min-w-0 flex-1 flex-col">

@@ -156,9 +156,7 @@ export default function HomeSidebar() {
           to="/manager/account"
           aria-current={accountActive ? "page" : undefined}
           title="계정 설정"
-          className={`flex gap-2 items-center w-full rounded px-1.5 py-1.5 -mx-1.5 transition-colors ${
-            accountActive ? "bg-[var(--home-nav-active-bg)]" : "hover:bg-[var(--home-nav-active-bg)]"
-          }`}
+          className="flex gap-2 items-center w-full rounded px-1.5 py-1.5 -mx-1.5 transition-colors hover:bg-[var(--home-nav-active-bg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
         >
           <DefaultProfileAvatar className="shrink-0 size-8" />
           <div className="flex flex-col min-w-0 flex-1">
