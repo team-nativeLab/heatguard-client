@@ -6,7 +6,7 @@ import { EmptyBlock, ErrorBlock, LoadingBlock } from "../../components/hq/LoadSt
 import { hqApi, errorMessage, type HqDashboard, type HqSite, type HqSiteWeather } from "../../api";
 import { useHqMe } from "../../hooks/useHqMe";
 import { usePolling } from "../../shared/hooks/usePolling";
-import { doneText, heatLabel, heatTone, sortByRisk, tempText } from "../../lib/hqFormat";
+import { doneText, heatLabel, heatTone, tempText } from "../../lib/hqFormat";
 import { ChevronDownIcon } from "../../components/home/HomeIcons";
 import {
   AlertStatIcon,
@@ -55,13 +55,6 @@ function StatTile({ icon, count, unit, label, tone, to }: { icon: ReactNode; cou
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 const pad = (n: number) => String(n).padStart(2, "0");
 
-const GLOW: Record<string, string> = {
-  red: "rgba(239, 68, 68, 0.46)",
-  orange: "rgba(249, 115, 22, 0.42)",
-  yellow: "rgba(251, 191, 36, 0.4)",
-  none: "rgba(148, 163, 184, 0.3)",
-};
-
 export default function ScreenHQDashboard() {
   const me = useHqMe();
   const [data, setData] = useState<HqDashboard | null>(null);
@@ -77,7 +70,11 @@ export default function ScreenHQDashboard() {
     try {
       const dash = await hqApi.getDashboard();
       const list = dash.sitesByRisk.length > 0 ? dash.sitesByRisk : await hqApi.listAllSites();
-      const orderedSites = sortByRisk(list);
+      const orderedSites = [...list].sort((a, b) => {
+        if (a.temperature == null && b.temperature != null) return 1;
+        if (b.temperature == null && a.temperature != null) return -1;
+        return (b.temperature ?? 0) - (a.temperature ?? 0) || (b.heatLevel ?? -1) - (a.heatLevel ?? -1);
+      });
       setData(dash);
       setSites(orderedSites);
       setSelectedSiteId((current) => current && orderedSites.some((site) => site.id === current) ? current : orderedSites[0]?.id ?? "");
@@ -112,7 +109,7 @@ export default function ScreenHQDashboard() {
   const dateText = `${now.getFullYear()}. ${pad(now.getMonth() + 1)}. ${pad(now.getDate())}. (${WEEKDAYS[now.getDay()]})`;
   const timeText = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
   const selectedSite = sites.find((site) => site.id === selectedSiteId);
-  const glowColor = GLOW[selectedSite ? heatTone(selectedSite) : "none"];
+  const glowColor = "rgba(96, 165, 250, 0.38)";
   const weatherStatus = weatherError
     ? "조회 실패"
     : weatherLoading
@@ -135,8 +132,8 @@ export default function ScreenHQDashboard() {
       <HQContent maxWidth={1600}>
         <header className="flex min-h-[74px] flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-sm text-[var(--color-text-body)]">안녕하세요, {me ? `${me.user.name} 님` : ""}</p>
-            <h1 className="whitespace-nowrap text-2xl font-bold leading-[1.35] text-[var(--color-text-heading)]">오늘도 안전한 현장을 만들어가요.</h1>
+            <p className="text-[13px] text-[var(--color-text-body)]">안녕하세요, {me ? `${me.user.name} 님` : ""}</p>
+            <h1 className="whitespace-nowrap text-[19px] font-bold leading-[1.4] text-[var(--color-text-heading)]">오늘도 안전한 현장을 만들어가요.</h1>
           </div>
           <div className="flex w-full items-center gap-3 pt-0.5 sm:w-auto">
             <label className="relative flex h-[38px] w-full items-center rounded-[10px] border border-[var(--home-search-border)] bg-[var(--home-search-bg)] transition-colors focus-within:border-[var(--color-accent)] sm:w-[260px]">
@@ -147,7 +144,7 @@ export default function ScreenHQDashboard() {
                 type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="현장을 검색하세요..."
+                placeholder="현장, 기록, 작업자를 검색하세요..."
                 className="h-full w-full bg-transparent pl-[35px] pr-2 text-[12.5px] text-[var(--color-text-heading)] outline-none placeholder:text-[var(--color-text-body)]"
               />
             </label>
@@ -157,7 +154,7 @@ export default function ScreenHQDashboard() {
         <section className="mt-0.5 grid grid-cols-1 gap-4 xl:grid-cols-2">
           <div
             className="relative flex min-h-[275px] flex-col overflow-hidden rounded-xl border border-[var(--home-card-border)] p-5"
-            style={{ background: `linear-gradient(110deg, color-mix(in srgb, ${glowColor} 32%, var(--home-card-bg)) 0%, var(--home-card-bg) 100%)` }}
+            style={{ background: `linear-gradient(110deg, color-mix(in srgb, ${glowColor} 58%, var(--home-card-bg)) 0%, var(--home-card-bg) 100%)` }}
           >
             <div className="relative flex flex-wrap items-center justify-start gap-2">
               <label className="relative flex h-[30px] max-w-full items-center gap-1.5 rounded-full border border-[var(--home-pill-border)] bg-[var(--home-pill-bg)] pl-[11px] pr-2 text-xs font-medium text-[var(--home-pill-fg)]">
