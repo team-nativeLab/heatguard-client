@@ -8,6 +8,7 @@ import { useSiteMe, patchSiteMeUser } from "../hooks/useSiteMe";
 import { authApi, siteApi, isDemoFallback, errorMessage } from "../api";
 import { markSignedOut } from "../shared/auth/RequireAuth";
 import { clearSiteMeCache } from "../hooks/useSiteMe";
+import { clearSelectedSiteId } from "../lib/siteSelection";
 import { getPasswordConfirmationError, getPasswordError } from "../lib/passwordPolicy";
 import { NewPasswordInput } from "../components/auth/NewPasswordField";
 import { usePasswordComposition } from "../components/auth/usePasswordComposition";
@@ -54,6 +55,27 @@ export default function AccountPage() {
   const [confirmingWithdrawal, setConfirmingWithdrawal] = useState(false);
   const [withdrawalPassword, setWithdrawalPassword] = useState("");
   const [withdrawing, setWithdrawing] = useState(false);
+  const [confirmingLogout, setConfirmingLogout] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const logout = async () => {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    try {
+      await authApi.logout();
+    } catch {
+      // 네트워크가 끊겨도 로컬 세션은 종료한다.
+    } finally {
+      clearSiteMeCache();
+      authApi.clearManagedSitesCache();
+      clearSelectedSiteId();
+      markSignedOut();
+      showToast("로그아웃했어요.");
+      navigate("/auth/login", { replace: true });
+      setLoggingOut(false);
+      setConfirmingLogout(false);
+    }
+  };
 
   const withdraw = async () => {
     if (withdrawing) return;
@@ -122,6 +144,15 @@ export default function AccountPage() {
                 </button>
               }
             />
+            <Row
+              label="로그아웃"
+              value="현재 기기에서 로그아웃합니다."
+              action={
+                <button type="button" onClick={() => setConfirmingLogout(true)} className={smallBtn}>
+                  로그아웃
+                </button>
+              }
+            />
           </Card>
 
           <Card title="회원 탈퇴" description="탈퇴 시 계정·현장·팀은 비활성화되고, 기록·사진은 365일 보관 후 삭제됩니다.">
@@ -138,6 +169,15 @@ export default function AccountPage() {
       {editingName && <NameModal initial={me.user.name} onClose={() => setEditingName(false)} />}
       {changingPw && <PasswordModal onClose={() => setChangingPw(false)} />}
       {editingPhone && <PhoneModal initial={me.user.phone ?? ""} onClose={() => setEditingPhone(false)} />}
+      {confirmingLogout && (
+        <ConfirmDialog
+          title="로그아웃할까요?"
+          confirmLabel={loggingOut ? "로그아웃 중..." : "로그아웃"}
+          busy={loggingOut}
+          onCancel={() => setConfirmingLogout(false)}
+          onConfirm={logout}
+        />
+      )}
       {confirmingWithdrawal && (
         <ConfirmDialog
           title="정말 탈퇴할까요?"
