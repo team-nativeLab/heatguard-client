@@ -523,7 +523,6 @@ export default function HomeDashboard() {
             </span>
             <span className="mx-3 sm:mx-[26px] text-sm text-[var(--home-date-sub)]">~</span>
             <DateField value={to} onChange={setTo} label="조회 종료일" />
-            <ChevronDownIcon className="size-4 ml-3 sm:ml-[26px] text-[var(--home-date-sub)]" />
           </div>
           <div className="flex items-center gap-3 sm:ml-auto sm:mr-9">
             <button
