@@ -52,7 +52,7 @@ export default function ScreenHQSiteDetail() {
           <>
             <div className="flex flex-wrap items-center gap-3 pt-6">
               <h1 className="text-xl font-semibold text-[var(--color-text-heading)]">{site.name}</h1>
-              <SiteHeatBadge temperature={site.temperature} label={HEAT_LABEL[site.heatLevel]} tone={HEAT_TONE[site.heatLevel]} />
+              <SiteHeatBadge temperature={site.temperature} label={site.heatLevel == null ? "미측정" : HEAT_LABEL[site.heatLevel]} tone={site.heatLevel == null ? "none" : HEAT_TONE[site.heatLevel]} />
               {!site.active && <span className="rounded bg-[var(--color-heat-none-bg)] px-2 py-0.5 text-[10px] text-[var(--color-heat-none-fg)]">비활성</span>}
             </div>
             {(site.managerName || site.managerEmail) && (
