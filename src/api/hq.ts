@@ -309,7 +309,7 @@ export async function listRecords(params?: { date?: string; siteId?: string; cur
 }
 
 export interface HqSiteDetail {
-  site: { id: string; name: string; active: boolean; managerName: string; managerEmail: string; managerPhone: string; heatLevel: HeatLevel; temperature: number | null };
+  site: { id: string; name: string; active: boolean; version: number; managerName: string; managerEmail: string; managerPhone: string; heatLevel: HeatLevel; temperature: number | null };
   teams: { id: string; name: string; leaderName: string; workplace: string; memberCount: number | null; done: number | null; total: number | null }[];
   checklistItems: { id: string; text: string }[];
   todayRecords: HqRecordRow[];
@@ -325,6 +325,7 @@ export async function getSite(siteId: string): Promise<HqSiteDetail> {
       id: site.id || siteId,
       name: site.name,
       active: site.active,
+      version: num(r, "site.version", "version") ?? 1,
       managerName: site.managerName,
       managerEmail: site.managerEmail,
       managerPhone: site.managerPhone,
@@ -354,4 +355,28 @@ export async function getSite(siteId: string): Promise<HqSiteDetail> {
 export async function listActiveEmergencyCalls() {
   const page = await apiFetch<Page<unknown>>("/api/v1/hq/emergency-calls/active");
   return (page?.items ?? []).map(normalizeCall);
+}
+
+export type HqWeatherAvailability = "AVAILABLE" | "CACHED" | "UNAVAILABLE" | "LOCATION_REQUIRED" | string;
+export interface HqSiteWeather {
+  temperature: number | null;
+  humidity: number | null;
+  apparentTemperature: number | null;
+  skyStatus: string | null;
+  observedAt: string | null;
+  availability: HqWeatherAvailability;
+  isStale: boolean;
+  errorCode: string | null;
+  weatherMode: string | null;
+  weatherLocation: { nx: number; ny: number } | null;
+}
+export async function getSiteWeather(siteId: string): Promise<HqSiteWeather> {
+  return apiFetch<HqSiteWeather>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}/weather`);
+}
+export async function updateSiteWeatherLocation(siteId: string, payload: {
+  version: number;
+  weatherMode: string;
+  weatherLocation: { nx: number; ny: number };
+}) {
+  return apiFetch<unknown>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}/weather-location`, { method: "PATCH", body: payload });
 }

@@ -7,6 +7,7 @@ import { hqApi, ApiError, errorMessage, type HqSiteDetail } from "../../api";
 import { HEAT_LABEL, HEAT_TONE } from "../../api/hq";
 import { doneText } from "../../lib/hqFormat";
 import SiteAppLinkStatusPanel from "../../components/hq/SiteAppLinkStatusPanel";
+import SiteWeatherPanel from "../../components/hq/SiteWeatherPanel";
 
 export default function ScreenHQSiteDetail() {
   const { siteId = "" } = useParams();
@@ -59,6 +60,7 @@ export default function ScreenHQSiteDetail() {
             )}
 
             <SiteAppLinkStatusPanel key={site.id} siteId={site.id} />
+            <SiteWeatherPanel siteId={site.id} version={site.version} active={site.active} />
 
             <div className="flex flex-wrap gap-2 pt-6">
               {detail.teams.length === 0 && <span className="text-xs text-[var(--color-text-faint)]">등록된 팀이 없어요.</span>}

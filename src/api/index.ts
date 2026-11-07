@@ -13,4 +13,4 @@ export * as alertsApi from "./alerts";
 export * as inquiriesApi from "./inquiries";
 export * as teamMembersApi from "./teamMembers";
 export * as hqApi from "./hq";
-export type { HqUser, HqProfile, HqSite, HqRecordRow, HqDashboard, HqSiteDetail, HqSiteAppLinks, HqEmergencyCall, HeatLevel, HeatTone } from "./hq";
+export type { HqUser, HqProfile, HqSite, HqRecordRow, HqDashboard, HqSiteDetail, HqSiteAppLinks, HqEmergencyCall, HqWeatherAvailability, HqSiteWeather, HeatLevel, HeatTone } from "./hq";
