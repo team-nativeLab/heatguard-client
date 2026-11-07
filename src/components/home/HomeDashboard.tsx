@@ -3,7 +3,6 @@ import { usePolling } from "../../shared/hooks/usePolling";
 import { Skeleton, SkeletonTable } from "../../shared/ui/Skeleton";
 import { useNavigate } from "react-router-dom";
 import RecordDetailDialog from "../manager/RecordDetailDialog";
-import ThemeToggleButton from "../../shared/ui/ThemeToggleButton";
 import { useToast } from "../../shared/ui/Toast";
 import RecordThumb from "./RecordThumb";
 import { useEmergency } from "./EmergencyWatcher";
@@ -20,6 +19,7 @@ import {
   MapPinIcon,
   MoreIcon,
   SearchIcon,
+  SunIcon,
   ThermometerIcon,
   TriangleAlertIcon,
 } from "./HomeIcons";
@@ -28,9 +28,9 @@ interface DashboardTodayResponse {
   date: string;
   siteName: string;
   weather: {
-    temperature: number;
-    humidity: number;
-    feelsLike: number;
+    temperature: number | null;
+    humidity: number | null;
+    feelsLike: number | null;
     condition?: string;
     skyStatus?: string | null;
     heatWarningLevel?: string;
@@ -87,16 +87,16 @@ function weatherGlowColor(weather: DashboardTodayResponse["weather"], hour: numb
   if (/rainbow|무지개/.test(condition)) return "rgba(244, 114, 182, 0.42)";
   if (/partly|mostly|구름많|구름 조금|구름조금/.test(condition)) {
     if (isNight) return "rgba(129, 140, 248, 0.4)";
-    return weather.temperature >= 30 ? "rgba(251, 146, 60, 0.42)" : "rgba(96, 165, 250, 0.38)";
+    return (weather.temperature ?? 0) >= 30 ? "rgba(251, 146, 60, 0.42)" : "rgba(96, 165, 250, 0.38)";
   }
   if (/overcast|흐림|cloud|구름/.test(condition)) {
-    return weather.temperature >= 30 ? "rgba(251, 146, 60, 0.38)" : "rgba(148, 163, 184, 0.4)";
+    return (weather.temperature ?? 0) >= 30 ? "rgba(251, 146, 60, 0.38)" : "rgba(148, 163, 184, 0.4)";
   }
   if (isNight) return "rgba(129, 140, 248, 0.4)";
-  if (weather.temperature >= 38) return "rgba(239, 68, 68, 0.46)";
-  if (weather.temperature >= 33) return "rgba(249, 115, 22, 0.44)";
-  if (weather.temperature >= 25 || /clear|sun|맑음/.test(condition)) return "rgba(251, 146, 60, 0.42)";
-  if (weather.temperature <= 5) return "rgba(125, 211, 252, 0.42)";
+  if ((weather.temperature ?? 0) >= 38) return "rgba(239, 68, 68, 0.46)";
+  if ((weather.temperature ?? 0) >= 33) return "rgba(249, 115, 22, 0.44)";
+  if ((weather.temperature ?? 0) >= 25 || /clear|sun|맑음/.test(condition)) return "rgba(251, 146, 60, 0.42)";
+  if ((weather.temperature ?? 0) <= 5) return "rgba(125, 211, 252, 0.42)";
   return "rgba(129, 140, 248, 0.36)";
 }
 
@@ -256,12 +256,12 @@ export default function HomeDashboard() {
           siteName: "",
           weather: dash.weather
             ? {
-                temperature: dash.weather.temperature,
+                temperature: dash.(weather.temperature ?? 0),
                 humidity: dash.weather.humidity,
                 feelsLike:
                   dash.weather.feelsLike ??
                   dash.weather.apparentTemperature ??
-                  dash.weather.temperature,
+                  dash.(weather.temperature ?? 0),
                 condition: dash.weather.condition ?? weatherConditionLabel(undefined, dash.weather.skyStatus),
                 skyStatus: dash.weather.skyStatus,
                 heatWarningLevel: dash.heatLevel,
@@ -386,9 +386,6 @@ export default function HomeDashboard() {
               className="w-full h-full bg-transparent pl-[35px] pr-2 text-[12.5px] text-[var(--color-text-heading)] placeholder:text-[var(--color-text-body)] outline-none"
             />
           </label>
-          <span className="hidden md:inline-flex">
-            <ThemeToggleButton />
-          </span>
         </div>
       </header>
   );
@@ -434,7 +431,7 @@ export default function HomeDashboard() {
           <div className="relative flex items-center justify-between">
             {w?.heatWarningLevel ? (
               <span className="bg-[var(--color-heat-badge-bg)] text-[#ff6800] text-xs font-medium leading-4 px-2.5 py-1 rounded-full">
-                <span className="figma-emoji">☀</span> {w.heatWarningLevel}
+                <SunIcon className="size-[13px]" /> {w.heatWarningLevel}
               </span>
             ) : (
               <span />
@@ -451,7 +448,7 @@ export default function HomeDashboard() {
                     setSelectedSiteId(nextSiteId);
                     window.location.reload();
                   }}
-                  className="h-[30px] max-w-[220px] cursor-pointer appearance-none rounded-full border border-[var(--home-pill-border)] bg-[var(--home-pill-bg)] pl-3 pr-8 text-xs font-medium text-[var(--home-pill-fg)] outline-none hover:brightness-95 focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+                  className="h-[30px] max-w-[220px] cursor-pointer appearance-none rounded-full border border-[var(--home-pill-border)] bg-[var(--home-pill-bg)] pl-3 pr-8 text-xs font-medium text-[var(--home-pill-fg)] outline-none [color-scheme:var(--native-color-scheme)] hover:brightness-95 focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
                 >
                   {managedSites.map((site) => <option key={site.siteId} value={site.siteId}>{site.siteName}</option>)}
                 </select>
@@ -484,7 +481,7 @@ export default function HomeDashboard() {
             <p className="relative text-[15px] font-medium leading-5 text-[var(--color-text-label)]">현재 온도</p>
             <div className="relative flex items-end gap-3 pt-1 h-[64px]">
               <span className="font-semibold text-[56px] leading-[56px] tracking-[-1.5px] text-[var(--color-text-heading)]">
-                {w ? w.temperature.toFixed(1) : "—"}
+                {w?.temperature != null ? w.temperature.toFixed(1) : "—"}
               </span>
               <div className="flex items-center gap-2 pb-1.5">
                 <span className="font-medium text-[24px] leading-8 text-[var(--color-text-heading)]">°C</span>
@@ -497,15 +494,15 @@ export default function HomeDashboard() {
               </div>
             </div>
             <p className="relative text-[15px] font-medium leading-5 pt-2 text-[var(--color-text-label)] whitespace-pre">
-              {w ? `습도 ${w.humidity}%  |  체감온도 ${w.feelsLike.toFixed(1)}°C` : "기상 기준값 미입력"}
+              {w ? "습도 " + (w.humidity == null ? "—" : w.humidity + "%") + "  |  체감온도 " + (w.feelsLike == null ? "—" : w.feelsLike.toFixed(1) + "°C") : "기상 기준값 미입력"}
             </p>
 
           </div>
 
           <div className="relative grid grid-cols-3 gap-3">
             {[
-              ["습도", w ? `${w.humidity}%` : "—"],
-              ["체감온도", w ? `${w.feelsLike.toFixed(1)}°C` : "—"],
+              ["습도", w?.humidity != null ? `${w.humidity}%` : "—"],
+              ["체감온도", w?.feelsLike != null ? `${w.feelsLike.toFixed(1)}°C` : "—"],
               ["날씨", w ? weatherConditionLabel(w.condition, w.skyStatus) : "—"],
             ].map(([label, value]) => (
               <div
