@@ -11,6 +11,7 @@ import { ChevronDownIcon } from "../../components/home/HomeIcons";
 import {
   AlertStatIcon,
   BuildingStatIcon,
+  ChevronStatIcon,
   HeatStatIcon,
   PinStatIcon,
   RecordStatIcon,
@@ -214,7 +215,7 @@ export default function ScreenHQDashboard() {
               <h2 className="text-sm font-medium leading-5 text-[var(--color-text-label)]">오늘의 현황</h2>
               <div className="flex flex-col items-end text-right">
                 <p className="whitespace-nowrap text-sm leading-5 text-[var(--color-text-body)]">{dateText}</p>
-                <p className="pt-1 text-[36px] font-light leading-[40px] tracking-[-1.2px] tabular-nums text-[var(--color-text-heading)]">{timeText}</p>
+                <p className="pt-1 text-[40px] font-light leading-[44px] tracking-[-1.2px] tabular-nums text-[var(--color-text-heading)]">{timeText}</p>
               </div>
             </div>
             <div className="mt-auto grid grid-cols-2 gap-3 pb-2 pt-6 sm:grid-cols-4">
@@ -230,8 +231,9 @@ export default function ScreenHQDashboard() {
           <h2 className="text-sm font-medium leading-5 text-[var(--color-text-label)]">
             현장 현황 · 위험도 순<span className="ml-2 text-xs text-[var(--color-text-faint)]">{visible.length}곳</span>
           </h2>
-          <Link to="/hq/sites" className="text-xs text-[var(--color-text-body)] transition-colors hover:text-[var(--color-text-heading)]">
-            전체 관리 →
+          <Link to="/hq/sites" className="inline-flex items-center gap-1 text-xs text-[var(--color-text-body)] transition-colors hover:text-[var(--color-text-heading)]">
+            전체 관리
+            <ChevronStatIcon />
           </Link>
         </div>
 
