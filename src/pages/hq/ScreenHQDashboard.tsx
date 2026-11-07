@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import HQLayout, { HQContent } from "../../components/hq/HQLayout";
 import { SiteHeatBadge } from "../../components/hq/RecordTable";
 import { EmptyBlock, ErrorBlock, LoadingBlock } from "../../components/hq/LoadState";
-import { hqApi, errorMessage, type HqDashboard, type HqSite } from "../../api";
+import { hqApi, errorMessage, type HqDashboard, type HqSite, type HqSiteWeather } from "../../api";
 import { useHqMe } from "../../hooks/useHqMe";
 import { usePolling } from "../../shared/hooks/usePolling";
 import { doneText, heatLabel, heatTone, sortByRisk, tempText } from "../../lib/hqFormat";
@@ -68,6 +68,10 @@ export default function ScreenHQDashboard() {
   const me = useHqMe();
   const [data, setData] = useState<HqDashboard | null>(null);
   const [sites, setSites] = useState<HqSite[]>([]);
+  const [selectedSiteId, setSelectedSiteId] = useState("");
+  const [selectedWeather, setSelectedWeather] = useState<HqSiteWeather | null>(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
+  const [weatherError, setWeatherError] = useState("");
   const [error, setError] = useState("");
 
   // 대시보드 요약 + 위험도 순 현장 목록. 30초마다 새로 고친다.
@@ -75,14 +79,30 @@ export default function ScreenHQDashboard() {
     try {
       const dash = await hqApi.getDashboard();
       const list = dash.sitesByRisk.length > 0 ? dash.sitesByRisk : await hqApi.listAllSites();
+      const orderedSites = sortByRisk(list);
       setData(dash);
-      setSites(sortByRisk(list));
+      setSites(orderedSites);
+      setSelectedSiteId((current) => current && orderedSites.some((site) => site.id === current) ? current : orderedSites[0]?.id ?? "");
       setError("");
     } catch (err) {
       setError(errorMessage(err, "대시보드를 불러오지 못했어요."));
     }
   }, []);
   usePolling(load, 30_000, 120_000);
+  useEffect(() => {
+    if (!selectedSiteId) {
+      setSelectedWeather(null);
+      setWeatherError("");
+      return;
+    }
+    let alive = true;
+    setWeatherLoading(true);
+    hqApi.getSiteWeather(selectedSiteId)
+      .then((result) => { if (alive) { setSelectedWeather(result); setWeatherError(""); } })
+      .catch((err) => { if (alive) setWeatherError(errorMessage(err, "현장 날씨를 불러오지 못했어요.")); })
+      .finally(() => { if (alive) setWeatherLoading(false); });
+    return () => { alive = false; };
+  }, [selectedSiteId]);
   const [now, setNow] = useState(() => new Date());
   const [search, setSearch] = useState("");
 
@@ -93,22 +113,23 @@ export default function ScreenHQDashboard() {
 
   const dateText = `${now.getFullYear()}. ${pad(now.getMonth() + 1)}. ${pad(now.getDate())}. (${WEEKDAYS[now.getDay()]})`;
   const timeText = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-  const hottest: HqSite | undefined = sites.reduce<HqSite | undefined>((current, site) => {
-    if (site.temperature == null) return current;
-    return current == null || site.temperature > (current.temperature ?? Number.NEGATIVE_INFINITY) ? site : current;
-  }, undefined);
-  const top: HqSite | undefined = hottest ?? sites[0];
-  // 온도 카드는 위험도 순서와 분리해 실제 최고 온도 현장을 표시한다.
-  const glowColor = GLOW[top ? heatTone(top) : "none"];
-  const weather = data?.weather;
-  const topTemp = hottest?.temperature ?? null;
-  const weatherStatus = error
-    ? (data ? "갱신 실패" : "조회 실패")
-    : !data
-      ? "불러오는 중"
-      : top
-        ? (topTemp == null ? "온도 정보 없음" : heatLabel(top))
-        : "현장 없음";
+  const selectedSite = sites.find((site) => site.id === selectedSiteId);
+  const glowColor = GLOW[selectedSite ? heatTone(selectedSite) : "none"];
+  const weatherStatus = weatherError
+    ? "조회 실패"
+    : weatherLoading
+      ? "날씨 조회 중"
+      : !selectedSite
+        ? "현장 없음"
+        : selectedWeather?.availability === "LOCATION_REQUIRED"
+          ? "위치 미등록"
+          : selectedWeather?.availability === "UNAVAILABLE"
+            ? "날씨 조회 불가"
+            : selectedWeather?.availability === "CACHED" || selectedWeather?.isStale
+              ? "이전 관측값"
+              : heatLabel(selectedSite);
+  const topTemp = selectedWeather?.temperature ?? null;
+  const weather = selectedWeather;
   const visible = sites.filter((s) => s.name.includes(search.trim()));
 
   return (
@@ -116,8 +137,8 @@ export default function ScreenHQDashboard() {
       <HQContent maxWidth={1600}>
         <header className="flex min-h-[74px] flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-[13px] text-[var(--color-text-body)]">안녕하세요, {me ? `${me.user.name} 님` : ""}</p>
-            <h1 className="whitespace-nowrap text-[19px] font-bold leading-[1.4] text-[var(--color-text-heading)]">오늘도 안전한 현장을 만들어가요.</h1>
+            <p className="text-sm text-[var(--color-text-body)]">안녕하세요, {me ? `${me.user.name} 님` : ""}</p>
+            <h1 className="whitespace-nowrap text-2xl font-bold leading-[1.35] text-[var(--color-text-heading)]">오늘도 안전한 현장을 만들어가요.</h1>
           </div>
           <div className="flex w-full items-center gap-3 pt-0.5 sm:w-auto">
             <label className="relative flex h-[38px] w-full items-center rounded-[10px] border border-[var(--home-search-border)] bg-[var(--home-search-bg)] transition-colors focus-within:border-[var(--color-accent)] sm:w-[260px]">
@@ -141,24 +162,18 @@ export default function ScreenHQDashboard() {
             className="relative flex min-h-[275px] flex-col overflow-hidden rounded-xl border border-[var(--home-card-border)] p-5"
             style={{ background: `linear-gradient(110deg, color-mix(in srgb, ${glowColor} 32%, var(--home-card-bg)) 0%, var(--home-card-bg) 100%)` }}
           >
-            <div className="relative flex items-center justify-between">
+            <div className="relative flex flex-wrap items-center justify-start gap-2">
+              <label className="relative flex h-[30px] max-w-full items-center gap-1.5 rounded-full border border-[var(--home-pill-border)] bg-[var(--home-pill-bg)] pl-[11px] pr-2 text-xs font-medium text-[var(--home-pill-fg)]">
+                <PinStatIcon />
+                <span className="sr-only">현장 선택</span>
+                <select aria-label="현장 선택" value={selectedSiteId} onChange={(event) => setSelectedSiteId(event.target.value)} className="max-w-[180px] cursor-pointer appearance-none truncate bg-transparent pr-4 outline-none">
+                  {sites.map((site) => <option key={site.id} value={site.id}>{site.name}</option>)}
+                </select>
+                <ChevronStatIcon className="pointer-events-none absolute right-2" />
+              </label>
               <span className="rounded-full bg-[var(--color-danger-soft-bg)] px-2.5 py-1 text-xs font-medium leading-4 text-[var(--color-danger-text)]">
-                <span className="figma-emoji">☀</span> {weatherStatus}
+                <span className="figma-emoji">☀</span> ${weatherStatus}
               </span>
-              {top && (
-                <button
-                  type="button"
-                  onClick={() => navigate(`/hq/sites/${encodeURIComponent(top.id)}`)}
-                  title="현장 상세로 이동"
-                  className="flex h-[26px] items-center gap-1.5 rounded-full border border-[var(--home-pill-border)] bg-[var(--home-pill-bg)] pl-[11px] pr-2 text-xs font-medium text-[var(--home-pill-fg)] transition hover:brightness-95"
-                >
-                  <PinStatIcon />
-                  {top.name}
-                  <span className="ml-2.5">
-                    <ChevronStatIcon />
-                  </span>
-                </button>
-              )}
             </div>
 
             {/* 헤더와 하단 타일 사이의 정중앙에 온도 영역과 날씨 아이콘을 맞춘다 */}
@@ -172,7 +187,7 @@ export default function ScreenHQDashboard() {
                 <img src="/sun.png" alt="" draggable={false} className="relative h-auto w-full object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.12)]" />
               </div>
 
-              <p className="relative text-[15px] font-medium leading-5 text-[var(--color-text-label)]">가장 높은 현장 온도</p>
+              <p className="relative text-[15px] font-medium leading-5 text-[var(--color-text-label)]">선택 현장 온도</p>
               <div className="relative flex h-[64px] items-end gap-3 pt-1">
                 <span className="text-[56px] font-semibold leading-[56px] tracking-[-1.5px] text-[var(--color-text-heading)]">{topTemp != null ? topTemp.toFixed(1) : "-"}</span>
                 {topTemp != null && (
@@ -190,7 +205,7 @@ export default function ScreenHQDashboard() {
               {[
                 ["습도", weather?.humidity != null ? `${weather.humidity}%` : "-"],
                 ["체감온도", tempText(weather?.apparentTemperature) || "-"],
-                ["날씨", weather?.sky || "-"],
+                ["날씨", weather?.skyStatus || "-"],
               ].map(([label, value]) => (
                 <div key={label} className="rounded-lg border border-[var(--home-weather-tile-border)] bg-[var(--home-weather-tile-bg)] px-3 py-2 backdrop-blur-[2px]">
                   <p className="text-xs leading-4 text-[var(--color-text-body)]">{label}</p>
@@ -203,9 +218,9 @@ export default function ScreenHQDashboard() {
           <div className="flex min-h-[275px] flex-col rounded-xl border border-[var(--home-card-border)] bg-[var(--home-card-bg)] p-5">
             <div className="flex items-start justify-between">
               <h2 className="text-sm font-medium leading-5 text-[var(--color-text-label)]">오늘의 현황</h2>
-              <div className="mr-[18px] mt-[13px] flex flex-col items-start">
+              <div className="flex flex-col items-end text-right">
                 <p className="whitespace-nowrap text-sm leading-5 text-[var(--color-text-body)]">{dateText}</p>
-                <p className="pt-1 text-[28px] font-light leading-[34px] tracking-[-1.2px] tabular-nums text-[var(--color-text-heading)]">{timeText}</p>
+                <p className="pt-1 text-[36px] font-light leading-[40px] tracking-[-1.2px] tabular-nums text-[var(--color-text-heading)]">{timeText}</p>
               </div>
             </div>
             <div className="mt-auto grid grid-cols-2 gap-3 pb-2 pt-6 sm:grid-cols-4">
