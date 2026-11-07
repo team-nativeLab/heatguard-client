@@ -127,7 +127,7 @@ export default function AccountPage() {
           <Card title="회원 탈퇴" description="탈퇴 시 계정·현장·팀은 비활성화되고, 기록·사진은 365일 보관 후 삭제됩니다.">
             <div className="flex items-center justify-between gap-4 border-t border-[var(--home-card-border)] px-5 py-3.5">
               <span className="text-xs text-[var(--color-text-body)]">탈퇴하려면 현재 비밀번호를 확인해야 합니다.</span>
-              <button type="button" onClick={() => setConfirmingWithdrawal(true)} className={`${smallBtn} border-[var(--color-modal-danger-border)] text-[var(--color-danger-text)]`}>
+              <button type="button" onClick={() => setConfirmingWithdrawal(true)} className={`${smallBtn} !border-[var(--color-danger-text)] !text-[var(--color-danger-text)] hover:!bg-[var(--color-danger-soft-bg)]`} style={{ color: "var(--color-danger-text)", borderColor: "var(--color-danger-text)" }}>
                 회원 탈퇴
               </button>
             </div>
