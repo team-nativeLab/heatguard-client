@@ -567,7 +567,6 @@ export default function HomeDashboard() {
       </div>
 
       <div className="flex items-center gap-3 pt-3 flex-wrap">
-        <div className="flex items-center gap-3 pt-4 flex-wrap">
           <div className="flex items-center h-[37px] rounded-[14px] bg-[var(--home-date-pill-bg)] border border-[var(--home-card-border)] pl-5 pr-4">
             <CalendarIcon className="size-[15px] text-[var(--color-text-body)]" />
             <span className="ml-[9px]">
@@ -602,8 +601,6 @@ export default function HomeDashboard() {
               인쇄
             </button>
           </div>
-        </div>
-
       </div>
 
       <div className="mt-3 bg-[var(--home-table-bg)] border border-[var(--home-card-border)] rounded-lg overflow-x-auto">
