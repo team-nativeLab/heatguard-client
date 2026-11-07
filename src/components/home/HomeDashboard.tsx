@@ -8,7 +8,8 @@ import { useToast } from "../../shared/ui/Toast";
 import RecordThumb from "./RecordThumb";
 import { useEmergency } from "./EmergencyWatcher";
 import { useSiteMe } from "../../hooks/useSiteMe";
-import { dashboardApi, recordsApi, isNetworkError, isDemoFallback, type RecordItem } from "../../api";
+import { authApi, dashboardApi, recordsApi, isNetworkError, isDemoFallback, type ManagedSite, type RecordItem } from "../../api";
+import { getSelectedSiteId, setSelectedSiteId, SITE_SELECTION_EVENT } from "../../lib/siteSelection";
 import {
   CalendarIcon,
   CameraIcon,
@@ -210,6 +211,21 @@ export default function HomeDashboard() {
   const navigate = useNavigate();
   const now = useNow();
   const me = useSiteMe();
+  const [managedSites, setManagedSites] = useState<ManagedSite[]>([]);
+  const [selectedSiteIdState, setSelectedSiteIdState] = useState(getSelectedSiteId());
+
+  useEffect(() => {
+    let alive = true;
+    authApi.listManagedSites().then((items) => {
+      if (alive) setManagedSites(items.filter((site) => site.active));
+    }).catch(() => {});
+    const onSelection = (event: Event) => setSelectedSiteIdState((event as CustomEvent<{ siteId: string }>).detail.siteId);
+    window.addEventListener(SITE_SELECTION_EVENT, onSelection);
+    return () => {
+      alive = false;
+      window.removeEventListener(SITE_SELECTION_EVENT, onSelection);
+    };
+  }, []);
 
   // null = 아직 불러오는 중 (가짜 데이터를 먼저 보여주지 않는다)
   const [today, setToday] = useState<DashboardTodayResponse | null>(null);
@@ -423,16 +439,31 @@ export default function HomeDashboard() {
             ) : (
               <span />
             )}
-            <button
-              type="button"
-              onClick={() => navigate("/manager/sites")}
-              title="현장 관리로 이동"
-              className="flex items-center gap-1.5 h-[26px] pl-[11px] pr-2 rounded-full bg-[var(--home-pill-bg)] border border-[var(--home-pill-border)] text-[var(--home-pill-fg)] text-xs font-medium hover:brightness-95 transition"
-            >
-              <MapPinIcon className="size-3" />
-              {siteName}
-              <ChevronRightIcon className="size-[11px] ml-2.5" />
-            </button>
+            {managedSites.length > 1 ? (
+              <label className="relative">
+                <span className="sr-only">현장 선택</span>
+                <select
+                  aria-label="현장 선택"
+                  value={selectedSiteIdState || managedSites.find((site) => site.siteName === siteName)?.siteId || managedSites[0].siteId}
+                  onChange={(event) => {
+                    const nextSiteId = event.target.value;
+                    setSelectedSiteIdState(nextSiteId);
+                    setSelectedSiteId(nextSiteId);
+                    window.location.reload();
+                  }}
+                  className="h-[30px] max-w-[220px] cursor-pointer appearance-none rounded-full border border-[var(--home-pill-border)] bg-[var(--home-pill-bg)] pl-3 pr-8 text-xs font-medium text-[var(--home-pill-fg)] outline-none hover:brightness-95 focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+                >
+                  {managedSites.map((site) => <option key={site.siteId} value={site.siteId}>{site.siteName}</option>)}
+                </select>
+                <MapPinIcon className="pointer-events-none absolute left-2.5 top-1/2 size-3 -translate-y-1/2 text-[var(--home-pill-fg)]" />
+                <ChevronDownIcon className="pointer-events-none absolute right-2.5 top-1/2 size-3 -translate-y-1/2 text-[var(--home-pill-fg)]" />
+              </label>
+            ) : (
+              <button type="button" onClick={() => navigate("/manager/sites")} title="현장 관리로 이동"
+                className="flex items-center gap-1.5 h-[26px] pl-[11px] pr-2 rounded-full bg-[var(--home-pill-bg)] border border-[var(--home-pill-border)] text-[var(--home-pill-fg)] text-xs font-medium hover:brightness-95 transition">
+                <MapPinIcon className="size-3" />{siteName}<ChevronRightIcon className="size-[11px] ml-2.5" />
+              </button>
+            )}
           </div>
 
           {/* 헤더와 하단 타일 사이의 정중앙에 온도 영역과 날씨 아이콘을 맞춘다 */}
