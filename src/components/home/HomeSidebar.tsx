@@ -1,14 +1,12 @@
 import { useEffect, useState, type ComponentType } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
 import sidebarWave from "../../assets/images/sidebar-wave.png";
 import { DashboardIcon, SiteManageIcon, ContactIcon, DefaultProfileAvatar } from "../icons/Icons";
 import { useToast } from "../../shared/ui/Toast";
-import { useSiteMe, clearSiteMeCache } from "../../hooks/useSiteMe";
-import { markSignedOut } from "../../shared/auth/RequireAuth";
-import ConfirmDialog from "../../shared/ui/ConfirmDialog";
-import { authApi, isNetworkError, type ManagedSite } from "../../api";
-import { clearSelectedSiteId, getSelectedSiteId, setSelectedSiteId, SITE_SELECTION_EVENT } from "../../lib/siteSelection";
+import { useSiteMe } from "../../hooks/useSiteMe";
+import { authApi, type ManagedSite } from "../../api";
+import { getSelectedSiteId, setSelectedSiteId, SITE_SELECTION_EVENT } from "../../lib/siteSelection";
 
 type NavItem = {
   label: string;
@@ -24,11 +22,8 @@ const NAV_ITEMS: NavItem[] = [
 
 export default function HomeSidebar() {
   const location = useLocation();
-  const navigate = useNavigate();
   const { showToast } = useToast();
   const me = useSiteMe();
-  const [confirmingLogout, setConfirmingLogout] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false);
   const [managedSites, setManagedSites] = useState<ManagedSite[]>([]);
   const [selectedSiteId, setSelectedId] = useState(getSelectedSiteId());
   const accountActive = location.pathname.startsWith("/manager/account");
@@ -46,26 +41,6 @@ export default function HomeSidebar() {
     };
   }, []);
 
-  const handleLogout = async () => {
-    setLoggingOut(true);
-    try {
-      await authApi.logout();
-    } catch (err) {
-      if (!isNetworkError(err)) {
-        console.warn("로그아웃 요청이 실패했어요.", err);
-      }
-    } finally {
-      clearSiteMeCache();
-      authApi.clearManagedSitesCache();
-      clearSelectedSiteId();
-      markSignedOut();
-      setLoggingOut(false);
-      setConfirmingLogout(false);
-      showToast("로그아웃했어요.");
-      navigate("/auth/login");
-    }
-  };
-
   return (
     <aside
       data-name="HomeSidebar"
@@ -73,10 +48,10 @@ export default function HomeSidebar() {
     >
       <div className="relative z-10 border-[var(--color-border)] border-b border-solid flex flex-col items-start p-5 w-full">
         <div className="flex gap-2.5 items-center w-full">
-          <div className="bg-[var(--home-nav-active-bg)] flex items-center justify-center rounded shrink-0 size-6 overflow-hidden">
-            <img alt="폭염가드 로고" className="size-6 object-cover" src={logo} />
+          <div className="bg-[var(--home-nav-active-bg)] flex items-center justify-center rounded shrink-0 size-8 overflow-hidden">
+            <img alt="폭염가드 로고" className="size-8 object-cover" src={logo} />
           </div>
-          <p className="font-semibold leading-5 text-sm text-[var(--color-text-heading)] whitespace-nowrap">폭염가드</p>
+          <p className="font-semibold leading-6 text-base text-[var(--color-text-heading)] whitespace-nowrap">폭염가드</p>
         </div>
         {managedSites.length > 1 ? (
           <label className="mt-2 block w-full pl-8">
@@ -94,11 +69,7 @@ export default function HomeSidebar() {
               {managedSites.map((site) => <option key={site.siteId} value={site.siteId}>{site.siteName}</option>)}
             </select>
           </label>
-        ) : (
-          <p className="font-['JetBrains_Mono',monospace] leading-[15px] pl-8 pt-0.5 text-[var(--color-text-body)] text-[10px] tracking-[0.5px] whitespace-nowrap">
-            {managedSites[0]?.siteName || "현장"}
-          </p>
-        )}
+        ) : null}
       </div>
 
       <nav className="relative z-10 flex flex-col gap-0.5 px-3 py-4 w-full">
@@ -164,26 +135,9 @@ export default function HomeSidebar() {
             <p className="leading-[16.5px] text-[var(--color-text-faint)] text-[11px] pt-px truncate">{me.site.name}</p>
           </div>
         </Link>
-        <div className="flex items-center pt-2">
-          <button
-            type="button"
-            onClick={() => setConfirmingLogout(true)}
-            className="leading-[16.5px] text-[var(--color-text-faint)] text-[11px] hover:text-[var(--color-text-body)] transition-colors"
-          >
-            로그아웃
-          </button>
-        </div>
+
       </div>
 
-      {confirmingLogout && (
-        <ConfirmDialog
-          title="로그아웃할까요?"
-          confirmLabel={loggingOut ? "로그아웃 중..." : "로그아웃"}
-          busy={loggingOut}
-          onCancel={() => setConfirmingLogout(false)}
-          onConfirm={handleLogout}
-        />
-      )}
     </aside>
   );
 }
