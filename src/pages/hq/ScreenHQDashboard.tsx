@@ -7,7 +7,6 @@ import { hqApi, errorMessage, type HqDashboard, type HqSite, type HqSiteWeather 
 import { useHqMe } from "../../hooks/useHqMe";
 import { usePolling } from "../../shared/hooks/usePolling";
 import { doneText, heatLabel, heatTone, sortByRisk, tempText } from "../../lib/hqFormat";
-import ThemeToggleButton from "../../shared/ui/ThemeToggleButton";
 import { ChevronDownIcon } from "../../components/home/HomeIcons";
 import {
   AlertStatIcon,
@@ -132,7 +131,7 @@ export default function ScreenHQDashboard() {
   const visible = sites.filter((s) => s.name.includes(search.trim()));
 
   return (
-    <HQLayout toggleInHeader>
+    <HQLayout>
       <HQContent maxWidth={1600}>
         <header className="flex min-h-[74px] flex-wrap items-start justify-between gap-4">
           <div>
@@ -152,7 +151,6 @@ export default function ScreenHQDashboard() {
                 className="h-full w-full bg-transparent pl-[35px] pr-2 text-[12.5px] text-[var(--color-text-heading)] outline-none placeholder:text-[var(--color-text-body)]"
               />
             </label>
-            <ThemeToggleButton />
           </div>
         </header>
 

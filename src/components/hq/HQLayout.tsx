@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
 import sidebarWave from "../../assets/images/sidebar-wave.png";
 import { DashboardIcon, SiteManageIcon, ContactIcon, PrintIcon, DefaultProfileAvatar } from "../icons/Icons";
-import ThemeToggleButton from "../../shared/ui/ThemeToggleButton";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 import { useToast } from "../../shared/ui/Toast";
 import { usePolling } from "../../shared/hooks/usePolling";
@@ -128,7 +127,7 @@ function HQSidebar({ onLogout }: { onLogout: () => void }) {
   );
 }
 
-export default function HQLayout({ children, toggleInHeader = false }: { children: ReactNode; toggleInHeader?: boolean }) {
+export default function HQLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [confirmingLogout, setConfirmingLogout] = useState(false);
@@ -138,11 +137,6 @@ export default function HQLayout({ children, toggleInHeader = false }: { childre
       <HQSidebar onLogout={() => setConfirmingLogout(true)} />
 
       <main className="h-full min-w-0 flex-1 overflow-y-auto">{children}</main>
-      {!toggleInHeader && (
-        <div className="absolute right-4 top-4 z-40">
-          <ThemeToggleButton />
-        </div>
-      )}
 
       {confirmingLogout && (
         <ConfirmDialog
