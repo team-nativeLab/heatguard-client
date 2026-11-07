@@ -8,10 +8,10 @@ import { useHqMe } from "../../hooks/useHqMe";
 import { usePolling } from "../../shared/hooks/usePolling";
 import { doneText, heatLabel, heatTone, sortByRisk, tempText } from "../../lib/hqFormat";
 import ThemeToggleButton from "../../shared/ui/ThemeToggleButton";
+import { ChevronDownIcon } from "../../components/home/HomeIcons";
 import {
   AlertStatIcon,
   BuildingStatIcon,
-  ChevronStatIcon,
   HeatStatIcon,
   PinStatIcon,
   RecordStatIcon,
@@ -169,7 +169,7 @@ export default function ScreenHQDashboard() {
                 <select aria-label="현장 선택" value={selectedSiteId} onChange={(event) => setSelectedSiteId(event.target.value)} className="max-w-[180px] cursor-pointer appearance-none truncate bg-transparent pr-4 outline-none">
                   {sites.map((site) => <option key={site.id} value={site.id}>{site.name}</option>)}
                 </select>
-                <ChevronStatIcon className="pointer-events-none absolute right-2" />
+                <ChevronDownIcon className="pointer-events-none absolute right-2 size-3.5 text-[var(--color-text-body)]" />
               </label>
               <span className="rounded-full bg-[var(--color-danger-soft-bg)] px-2.5 py-1 text-xs font-medium leading-4 text-[var(--color-danger-text)]">
                 <span className="figma-emoji">☀</span> ${weatherStatus}
