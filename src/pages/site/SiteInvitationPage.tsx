@@ -7,7 +7,7 @@ import { AnimatedLockIcon, MailIcon } from "../../components/auth/AuthIcons";
 import { NewPasswordAuthField } from "../../components/auth/NewPasswordField";
 import { usePasswordComposition } from "../../components/auth/usePasswordComposition";
 import { ApiError, authApi, errorMessage } from "../../api";
-import { getPasswordConfirmationError, getPasswordError } from "../../lib/passwordPolicy";
+import { getPasswordConfirmationError, getPasswordError, SIGNUP_PASSWORD_MIN_LENGTH, SIGNUP_PASSWORD_POLICY_HINT } from "../../lib/passwordPolicy";
 import { clearSelectedSiteId } from "../../lib/siteSelection";
 import { clearSiteMeCache } from "../../hooks/useSiteMe";
 import { markSignedIn } from "../../shared/auth/RequireAuth";
@@ -33,7 +33,7 @@ export default function SiteInvitationPage() {
     if (accepting || composition.isComposing()) return;
     if (!invitationId) return setError("초대 링크가 올바르지 않아요. 본사 관리자에게 새 링크를 요청해주세요.");
     if (!EMAIL_RE.test(email.trim())) return setError("이메일 주소를 확인해주세요.");
-    const passwordError = getPasswordError(password) || getPasswordConfirmationError(password, confirmPassword);
+    const passwordError = getPasswordError(password, SIGNUP_PASSWORD_MIN_LENGTH) || getPasswordConfirmationError(password, confirmPassword);
     if (passwordError) return setError(passwordError);
 
     setAccepting(true);
@@ -99,7 +99,9 @@ export default function SiteInvitationPage() {
           <NewPasswordAuthField
             label="비밀번호"
             icon={<AnimatedLockIcon open={!!password} />}
-            placeholder="8자 이상 입력하세요"
+            placeholder="10자 이상 입력하세요"
+            minimumLength={SIGNUP_PASSWORD_MIN_LENGTH}
+            policyHint={SIGNUP_PASSWORD_POLICY_HINT}
             value={password}
             onChange={(e) => { setPassword(e.target.value); setError(""); }}
             {...composition.inputProps}
