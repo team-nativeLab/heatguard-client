@@ -10,6 +10,7 @@ export default function SiteTeamInvitationModal({ team, onClose, autoGenerate = 
   autoGenerate?: boolean;
 }) {
   const { showToast } = useToast();
+  const inviteDisplayName = team.workLocation?.trim() || "팀원";
   const [inviteUrl, setInviteUrl] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -29,14 +30,14 @@ export default function SiteTeamInvitationModal({ team, onClose, autoGenerate = 
         return;
       }
       setInviteUrl(result.inviteUrl);
-      showToast(`${team.name} 초대 링크를 발급했어요.`, "success");
+      showToast(`${inviteDisplayName} 초대 링크를 발급했어요.`, "success");
     } catch (err) {
       setError(errorMessage(err, "팀 초대 링크 발급에 실패했어요."));
     } finally {
       generating.current = false;
       setBusy(false);
     }
-  }, [busy, showToast, team.id, team.name]);
+  }, [busy, showToast, team.id, team.workLocation]);
 
   useEffect(() => {
     if (!autoGenerate || autoStarted.current) return;
@@ -57,7 +58,7 @@ export default function SiteTeamInvitationModal({ team, onClose, autoGenerate = 
   async function share() {
     if (!inviteUrl || typeof navigator.share !== "function") return;
     try {
-      await navigator.share({ title: `${team.name} 앱 초대`, text: inviteUrl });
+      await navigator.share({ title: `${inviteDisplayName} 앱 초대`, text: inviteUrl });
     } catch (err) {
       if (!(err instanceof DOMException && err.name === "AbortError")) {
         showToast("공유하지 못했어요. 초대 링크를 복사해 전달해 주세요.", "error");
@@ -67,7 +68,7 @@ export default function SiteTeamInvitationModal({ team, onClose, autoGenerate = 
 
   return (
     <ModalShell
-      title={`${team.name} 앱 초대`}
+      title={`${inviteDisplayName} 앱 초대`}
       onClose={onClose}
       busy={busy}
       footer={<button type="button" className={btnSecondary} disabled={busy} onClick={onClose}>닫기</button>}
@@ -91,7 +92,7 @@ export default function SiteTeamInvitationModal({ team, onClose, autoGenerate = 
               readOnly
               value={inviteUrl}
               onFocus={(event) => event.currentTarget.select()}
-              aria-label={`${team.name} 초대 링크`}
+              aria-label={`${inviteDisplayName} 초대 링크`}
             />
           </label>
           <div className="flex flex-wrap gap-2">
