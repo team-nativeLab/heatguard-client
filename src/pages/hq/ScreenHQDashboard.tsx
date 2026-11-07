@@ -131,7 +131,7 @@ export default function ScreenHQDashboard() {
   const visible = sites.filter((s) => s.name.includes(search.trim()));
 
   return (
-    <HQLayout toggleInHeader>
+    <HQLayout>
       <HQContent maxWidth={1600}>
         <header className="flex min-h-[74px] flex-wrap items-start justify-between gap-4">
           <div>
