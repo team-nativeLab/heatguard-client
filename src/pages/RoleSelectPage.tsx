@@ -68,7 +68,7 @@ function RoleCard({
 }) {
   return (
     <div
-      className="flex flex-col items-center rounded-2xl border px-[18px] pb-[18px] pt-[22px] text-center"
+      className="flex flex-col rounded-2xl border px-[18px] pb-[18px] pt-[22px]"
       style={{ background: "var(--auth-secondary-bg)", borderColor: "var(--auth-input-border)" }}
     >
       <div
@@ -126,7 +126,7 @@ export default function RoleSelectPage({ mode }: { mode: Mode }) {
         <p className="text-sm leading-[1.4] text-[var(--auth-text-muted)]">{c.sub}</p>
       </div>
 
-      <div className={mode === "signup" ? "mt-7 max-w-[310px]" : "mt-7 max-w-[310px]"}>
+      <div className="mx-auto mt-7 w-full max-w-[310px]">
         <RoleCard to={c.hq.to} from={mode} tone="blue" icon={<BarChartIcon size={24} />} title={mode === "login" ? "관리자 로그인" : "본사 관리자"} desc={c.hq.desc} cta={c.cta} />
       </div>
 
