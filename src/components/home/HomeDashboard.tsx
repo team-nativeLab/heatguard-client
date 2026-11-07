@@ -430,8 +430,8 @@ export default function HomeDashboard() {
         >
           <div className="relative flex items-center justify-between">
             {w?.heatWarningLevel ? (
-              <span className="bg-[var(--color-heat-badge-bg)] text-[#ff6800] text-xs font-medium leading-4 px-2.5 py-1 rounded-full">
-                <SunIcon className="size-[13px]" /> {w.heatWarningLevel}
+              <span className="inline-flex items-center gap-1.5 whitespace-nowrap bg-[var(--color-heat-badge-bg)] text-[#ff6800] text-xs font-medium leading-4 px-2.5 py-1 rounded-full">
+                <SunIcon className="size-[13px] shrink-0" />{w.heatWarningLevel}
               </span>
             ) : (
               <span />
