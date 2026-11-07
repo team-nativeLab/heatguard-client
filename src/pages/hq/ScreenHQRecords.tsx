@@ -94,25 +94,32 @@ export default function ScreenHQRecords() {
         <h1 className="text-xl font-semibold text-[var(--color-text-heading)]">전체 기록</h1>
         <p className="pt-1 text-sm text-[var(--color-text-body)]">소속 현장 전체 · {date || "전체 날짜"} 기준 · 최근 활동 순</p>
 
-        <div className="flex flex-wrap items-center gap-2 pt-5">
-          <input type="date" value={date} max={todayKst()} onChange={(e) => setDate(e.target.value)} className={filterCls} aria-label="날짜" />
-          <label className="relative inline-flex items-center">
-            <span className="sr-only">현장 필터</span>
-            <select
-              value={siteId}
-              onChange={(e) => setSiteId(e.target.value)}
-              className={`${filterCls} appearance-none pr-8`}
-              aria-label="현장"
-            >
-              <option value="">전체 현장</option>
-              {sites.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.active ? s.name : `${s.name} (비활성 · 기록 보존)`}
-                </option>
-              ))}
-            </select>
-            <ChevronDownIcon className="pointer-events-none absolute right-2 size-3.5 text-[var(--color-text-body)]" />
-          </label>
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <input type="date" value={date} max={todayKst()} onChange={(e) => setDate(e.target.value)} className={filterCls} aria-label="날짜" />
+            <label className="relative inline-flex items-center">
+              <span className="sr-only">현장 필터</span>
+              <select
+                value={siteId}
+                onChange={(e) => setSiteId(e.target.value)}
+                className={`${filterCls} appearance-none pr-8`}
+                aria-label="현장"
+              >
+                <option value="">전체 현장</option>
+                {sites.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.active ? s.name : `${s.name} (비활성 · 기록 보존)`}
+                  </option>
+                ))}
+              </select>
+              <ChevronDownIcon className="pointer-events-none absolute right-2 size-3.5 text-[var(--color-text-body)]" />
+            </label>
+          </div>
+          <div className="ml-auto flex items-center gap-2">
+            <button type="button" onClick={load} className="h-[34px] rounded-md bg-[var(--color-text-heading)] px-3.5 text-xs font-medium text-[var(--color-bg-card)] transition hover:opacity-90">조회</button>
+            <button type="button" onClick={() => { setDate(todayKst()); setSiteId(""); }} className="h-[34px] rounded-md border border-[var(--color-border)] px-3 text-xs text-[var(--color-text-body)] transition hover:bg-[var(--color-bg-tile)]">초기화</button>
+            <button type="button" onClick={() => window.print()} className="h-[34px] rounded-md border border-[var(--color-border)] px-3 text-xs text-[var(--color-text-body)] transition hover:bg-[var(--color-bg-tile)]">인쇄</button>
+          </div>
         </div>
 
         {sitesLoading && <p role="status" className="pt-3 text-xs text-[var(--color-text-faint)]">현장 목록 불러오는 중</p>}
