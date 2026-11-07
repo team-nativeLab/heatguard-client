@@ -41,10 +41,10 @@ function HQSidebar({ onLogout }: { onLogout: () => void }) {
     >
       <div className="relative z-10 flex w-full flex-col items-start border-b border-solid border-[var(--color-border)] p-5">
         <div className="flex w-full items-center gap-2.5">
-          <div className="flex size-6 shrink-0 items-center justify-center overflow-hidden rounded bg-[var(--home-nav-active-bg)]">
-            <img alt="폭염가드 로고" className="size-6 object-cover" src={logo} />
+          <div className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded bg-[var(--home-nav-active-bg)]">
+            <img alt="폭염가드 로고" className="size-8 object-cover" src={logo} />
           </div>
-          <p className="whitespace-nowrap text-sm font-semibold leading-5 text-[var(--color-text-heading)]">폭염가드</p>
+          <p className="whitespace-nowrap text-base font-semibold leading-6 text-[var(--color-text-heading)]">폭염가드</p>
         </div>
         <p className="whitespace-nowrap pl-8 pt-0.5 font-['JetBrains_Mono',monospace] text-[10px] leading-[15px] tracking-[0.5px] text-[var(--color-text-body)]">
           본사
@@ -105,9 +105,9 @@ function HQSidebar({ onLogout }: { onLogout: () => void }) {
           to="/hq/account"
           aria-current={accountActive ? "page" : undefined}
           title="계정 설정"
-          className="flex w-full items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left transition-colors hover:border-[var(--color-border)] hover:bg-[var(--home-nav-active-bg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
+          className={`flex w-full items-center gap-2 rounded px-1.5 py-1.5 -mx-1.5 text-left transition-colors ${accountActive ? "bg-[var(--home-nav-active-bg)]" : "hover:bg-[var(--home-nav-active-bg)]"} focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]`}
         >
-          <DefaultProfileAvatar className="size-9 shrink-0" />
+          <DefaultProfileAvatar className="size-8 shrink-0" />
           <div className="flex min-w-0 flex-1 flex-col">
             <p className="text-xs leading-4 text-[var(--color-text-body)]">{me ? `${me.user.name} 님` : " "}</p>
             <p className="truncate pt-px text-[11px] leading-[16.5px] text-[var(--color-text-faint)]">{me?.company.companyName ?? " "}</p>
