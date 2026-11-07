@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import HQLayout, { HQContent } from "../../components/hq/HQLayout";
 import { SiteHeatBadge } from "../../components/hq/RecordTable";
 import { EmptyBlock, ErrorBlock, LoadingBlock } from "../../components/hq/LoadState";
@@ -64,7 +64,6 @@ const GLOW: Record<string, string> = {
 };
 
 export default function ScreenHQDashboard() {
-  const navigate = useNavigate();
   const me = useHqMe();
   const [data, setData] = useState<HqDashboard | null>(null);
   const [sites, setSites] = useState<HqSite[]>([]);
