@@ -428,15 +428,8 @@ export default function HomeDashboard() {
             background: `linear-gradient(110deg, color-mix(in srgb, ${glowColor} 32%, var(--home-card-bg)) 0%, var(--home-card-bg) 100%)`,
           }}
         >
-          <div className="relative flex items-center justify-between">
-            {w?.heatWarningLevel ? (
-              <span className="bg-[var(--color-heat-badge-bg)] text-[#ff6800] text-xs font-medium leading-4 px-2.5 py-1 rounded-full">
-                <SunIcon className="size-[13px]" /> {w.heatWarningLevel}
-              </span>
-            ) : (
-              <span />
-            )}
-            {managedSites.length > 1 ? (
+          <div className="relative flex flex-wrap items-center justify-start gap-2">
+{managedSites.length > 1 ? (
               <label className="relative">
                 <span className="sr-only">현장 선택</span>
                 <select
@@ -461,8 +454,14 @@ export default function HomeDashboard() {
                 <MapPinIcon className="size-3" />{siteName}<ChevronRightIcon className="size-[11px] ml-2.5" />
               </button>
             )}
+{w?.heatWarningLevel ? (
+              <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap bg-[var(--color-heat-badge-bg)] text-[#ff6800] text-xs font-medium leading-4 px-2.5 py-1 rounded-full">
+                <SunIcon className="size-[13px] shrink-0" />{w.heatWarningLevel}
+              </span>
+            ) : (
+              <span />
+            )}
           </div>
-
           {/* 헤더와 하단 타일 사이의 정중앙에 온도 영역과 날씨 아이콘을 맞춘다 */}
           <div className="relative flex flex-1 flex-col justify-center py-4">
             {/* 날씨 아이콘 + 글로우: 한 묶음으로 두어 블러가 항상 아이콘 정중앙에 오도록 한다 */}
