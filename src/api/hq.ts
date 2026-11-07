@@ -169,7 +169,6 @@ function normalizeCall(raw: unknown): HqEmergencyCall {
     callId: str(r, "callId", "id"),
     siteId: str(r, "siteId"),
     siteName: str(r, "siteName"),
-    siteStatus: r.siteStatus === "ACTIVE" || r.siteStatus === "INACTIVE" ? r.siteStatus : null,
     teamName: str(r, "teamName"),
     status: str(r, "status"),
     createdAt: str(r, "createdAt"),
@@ -301,6 +300,7 @@ export function normalizeRecord(raw: unknown): HqRecordRow {
     photoCount: Math.max(photoUrls.length, photoKeys),
     siteId: str(r, "siteId"),
     siteName: str(r, "siteName"),
+    siteStatus: r.siteStatus === "ACTIVE" || r.siteStatus === "INACTIVE" ? r.siteStatus : null,
     teamName: str(r, "teamName"),
   };
 }
@@ -311,7 +311,7 @@ export async function listRecords(params?: { date?: string; siteId?: string; cur
 }
 
 export interface HqSiteDetail {
-  site: { id: string; name: string; active: boolean; version: number; managerName: string; managerEmail: string; managerPhone: string; heatLevel: HeatLevel; temperature: number | null };
+  site: { id: string; name: string; active: boolean; version: number; managerName: string; managerEmail: string; managerPhone: string; heatLevel: HeatLevel | null; temperature: number | null };
   teams: { id: string; name: string; leaderName: string; workplace: string; memberCount: number | null; done: number | null; total: number | null }[];
   checklistItems: { id: string; text: string }[];
   todayRecords: HqRecordRow[];
