@@ -150,7 +150,7 @@ export function normalizeSite(raw: unknown): HqSite {
     todayRecordCount: num(r, "todayRecordCount", "recordCount", "todayRecords") ?? 0,
     teamCount: num(r, "teamCount", "teamsCount"),
     emergency: get(r, "hasActiveEmergency", "emergency", "activeEmergency") === true || (num(r, "activeEmergencyCount") ?? 0) > 0,
-    active: get(r, "active") !== false,
+    active: get(r, "active") !== false && get(r, "status") !== "INACTIVE",
   };
 }
 
