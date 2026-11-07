@@ -9,7 +9,7 @@ const TABS: { key: SiteTab; label: string; to: string }[] = [
   { key: "withdrawn", label: "탈퇴 회원", to: "/manager/sites/withdrawn" },
 ];
 
-export default function SiteManagementHeader({ active, siteName }: { active: SiteTab; siteName?: string }) {
+export default function SiteManagementHeader({ active }: { active: SiteTab; siteName?: string }) {
   return (
     <div className="w-full">
       <h1 className="font-semibold text-[var(--color-text-heading)] text-xl">현장 관리</h1>
