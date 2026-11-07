@@ -74,9 +74,9 @@ export interface WithdrawSitePayload {
 }
 
 export interface WeatherInfo {
-  temperature: number;
-  humidity: number;
-  feelsLike: number;
+  temperature: number | null;
+  humidity: number | null;
+  feelsLike: number | null;
   apparentTemperature?: number | null;
   condition?: string;
   skyStatus?: string | null;
@@ -98,7 +98,7 @@ export interface DashboardResponse {
     siteRequestCount?: number;
   };
   weather: (Partial<WeatherInfo> & Pick<WeatherInfo, "temperature" | "humidity">) | null;
-  heatLevel: HeatLevel;
+  heatLevel: HeatLevel | null;
 }
 
 export interface ManualWeather {
