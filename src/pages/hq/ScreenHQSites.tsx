@@ -15,7 +15,7 @@ const inputCls =
 const EMPTY_FORM = { siteName: "", managerName: "" };
 
 function makeInvitationUrl(invitationId: string) {
-  const url = new URL("/auth/site/invitation", window.location.origin);
+  const url = new URL("/site-invitation", window.location.origin);
   url.searchParams.set("invitationId", invitationId);
   return url.toString();
 }

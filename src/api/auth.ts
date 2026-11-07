@@ -86,3 +86,8 @@ export function changePassword(payload: ChangePasswordPayload) {
 export function updateProfile(payload: UpdateProfilePayload) {
   return apiFetch<SiteUser>("/api/v1/auth/site/me", { method: "PATCH", body: payload });
 }
+
+export interface AdminLoginResponse { user: { userId: string; name: string; role: "HQ_MANAGER" | "SITE_MANAGER" | string }; siteId?: string; sites?: { siteId: string; siteName: string }[] }
+export function adminLogin(payload: LoginPayload) {
+  return apiFetch<AdminLoginResponse>("/api/v1/auth/admin/login", { method: "POST", body: payload });
+}

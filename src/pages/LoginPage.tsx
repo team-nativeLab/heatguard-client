@@ -46,7 +46,7 @@ export default function LoginPage() {
   // 비밀번호 칸에 포커스하고 아직 입력 전이면 자물쇠가 열려 있고, 입력을 시작하면 잠긴다.
   const lockOpen = unlocked || (pwFocused && !password);
 
-  const enter = () => navigate(redirectTo, { replace: true });
+  const enter = (path: string) => navigate(path, { replace: true });
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -64,7 +64,9 @@ export default function LoginPage() {
 
     setSubmitting(true);
     try {
-      await authApi.login({ email: email.trim(), password });
+      const session = await authApi.adminLogin({ email: email.trim(), password });
+      const role = session.user?.role;
+      if (role !== "HQ_MANAGER" && role !== "SITE_MANAGER") throw new Error("관리자 계정이 아닙니다.");
       clearSiteMeCache();
       authApi.clearManagedSitesCache();
       clearSelectedSiteId();
@@ -72,7 +74,12 @@ export default function LoginPage() {
       // 성공: 자물쇠가 열리는 모습을 잠깐 보여준 뒤 이동한다.
       setUnlocked(true);
       await new Promise((r) => setTimeout(r, 650));
-      enter();
+      if (role === "HQ_MANAGER") enter(redirectTo.startsWith("/hq") ? redirectTo : "/hq/dashboard");
+      else {
+        const sites = session.sites ?? [];
+        if (sites.length > 1) enter("/manager/select-site");
+        else enter(redirectTo.startsWith("/hq") ? "/manager" : redirectTo);
+      }
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
         setPasswordError("비밀번호가 올바르지 않아요");
