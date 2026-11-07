@@ -33,7 +33,7 @@ interface DashboardTodayResponse {
     feelsLike: number | null;
     condition?: string;
     skyStatus?: string | null;
-    heatWarningLevel?: string;
+    heatWarningLevel?: string | null;
     deltaFromYesterday?: number;
   } | null;
   stats: { workPhotoCount: number; restPhotoCount: number; siteRequestCount: number; dangerAlertCount: number };
