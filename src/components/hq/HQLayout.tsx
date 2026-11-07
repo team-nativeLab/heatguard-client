@@ -127,7 +127,7 @@ function HQSidebar({ onLogout }: { onLogout: () => void }) {
   );
 }
 
-export default function HQLayout({ children, toggleInHeader = false }: { children: ReactNode; toggleInHeader?: boolean }) {
+export default function HQLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [confirmingLogout, setConfirmingLogout] = useState(false);
@@ -137,8 +137,6 @@ export default function HQLayout({ children, toggleInHeader = false }: { childre
       <HQSidebar onLogout={() => setConfirmingLogout(true)} />
 
       <main className="h-full min-w-0 flex-1 overflow-y-auto">{children}</main>
-      {!toggleInHeader && (
-        )}
 
       {confirmingLogout && (
         <ConfirmDialog
