@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { ApiError, errorMessage, hqApi, type HqSiteWeather } from "../../api";
+import { ChevronDownIcon } from "../home/HomeIcons";
 
-const inputClass = "h-10 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 text-sm text-[var(--color-text-heading)] outline-none focus:border-[var(--color-accent)]";
+const inputClass = "h-10 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-2.5 text-sm text-[var(--color-text-heading)] outline-none focus:border-[var(--color-accent)]";
 
 function statusText(weather: HqSiteWeather) {
   if (weather.availability === "LOCATION_REQUIRED" || weather.errorCode === "WEATHER_LOCATION_REQUIRED") return "현장 위치를 등록해야 날씨를 조회할 수 있어요.";
@@ -80,7 +81,7 @@ export default function SiteWeatherPanel({ siteId, version, active }: { siteId: 
     }
   };
 
-  return <section className="mt-6 rounded-xl border border-[var(--home-card-border)] bg-[var(--home-card-bg)] p-5">
+  return <section className="mt-6 rounded-xl border border-[var(--home-card-border)] bg-[var(--home-card-bg)] p-4">
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div>
         <h2 className="text-base font-semibold text-[var(--color-text-heading)]">현장 날씨</h2>
@@ -100,11 +101,14 @@ export default function SiteWeatherPanel({ siteId, version, active }: { siteId: 
     <div className="mt-5 border-t border-[var(--color-border)] pt-4">
       <h3 className="text-sm font-medium text-[var(--color-text-heading)]">기상청 위치 설정</h3>
       <p className="mt-1 text-xs text-[var(--color-text-body)]">현장 위도와 경도를 입력하면 서버가 기상청 격자로 변환해요.</p>
-      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-3">
         <label className="text-xs text-[var(--color-text-body)]">날씨 모드
-          <select className={`${inputClass} mt-1 w-full`} value={mode} onChange={e => setMode(e.target.value as "AUTOMATIC" | "MANUAL")}>
-            <option value="AUTOMATIC">자동 조회</option><option value="MANUAL">수동 입력</option>
-          </select>
+          <span className="relative mt-1 block">
+            <select className={`${inputClass} w-full appearance-none pr-10`} value={mode} onChange={e => setMode(e.target.value as "AUTOMATIC" | "MANUAL")}>
+              <option value="AUTOMATIC">자동 조회</option><option value="MANUAL">수동 입력</option>
+            </select>
+            <ChevronDownIcon className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-[var(--color-text-body)]" />
+          </span>
         </label>
         <label className="text-xs text-[var(--color-text-body)]">위도
           <input className={`${inputClass} mt-1 w-full`} type="number" step="any" inputMode="decimal" value={latitude} onChange={e => setLatitude(e.target.value)} placeholder="37.5665" />
