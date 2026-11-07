@@ -8,6 +8,7 @@ import { HEAT_LABEL, HEAT_TONE } from "../../api/hq";
 import { doneText } from "../../lib/hqFormat";
 import SiteAppLinkStatusPanel from "../../components/hq/SiteAppLinkStatusPanel";
 import SiteWeatherPanel from "../../components/hq/SiteWeatherPanel";
+import { ChevronLeftIcon } from "../../components/home/HomeIcons";
 
 export default function ScreenHQSiteDetail() {
   const { siteId = "" } = useParams();
@@ -37,7 +38,8 @@ export default function ScreenHQSiteDetail() {
     <HQLayout>
       <HQContent>
         <Link to="/hq/sites" className="flex items-center gap-1.5 text-sm text-[var(--color-text-body)] transition-colors hover:text-[var(--color-text-heading)]">
-          ← 현장 목록
+          <ChevronLeftIcon className="size-4" />
+          현장 목록
         </Link>
 
         {notFound ? (
