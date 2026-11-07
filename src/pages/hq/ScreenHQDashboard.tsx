@@ -245,7 +245,7 @@ export default function ScreenHQDashboard() {
               <h2 className="text-sm font-medium leading-5 text-[var(--color-text-label)]">오늘의 현황</h2>
               <div className="flex flex-col items-end text-right">
                 <p className="whitespace-nowrap text-sm leading-5 text-[var(--color-text-body)]">{dateText}</p>
-                <p className="pt-1 text-[40px] font-light leading-[44px] tracking-[-1.2px] tabular-nums text-[var(--color-text-heading)]">{timeText}</p>
+                <p className="pt-1 text-[28px] font-light leading-[34px] tracking-[-1.2px] tabular-nums text-[var(--color-text-heading)]">{timeText}</p>
               </div>
             </div>
             <div className="mt-auto grid grid-cols-2 gap-3 pb-2 pt-6 sm:grid-cols-4">
