@@ -13,6 +13,7 @@ import { LoadError, SkeletonList } from "../../shared/ui/Skeleton";
 import { getPasswordError } from "../../lib/passwordPolicy";
 import { NewPasswordInput } from "../../components/auth/NewPasswordField";
 import { usePasswordComposition } from "../../components/auth/usePasswordComposition";
+import { useSiteMe } from "../../hooks/useSiteMe";
 
 const FALLBACK_TEAMS: TeamSummary[] = [
   { id: "t1", name: "A팀", leaderName: "홍길동", workLocation: "3층 외벽", memberCount: 8, active: true, version: 1, loginEmail: "team-a@example.com" },
@@ -35,6 +36,7 @@ const ghostBtn =
 
 export default function SiteTeamsPage() {
   const { showToast } = useToast();
+  const me = useSiteMe();
   const [adding, setAdding] = useState(false);
   const [teams, setTeams] = useState<TeamSummary[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -99,7 +101,7 @@ export default function SiteTeamsPage() {
     if (passwordError) return showToast(passwordError, "error");
     setSubmitting(true);
     const payload = {
-      name: `${form.leaderName.trim()} 팀`,
+      name: me.site.name?.trim() || form.workLocation.trim() || "현장",
       workplace: form.workLocation.trim(),
       leaderName: form.leaderName.trim(),
       leaderEmail: form.leaderEmail.trim(),
@@ -118,7 +120,7 @@ export default function SiteTeamsPage() {
           ...prev,
           {
             id: `local-${Date.now()}`,
-            name: `${payload.leaderName} 팀`,
+            name: payload.name,
             leaderName: payload.leaderName,
             workLocation: payload.workplace,
             memberCount: payload.workerCount,
@@ -127,7 +129,7 @@ export default function SiteTeamsPage() {
             loginEmail: payload.leaderEmail,
           },
         ]);
-        showToast(`${payload.leaderName} 팀을 추가했어요. (데모)`, "success");
+        showToast(`${payload.name} 팀을 추가했어요. (데모)`, "success");
         setForm(EMPTY_FORM);
         setAdding(false);
         return;
@@ -174,7 +176,7 @@ export default function SiteTeamsPage() {
             <div className="hidden md:flex gap-4 px-5 text-xs text-[var(--color-text-faint)]">
               <span className="size-8 shrink-0" aria-hidden="true" />
               <div className="grid grid-cols-3 gap-x-4 flex-1 min-w-0">
-                <span>이름</span>
+                <span>현장명</span>
                 <span>인원</span>
                 <span>이메일</span>
               </div>
@@ -192,8 +194,8 @@ export default function SiteTeamsPage() {
 
               <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2 flex-1 min-w-0 w-full">
                 <div>
-                  <p className="font-medium leading-5 text-sm text-[var(--color-text-heading)]">{team.leaderName}</p>
-                  <p className="leading-4 text-[var(--color-text-body)] text-xs">{team.workLocation || "미지정"}</p>
+                  <p className="font-medium leading-5 text-sm text-[var(--color-text-heading)]">{me.site.name || team.name || "현장"}</p>
+                  <p className="leading-4 text-[var(--color-text-body)] text-xs">팀장 {team.leaderName} · {team.workLocation || "작업 장소 미입력"}</p>
                 </div>
                                 <p className="leading-4 text-[var(--color-text-label)] text-xs self-center">
                   {team.memberCount ? `${team.memberCount}명` : "-"}
