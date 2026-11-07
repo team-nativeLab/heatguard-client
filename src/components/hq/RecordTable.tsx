@@ -117,7 +117,7 @@ export function HeatBadge({ temp, status, tone = "orange" }: { temp: string; sta
 /** 온도·위험단계 배지. 위험단계가 0(미입력)이면 회색 "미입력" */
 export function SiteHeatBadge({ temperature, label, tone }: { temperature: number | null; label: string; tone: HeatTone }) {
   if (tone === "none" && temperature == null) {
-    return <span className="rounded bg-[var(--color-heat-none-bg)] px-2 py-0.5 text-[10px] text-[var(--color-heat-none-fg)]">미입력</span>;
+    return <span className="rounded bg-[var(--color-heat-none-bg)] px-2 py-0.5 text-[10px] text-[var(--color-heat-none-fg)]">{label === "미측정" ? "미측정" : "미입력"}</span>;
   }
   return <HeatBadge temp={temperature != null ? `${temperature.toFixed(1)}°C` : ""} status={label} tone={tone} />;
 }

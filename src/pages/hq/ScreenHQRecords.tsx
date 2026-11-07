@@ -26,7 +26,7 @@ export default function ScreenHQRecords() {
     setSitesError("");
     setSitesLoading(true);
     try {
-      setSites(await hqApi.listAllSites());
+      setSites(await hqApi.listAllSites({ status: "ALL" }));
     } catch (err) {
       setSitesError(errorMessage(err, "현장 목록을 불러오지 못했어요."));
     } finally {
@@ -71,10 +71,10 @@ export default function ScreenHQRecords() {
   };
 
   const groups = useMemo(() => {
-    const map = new Map<string, { siteId: string; name: string; rows: HqRecordRow[] }>();
+    const map = new Map<string, { siteId: string; name: string; siteStatus: HqRecordRow["siteStatus"]; rows: HqRecordRow[] }>();
     for (const r of records ?? []) {
       const key = r.siteId || r.siteName || "unknown";
-      if (!map.has(key)) map.set(key, { siteId: r.siteId, name: r.siteName || "(현장 미상)", rows: [] });
+      if (!map.has(key)) map.set(key, { siteId: r.siteId, name: r.siteName || "(현장 미상)", siteStatus: r.siteStatus, rows: [] });
       map.get(key)!.rows.push(r);
     }
     return [...map.values()].sort((a, b) => {
@@ -82,7 +82,7 @@ export default function ScreenHQRecords() {
       const siteB = sites.find((site) => site.id === b.siteId);
       if (!siteA) return siteB ? 1 : 0;
       if (!siteB) return -1;
-      return siteB.heatLevel - siteA.heatLevel || (siteB.temperature ?? -1) - (siteA.temperature ?? -1);
+      return (siteB.heatLevel ?? -1) - (siteA.heatLevel ?? -1) || (siteB.temperature ?? -1) - (siteA.temperature ?? -1);
     });
   }, [records, sites]);
 
@@ -132,7 +132,7 @@ export default function ScreenHQRecords() {
                 <section key={g.siteId || g.name}>
                   <div className="flex items-center gap-3">
                     <h2 className="text-sm font-medium text-[var(--color-text-heading)]">{g.name}</h2>
-                    {site && !site.active && <span className="rounded bg-[var(--color-heat-none-bg)] px-1.5 py-0.5 text-[10px] text-[var(--color-heat-none-fg)]">비활성 · 기록 보존</span>}
+                    {(g.siteStatus === "INACTIVE" || (site && !site.active)) && <span className="rounded bg-[var(--color-heat-none-bg)] px-1.5 py-0.5 text-[10px] text-[var(--color-heat-none-fg)]">비활성 · 기록 보존</span>}
                     {site && <SiteHeatBadge temperature={site.temperature} label={heatLabel(site)} tone={heatTone(site)} />}
                     <span className="font-['JetBrains_Mono',monospace] text-xs text-[var(--color-text-faint)]">{g.rows.length}건 표시</span>
                   </div>

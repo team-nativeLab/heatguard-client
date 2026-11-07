@@ -113,8 +113,8 @@ export const HEAT_LABEL: Record<HeatLevel, string> = {
 };
 export const HEAT_TONE: Record<HeatLevel, HeatTone> = { 0: "none", 1: "yellow", 2: "orange", 3: "red" };
 
-function toHeatLevel(v: number | null): HeatLevel {
-  if (v == null) return 0;
+function toHeatLevel(v: number | null): HeatLevel | null {
+  if (v == null) return null;
   return Math.max(0, Math.min(3, Math.round(v))) as HeatLevel;
 }
 
@@ -123,7 +123,7 @@ export interface HqSite {
   name: string;
   managerName: string;
   managerEmail: string;
-  heatLevel: HeatLevel;
+  heatLevel: HeatLevel | null;
   managerPhone: string;
   /** 현재 현장 온도(°C). 미입력이면 null */
   temperature: number | null;
@@ -150,7 +150,7 @@ export function normalizeSite(raw: unknown): HqSite {
     todayRecordCount: num(r, "todayRecordCount", "recordCount", "todayRecords") ?? 0,
     teamCount: num(r, "teamCount", "teamsCount"),
     emergency: get(r, "hasActiveEmergency", "emergency", "activeEmergency") === true || (num(r, "activeEmergencyCount") ?? 0) > 0,
-    active: get(r, "active") !== false,
+    active: get(r, "active") !== false && get(r, "status") !== "INACTIVE",
   };
 }
 
@@ -208,13 +208,13 @@ export async function getDashboard(): Promise<HqDashboard> {
   };
 }
 
-export async function listSites(params?: { heatLevel?: number; emergency?: boolean; cursor?: string; limit?: number }) {
+export async function listSites(params?: { heatLevel?: number; emergency?: boolean; status?: "ACTIVE" | "INACTIVE" | "ALL"; cursor?: string; limit?: number }) {
   const page = await apiFetch<Page<unknown>>("/api/v1/hq/sites", { params });
   return { ...page, items: (page?.items ?? []).map(normalizeSite) };
 }
 
 /** 모든 페이지를 이어서 가져온다 (현장 수가 많지 않다는 전제) */
-export async function listAllSites(params?: { heatLevel?: number; emergency?: boolean }) {
+export async function listAllSites(params?: { heatLevel?: number; emergency?: boolean; status?: "ACTIVE" | "INACTIVE" | "ALL" }) {
   const items: HqSite[] = [];
   let cursor: string | undefined;
   do {
@@ -274,6 +274,7 @@ export interface HqRecordRow {
   photoCount: number;
   siteId: string;
   siteName: string;
+  siteStatus: "ACTIVE" | "INACTIVE" | null;
   teamName: string;
 }
 
@@ -299,6 +300,7 @@ export function normalizeRecord(raw: unknown): HqRecordRow {
     photoCount: Math.max(photoUrls.length, photoKeys),
     siteId: str(r, "siteId"),
     siteName: str(r, "siteName"),
+    siteStatus: r.siteStatus === "ACTIVE" || r.siteStatus === "INACTIVE" ? r.siteStatus : null,
     teamName: str(r, "teamName"),
   };
 }
@@ -309,7 +311,7 @@ export async function listRecords(params?: { date?: string; siteId?: string; cur
 }
 
 export interface HqSiteDetail {
-  site: { id: string; name: string; active: boolean; version: number; managerName: string; managerEmail: string; managerPhone: string; heatLevel: HeatLevel; temperature: number | null };
+  site: { id: string; name: string; active: boolean; version: number; managerName: string; managerEmail: string; managerPhone: string; heatLevel: HeatLevel | null; temperature: number | null };
   teams: { id: string; name: string; leaderName: string; workplace: string; memberCount: number | null; done: number | null; total: number | null }[];
   checklistItems: { id: string; text: string }[];
   todayRecords: HqRecordRow[];
@@ -359,6 +361,7 @@ export async function listActiveEmergencyCalls() {
 
 export type HqWeatherAvailability = "AVAILABLE" | "CACHED" | "UNAVAILABLE" | "LOCATION_REQUIRED" | string;
 export interface HqSiteWeather {
+  version: number;
   temperature: number | null;
   humidity: number | null;
   apparentTemperature: number | null;
@@ -367,16 +370,16 @@ export interface HqSiteWeather {
   availability: HqWeatherAvailability;
   isStale: boolean;
   errorCode: string | null;
-  weatherMode: string | null;
-  weatherLocation: { nx: number; ny: number } | null;
+  weatherMode: "AUTOMATIC" | "MANUAL" | string | null;
+  weatherLocation: { latitude: number; longitude: number } | null;
 }
 export async function getSiteWeather(siteId: string): Promise<HqSiteWeather> {
   return apiFetch<HqSiteWeather>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}/weather`);
 }
 export async function updateSiteWeatherLocation(siteId: string, payload: {
   version: number;
-  weatherMode: string;
-  weatherLocation: { nx: number; ny: number };
+  weatherMode: "AUTOMATIC" | "MANUAL";
+  weatherLocation: { latitude: number; longitude: number } | null;
 }) {
   return apiFetch<unknown>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}/weather-location`, { method: "PATCH", body: payload });
 }

@@ -93,11 +93,15 @@ export default function ScreenHQDashboard() {
 
   const dateText = `${now.getFullYear()}. ${pad(now.getMonth() + 1)}. ${pad(now.getDate())}. (${WEEKDAYS[now.getDay()]})`;
   const timeText = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-  const top: HqSite | undefined = sites[0];
-  // 가장 위험한 현장의 위험도에 맞춘 카드 글로우 색
+  const hottest: HqSite | undefined = sites.reduce<HqSite | undefined>((current, site) => {
+    if (site.temperature == null) return current;
+    return current == null || site.temperature > (current.temperature ?? Number.NEGATIVE_INFINITY) ? site : current;
+  }, undefined);
+  const top: HqSite | undefined = hottest ?? sites[0];
+  // 온도 카드는 위험도 순서와 분리해 실제 최고 온도 현장을 표시한다.
   const glowColor = GLOW[top ? heatTone(top) : "none"];
   const weather = data?.weather;
-  const topTemp = top?.temperature ?? weather?.temperature ?? null;
+  const topTemp = hottest?.temperature ?? null;
   const weatherStatus = error
     ? (data ? "갱신 실패" : "조회 실패")
     : !data
