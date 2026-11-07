@@ -35,7 +35,7 @@ function Row({ label, value, sub, action }: { label: string; value: ReactNode; s
     <div className="flex items-center gap-4 border-t border-[var(--home-card-border)] px-5 py-3.5">
       <span className="w-[88px] shrink-0 text-[13px] leading-[1.45] text-[var(--color-text-body)] sm:w-[120px]">{label}</span>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5 leading-[1.45]">
-        <span className="truncate text-sm font-normal text-[var(--color-text-heading)]">{value}</span>
+        {value ? <span className="truncate text-sm font-normal text-[var(--color-text-heading)]">{value}</span> : null}
         {sub && <span className="text-xs text-[var(--color-text-faint)]">{sub}</span>}
       </div>
       {action}
@@ -146,7 +146,7 @@ export default function AccountPage() {
             />
             <Row
               label="로그아웃"
-              value="현재 기기에서 로그아웃합니다."
+              value=""
               action={
                 <button type="button" onClick={() => setConfirmingLogout(true)} className={smallBtn}>
                   로그아웃
