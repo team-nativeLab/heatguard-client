@@ -175,7 +175,7 @@ export default function SiteTeamsPage() {
               <span className="size-8 shrink-0" aria-hidden="true" />
               <div className="grid grid-cols-3 gap-x-4 flex-1 min-w-0">
                 <span>이름</span>
-                <span>인원</span>
+                <span className="text-center">인원</span>
                 <span>이메일</span>
               </div>
               <span className="w-[132px] shrink-0" aria-hidden="true" />
@@ -195,7 +195,7 @@ export default function SiteTeamsPage() {
                   <p className="font-medium leading-5 text-sm text-[var(--color-text-heading)]">{team.leaderName}</p>
                   <p className="leading-4 text-[var(--color-text-body)] text-xs">{team.workLocation || "미지정"}</p>
                 </div>
-                                <p className="leading-4 text-[var(--color-text-label)] text-xs self-center">
+                                <p className="leading-4 text-center text-[var(--color-text-label)] text-xs self-center">
                   {team.memberCount ? `${team.memberCount}명` : "-"}
                 </p>
                 <p className="font-['JetBrains_Mono',monospace] leading-4 text-[var(--color-text-body)] text-[11px] self-center truncate" title={team.loginEmail ?? undefined}>
