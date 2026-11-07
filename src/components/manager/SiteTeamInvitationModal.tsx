@@ -3,6 +3,7 @@ import { errorMessage, teamsApi } from "../../api";
 import type { TeamSummary } from "../../api";
 import { useToast } from "../../shared/ui/Toast";
 import ModalShell, { btnPrimary, btnSecondary, inputCls } from "../home/ModalShell";
+import { useSiteMe } from "../../hooks/useSiteMe";
 
 export default function SiteTeamInvitationModal({ team, onClose, autoGenerate = false }: {
   team: TeamSummary;
@@ -10,7 +11,8 @@ export default function SiteTeamInvitationModal({ team, onClose, autoGenerate = 
   autoGenerate?: boolean;
 }) {
   const { showToast } = useToast();
-  const inviteDisplayName = team.workLocation?.trim() || "팀원";
+  const me = useSiteMe();
+  const inviteDisplayName = me.site.name?.trim() || team.workLocation?.trim() || "현장";
   const [inviteUrl, setInviteUrl] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -37,7 +39,7 @@ export default function SiteTeamInvitationModal({ team, onClose, autoGenerate = 
       generating.current = false;
       setBusy(false);
     }
-  }, [busy, showToast, team.id, team.workLocation]);
+  }, [busy, inviteDisplayName, showToast, team.id]);
 
   useEffect(() => {
     if (!autoGenerate || autoStarted.current) return;
