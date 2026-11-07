@@ -56,6 +56,33 @@ function StatTile({ icon, count, unit, label, tone, to }: { icon: ReactNode; cou
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 const pad = (n: number) => String(n).padStart(2, "0");
 
+function weatherGlowColor(weather: HqSiteWeather | null, hour: number) {
+  if (!weather) return "rgba(148, 163, 184, 0.3)";
+  const condition = (weather.skyStatus ?? "").toLowerCase();
+  const isNight = hour < 6 || hour >= 19;
+  if (/thunder|storm|뇌우|천둥|번개/.test(condition)) return "rgba(167, 139, 250, 0.48)";
+  if (/rain|shower|비|소나기/.test(condition)) return "rgba(56, 189, 248, 0.46)";
+  if (/snow|눈|진눈깨비/.test(condition)) return "rgba(125, 211, 252, 0.5)";
+  if (/fog|mist|안개/.test(condition)) return "rgba(203, 213, 225, 0.45)";
+  if (/haze|dust|smog|황사|미세먼지|연무/.test(condition)) return "rgba(250, 204, 21, 0.42)";
+  if (/cloud|구름|흐림/.test(condition)) return (weather.temperature ?? 0) >= 30 ? "rgba(251, 146, 60, 0.38)" : "rgba(148, 163, 184, 0.4)";
+  if (isNight) return "rgba(129, 140, 248, 0.4)";
+  if ((weather.temperature ?? 0) >= 38) return "rgba(239, 68, 68, 0.46)";
+  if ((weather.temperature ?? 0) >= 33) return "rgba(249, 115, 22, 0.44)";
+  if ((weather.temperature ?? 0) >= 25 || /clear|sun|맑음/.test(condition)) return "rgba(251, 146, 60, 0.42)";
+  if ((weather.temperature ?? 0) <= 5) return "rgba(125, 211, 252, 0.42)";
+  return "rgba(96, 165, 250, 0.38)";
+}
+
+function SunStatusIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true" className="size-[13px] shrink-0">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" />
+    </svg>
+  );
+}
+
 export default function ScreenHQDashboard() {
   const me = useHqMe();
   const [data, setData] = useState<HqDashboard | null>(null);
@@ -110,7 +137,7 @@ export default function ScreenHQDashboard() {
   const dateText = `${now.getFullYear()}. ${pad(now.getMonth() + 1)}. ${pad(now.getDate())}. (${WEEKDAYS[now.getDay()]})`;
   const timeText = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
   const selectedSite = sites.find((site) => site.id === selectedSiteId);
-  const glowColor = "rgba(96, 165, 250, 0.38)";
+  const glowColor = weatherGlowColor(selectedWeather, now.getHours());
   const weatherStatus = weatherError
     ? "조회 실패"
     : weatherLoading
@@ -123,7 +150,9 @@ export default function ScreenHQDashboard() {
             ? "날씨 조회 불가"
             : selectedWeather?.availability === "CACHED" || selectedWeather?.isStale
               ? "이전 관측값"
-              : heatLabel(selectedSite);
+              : selectedWeather?.temperature == null
+                ? "미측정"
+                : heatLabel(selectedSite);
   const topTemp = selectedWeather?.temperature ?? null;
   const weather = selectedWeather;
   const visible = sites.filter((s) => s.name.includes(search.trim()));
@@ -155,7 +184,7 @@ export default function ScreenHQDashboard() {
         <section className="mt-0.5 grid grid-cols-1 gap-4 xl:grid-cols-2">
           <div
             className="relative flex min-h-[275px] flex-col overflow-hidden rounded-xl border border-[var(--home-card-border)] p-5"
-            style={{ background: `linear-gradient(110deg, color-mix(in srgb, ${glowColor} 58%, var(--home-card-bg)) 0%, var(--home-card-bg) 100%)` }}
+            style={{ background: `linear-gradient(110deg, color-mix(in srgb, ${glowColor} 32%, var(--home-card-bg)) 0%, var(--home-card-bg) 100%)` }}
           >
             <div className="relative flex flex-wrap items-center justify-start gap-2">
               <label className="relative flex h-[30px] max-w-full items-center gap-1.5 rounded-full border border-[var(--home-pill-border)] bg-[var(--home-pill-bg)] pl-[11px] pr-2 text-xs font-medium text-[var(--home-pill-fg)]">
@@ -166,8 +195,9 @@ export default function ScreenHQDashboard() {
                 </select>
                 <ChevronDownIcon className="pointer-events-none absolute right-2 size-3.5 text-[var(--color-text-body)]" />
               </label>
-              <span className="rounded-full bg-[var(--color-danger-soft-bg)] px-2.5 py-1 text-xs font-medium leading-4 text-[var(--color-danger-text)]">
-                <span className="figma-emoji">☀</span> ${weatherStatus}
+              <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-[var(--color-heat-badge-bg)] px-2.5 py-1 text-xs font-medium leading-4 text-[#ff6800]">
+                <SunStatusIcon />
+                {weatherStatus}
               </span>
             </div>
 
