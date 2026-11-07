@@ -551,7 +551,7 @@ export default function HomeDashboard() {
             <span className="mx-3 sm:mx-[26px] text-sm text-[var(--home-date-sub)]">~</span>
             <DateField value={to} onChange={setTo} label="조회 종료일" />
           </div>
-          <div className="flex items-center gap-3 sm:ml-auto sm:mr-9">
+          <div className="ml-auto flex items-center gap-3">
             <button
               type="button"
               onClick={runQuery}
