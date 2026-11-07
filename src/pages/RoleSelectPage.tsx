@@ -68,7 +68,7 @@ function RoleCard({
 }) {
   return (
     <div
-      className="flex flex-col rounded-2xl border px-[18px] pb-[18px] pt-[22px]"
+      className="flex flex-col items-center rounded-2xl border px-[18px] pb-[18px] pt-[22px] text-center"
       style={{ background: "var(--auth-secondary-bg)", borderColor: "var(--auth-input-border)" }}
     >
       <div
@@ -129,12 +129,6 @@ export default function RoleSelectPage({ mode }: { mode: Mode }) {
       <div className={mode === "signup" ? "mt-7 max-w-[310px]" : "mt-7 max-w-[310px]"}>
         <RoleCard to={c.hq.to} from={mode} tone="blue" icon={<BarChartIcon size={24} />} title={mode === "login" ? "관리자 로그인" : "본사 관리자"} desc={c.hq.desc} cta={c.cta} />
       </div>
-
-      {mode === "signup" && (
-        <p className="mt-4 max-w-[310px] text-xs leading-5 text-[var(--auth-text-muted)]">
-          현장관리자 계정은 본사 가입 후 현장 관리에서 현장과 함께 생성해 주세요.
-        </p>
-      )}
 
       <p className="mt-7 flex justify-center gap-3 text-sm leading-[1.4]">
         <span className="text-[var(--auth-text-muted)]">{c.footerText}</span>
