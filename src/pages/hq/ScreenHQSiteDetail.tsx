@@ -66,7 +66,7 @@ export default function ScreenHQSiteDetail() {
 
             <div className="flex flex-wrap gap-2 pt-6">
               {detail.teams.length === 0 && <span className="text-xs text-[var(--color-text-faint)]">등록된 팀이 없어요.</span>}
-              {detail.teams.filter((t) => t.name.trim() !== "기본팀").map((t) => (
+              {detail.teams.filter((t) => !["기본팀", "기본 팀", "test 팀", "테스트 팀"].includes(t.name.trim().toLowerCase())).map((t) => (
                 <span key={t.id || t.name} className="rounded-full border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 py-1 font-['JetBrains_Mono',monospace] text-xs text-[var(--color-text-label)]">
                   {t.name} {t.done != null && t.total != null ? doneText(t.done, t.total) : t.memberCount != null ? `${t.memberCount}명` : ""}
                 </span>
