@@ -1,14 +1,11 @@
 import { useCallback, useState, type ReactNode } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
 import sidebarWave from "../../assets/images/sidebar-wave.png";
 import { DashboardIcon, SiteManageIcon, ContactIcon, PrintIcon, DefaultProfileAvatar } from "../icons/Icons";
-import ConfirmDialog from "../../shared/ui/ConfirmDialog";
-import { useToast } from "../../shared/ui/Toast";
 import { usePolling } from "../../shared/hooks/usePolling";
 import { hqApi } from "../../api";
-import { clearHqMeCache, useHqMe } from "../../hooks/useHqMe";
-import { markSignedOut } from "../../shared/auth/RequireAuth";
+import { useHqMe } from "../../hooks/useHqMe";
 
 const NAV_ITEMS = [
   { label: "대시보드", Icon: DashboardIcon, to: "/hq/dashboard" },
@@ -18,7 +15,7 @@ const NAV_ITEMS = [
 ];
 
 /** 현장 관리자 화면과 같은 사이드바 (브랜드 · 메뉴 · 흐르는 물결 · 사용자) */
-function HQSidebar({ onLogout }: { onLogout: () => void }) {
+function HQSidebar() {
   const location = useLocation();
   const me = useHqMe();
   const [emergencyCount, setEmergencyCount] = useState(0);
@@ -46,9 +43,6 @@ function HQSidebar({ onLogout }: { onLogout: () => void }) {
           </div>
           <p className="whitespace-nowrap text-base font-semibold leading-6 text-[var(--color-text-heading)]">폭염가드</p>
         </div>
-        <p className="whitespace-nowrap pl-8 pt-0.5 font-['JetBrains_Mono',monospace] text-[10px] leading-[15px] tracking-[0.5px] text-[var(--color-text-body)]">
-          본사
-        </p>
       </div>
 
       <nav className="relative z-10 flex w-full flex-col gap-0.5 px-3 py-4">
@@ -113,50 +107,16 @@ function HQSidebar({ onLogout }: { onLogout: () => void }) {
             <p className="truncate pt-px text-[11px] leading-[16.5px] text-[var(--color-text-faint)]">{me?.company.companyName ?? " "}</p>
           </div>
         </Link>
-        <div className="flex items-center pt-2">
-          <button
-            type="button"
-            onClick={onLogout}
-            className="text-[11px] leading-[16.5px] text-[var(--color-text-faint)] transition-colors hover:text-[var(--color-text-body)]"
-          >
-            로그아웃
-          </button>
-        </div>
       </div>
     </aside>
   );
 }
 
 export default function HQLayout({ children }: { children: ReactNode }) {
-  const navigate = useNavigate();
-  const { showToast } = useToast();
-  const [confirmingLogout, setConfirmingLogout] = useState(false);
-
   return (
     <div className="relative flex h-screen w-full overflow-hidden bg-[var(--home-main-bg)] text-[var(--color-text-body)]">
-      <HQSidebar onLogout={() => setConfirmingLogout(true)} />
-
+      <HQSidebar />
       <main className="h-full min-w-0 flex-1 overflow-y-auto">{children}</main>
-
-      {confirmingLogout && (
-        <ConfirmDialog
-          title="로그아웃할까요?"
-          confirmLabel="로그아웃"
-          onCancel={() => setConfirmingLogout(false)}
-          onConfirm={async () => {
-            setConfirmingLogout(false);
-            try {
-              await hqApi.logout();
-            } catch {
-              /* 세션이 이미 끝났어도 로그아웃 처리는 계속한다 */
-            }
-            clearHqMeCache();
-            markSignedOut("hq");
-            showToast("로그아웃했어요.");
-            navigate("/hq/login", { replace: true });
-          }}
-        />
-      )}
     </div>
   );
 }
