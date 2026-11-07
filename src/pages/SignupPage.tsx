@@ -8,7 +8,7 @@ import AuthSubmitButton from "../components/auth/AuthSubmitButton";
 import { AnimatedLockIcon, BuildingIcon, MailIcon, MapPinIcon, UserIcon, UsersIcon } from "../components/auth/AuthIcons";
 import { useToast } from "../shared/ui/Toast";
 import { authApi, ApiError, errorMessage } from "../api";
-import { getPasswordConfirmationError, getPasswordError } from "../lib/passwordPolicy";
+import { getPasswordConfirmationError, getPasswordError, SIGNUP_PASSWORD_MIN_LENGTH, SIGNUP_PASSWORD_POLICY_HINT } from "../lib/passwordPolicy";
 import { NewPasswordAuthField } from "../components/auth/NewPasswordField";
 import { usePasswordComposition } from "../components/auth/usePasswordComposition";
 
@@ -47,7 +47,7 @@ function validate(v: Values): Errors {
   if (!v.siteName.trim()) errors.siteName = REQUIRED;
   if (!v.email.trim()) errors.email = REQUIRED;
   else if (!EMAIL_RE.test(v.email.trim())) errors.email = "이메일 형식을 확인해주세요";
-  const passwordError = getPasswordError(v.password);
+  const passwordError = getPasswordError(v.password, SIGNUP_PASSWORD_MIN_LENGTH);
   const confirmationError = getPasswordConfirmationError(v.password, v.passwordConfirm);
   if (passwordError) errors.password = passwordError;
   if (confirmationError) errors.passwordConfirm = confirmationError;
@@ -211,6 +211,8 @@ export default function SignupPage() {
                 label="비밀번호"
                 icon={<AnimatedLockIcon key={`password-${shakeKey}`} open={focusedPassword === "password"} shake={!!errors.password} />}
                 placeholder="10자 이상 입력하세요"
+                minimumLength={SIGNUP_PASSWORD_MIN_LENGTH}
+                policyHint={SIGNUP_PASSWORD_POLICY_HINT}
                 revealable
                 {...bind("password")}
                 onFocus={() => setFocusedPassword("password")}
