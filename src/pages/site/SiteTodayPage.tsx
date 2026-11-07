@@ -95,14 +95,14 @@ function heatBadgeClass(level: string | null) {
   return { bg: "bg-[var(--color-bg-tile)]", text: "text-[var(--color-text-body)]" };
 }
 
-function buildTeamStatus(team: TeamSummary, records: RecordItem[], checkTimes: string[], checklistTotal: number | null): TeamStatusToday {
+function buildTeamStatus(team: TeamSummary, records: RecordItem[], checkTimes: string[], checklistTotal: number | null, siteName: string): TeamStatusToday {
   const mine = records.filter((r) => r.teamId === team.id);
   const latest = [...mine].sort((a, b) => b.time.localeCompare(a.time)).find((r) => r.apparentTemperature != null);
   const feelsLike = latest?.apparentTemperature ?? null;
   const thermoTimes = mine.filter((r) => r.type === "온도계").map((r) => toMinutes(r.time));
   return {
     teamId: team.id,
-    teamName: team.workLocation || team.name || `${team.leaderName} 팀`,
+    teamName: siteName || team.workLocation || team.name || "현장",
     leaderName: team.leaderName,
     workLocation: team.workLocation || "미지정",
     feelsLike,
@@ -143,9 +143,9 @@ export default function SiteTodayPage() {
         setTeams(
           teamsRes.items
             .filter((t) => t.active)
-            .map((t) => buildTeamStatus(t, recordsRes.items, checkTimes, checklistTotal)),
+            .map((t) => buildTeamStatus(t, recordsRes.items, checkTimes, checklistTotal, me.site.name)),
         );
-        setRows(recordsRes.items.map(toRecordRow));
+        setRows(recordsRes.items.map((item) => ({ ...toRecordRow(item), teamName: me.site.name || undefined })));
       })
       .catch((err) => {
         if (!alive) return;
@@ -257,7 +257,7 @@ export default function SiteTodayPage() {
           })}
           {teams.length === 0 && (
             <p className="md:col-span-3 text-[var(--color-text-faint)] text-sm py-6">
-              등록된 팀이 없어요. ‘현장’ 탭에서 팀을 추가해주세요.
+              등록된 팀이 없어요. ‘현장 관리’ 탭에서 팀을 추가해주세요.
             </p>
           )}
         </div>
