@@ -256,12 +256,12 @@ export default function HomeDashboard() {
           siteName: "",
           weather: dash.weather
             ? {
-                temperature: dash.(weather.temperature ?? 0),
+                temperature: dash.weather.temperature,
                 humidity: dash.weather.humidity,
                 feelsLike:
                   dash.weather.feelsLike ??
                   dash.weather.apparentTemperature ??
-                  dash.(weather.temperature ?? 0),
+                  dash.weather.temperature,
                 condition: dash.weather.condition ?? weatherConditionLabel(undefined, dash.weather.skyStatus),
                 skyStatus: dash.weather.skyStatus,
                 heatWarningLevel: dash.heatLevel,
