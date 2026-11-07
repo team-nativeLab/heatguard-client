@@ -1,5 +1,4 @@
 // ⚠️ 자동 생성 파일 — heatguard-shared/src 에서 수정한 뒤 `node sync.mjs`로 반영하세요.
-import ThemeToggleButton from "./ThemeToggleButton";
 
 /** 좁은 화면(768px 미만)에서 사이드바 대신 보이는 상단 바 */
 export default function MobileTopBar({
@@ -33,7 +32,6 @@ export default function MobileTopBar({
         <p className="truncate text-sm font-semibold text-[var(--color-text-heading)]">폭염가드</p>
         <span className="text-[10px] text-[var(--color-accent)]">{subtitle}</span>
       </div>
-      <ThemeToggleButton />
     </div>
   );
 }
