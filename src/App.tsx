@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
 import DashboardPage from "./pages/DashboardPage";
 import SiteTodayPage from "./pages/site/SiteTodayPage";
 import SiteTeamsPage from "./pages/site/SiteTeamsPage";
@@ -50,13 +51,13 @@ export default function App() {
       <SessionGuard />
       <Routes>
         {/* 첫 화면: 스플래시 → 소속 선택. 이후 각 로그인/회원가입은 스플래시 없이 이동 */}
-        <Route path="/" element={<Navigate to="/auth/select" replace />} />
+        <Route path="/" element={<Navigate to="/auth/login" replace />} />
         <Route path="/auth/select" element={<RoleSelectPage mode="login" />} />
         <Route path="/auth/select/signup" element={<RoleSelectPage mode="signup" />} />
 
         {/* 현장 관리자 */}
         <Route path="/auth/login" element={<LoginPage />} />
-        <Route path="/auth/signup" element={<Navigate to="/auth/select/signup" replace />} />
+        <Route path="/auth/signup" element={<SignupPage />} />
         <Route path="/site-invitation" element={<SiteInvitationPage />} />
         <Route path="/auth/site/invitation" element={<SiteInvitationPage />} />
         <Route path="/manager" element={<Protected><DashboardPage /></Protected>} />

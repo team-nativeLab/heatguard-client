@@ -5,7 +5,7 @@ import { CheckboxCheckIcon } from "../../components/icons/Icons";
 import { settingsApi, isDemoFallback, errorMessage } from "../../api";
 import { useToast } from "../../shared/ui/Toast";
 
-const TIME_SLOTS = ["07:00", "09:00", "11:00", "13:00", "15:00", "17:00"];
+const TIME_SLOTS = Array.from({ length: 11 }, (_, index) => `${String(index + 7).padStart(2, "0")}:00`);
 
 export default function SiteSettingsPage() {
   const { showToast } = useToast();
@@ -19,7 +19,7 @@ export default function SiteSettingsPage() {
       if (alive) setChecked(Object.fromEntries(times.times.map((time) => [time, true])));
     }).catch((err) => {
       if (!alive) return;
-      if (isDemoFallback(err)) setChecked({ "07:00": true, "09:00": true });
+      if (isDemoFallback(err)) setChecked({ "07:00": true, "08:00": true });
       else showToast(errorMessage(err, "체크 시간을 불러오지 못했어요."), "error");
     }).finally(() => {
       if (alive) setLoading(false);

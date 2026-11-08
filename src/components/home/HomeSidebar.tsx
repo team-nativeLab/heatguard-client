@@ -134,6 +134,10 @@ export default function HomeSidebar() {
             <p className="leading-4 text-[var(--color-text-body)] text-xs">{me.user.name} 님</p>
             <p className="leading-[16.5px] text-[var(--color-text-faint)] text-[11px] pt-px truncate">{me.site.name}</p>
           </div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="size-4 shrink-0 text-[var(--color-text-faint)]">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.7 2.94-.08-.03a1.7 1.7 0 0 0-1.78.25l-.07.05h-3.4l-.02-.09a1.7 1.7 0 0 0-1.24-1.3l-.09-.02-1.7-2.94.06-.06A1.7 1.7 0 0 0 10 14l-.02-.09V10.5l.09-.02a1.7 1.7 0 0 0 1.3-1.24l.02-.09 2.94-1.7.06.06a1.7 1.7 0 0 0 1.88.34l.06-.03 2.94 1.7-.03.08a1.7 1.7 0 0 0 .25 1.78l.05.07v3.4l-.09.02A1.7 1.7 0 0 0 19.4 15Z" transform="translate(-2 -1) scale(1.15)" />
+          </svg>
         </Link>
 
       </div>

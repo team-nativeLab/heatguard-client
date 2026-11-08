@@ -540,9 +540,33 @@ export default function HomeDashboard() {
         </div>
       </section>
 
-      <section className="pt-8 pb-2">
-        <h2 className="text-sm font-medium leading-5 text-[var(--color-text-label)]">기록 조회</h2>
-        <div className="flex items-center gap-3 pt-4 flex-wrap">
+      <div className="flex items-center justify-between pt-5">
+        <h2 className="text-sm font-medium leading-5 text-[var(--color-text-label)]">
+          {queriedRecords
+            ? `${toDisplayDate(from)}${isRange ? ` ~ ${toDisplayDate(to)}` : ""} 기록`
+            : "오늘의 기록"}
+          <span className="ml-2 text-xs text-[var(--color-text-faint)]">{rows.length}건</span>
+        </h2>
+        <label className="relative flex items-center h-6 rounded border border-[var(--home-btn-border)] text-[10px] text-[var(--color-text-body)]">
+          <select
+            value={teamFilter}
+            onChange={(e) => setTeamFilter(e.target.value)}
+            aria-label="팀 필터"
+            className="appearance-none bg-[var(--home-main-bg)] h-full pl-2.5 pr-6 outline-none cursor-pointer rounded"
+            style={{ WebkitAppearance: "none", MozAppearance: "none" }}
+          >
+            <option value="all">전체 팀</option>
+            {teamOptions.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+          <ChevronDownIcon className="absolute right-2 size-[11px] pointer-events-none" />
+        </label>
+      </div>
+
+      <div className="flex items-center gap-3 pt-3 flex-wrap">
           <div className="flex items-center h-[37px] rounded-[14px] bg-[var(--home-date-pill-bg)] border border-[var(--home-card-border)] pl-5 pr-4">
             <CalendarIcon className="size-[15px] text-[var(--color-text-body)]" />
             <span className="ml-[9px]">
@@ -551,7 +575,7 @@ export default function HomeDashboard() {
             <span className="mx-3 sm:mx-[26px] text-sm text-[var(--home-date-sub)]">~</span>
             <DateField value={to} onChange={setTo} label="조회 종료일" />
           </div>
-          <div className="flex items-center gap-3 sm:ml-auto sm:mr-9">
+          <div className="ml-auto flex items-center gap-3">
             <button
               type="button"
               onClick={runQuery}
@@ -577,33 +601,6 @@ export default function HomeDashboard() {
               인쇄
             </button>
           </div>
-        </div>
-      </section>
-
-      <div className="flex items-center justify-between pt-5">
-        <h2 className="text-sm font-medium leading-5 text-[var(--color-text-label)]">
-          {queriedRecords
-            ? `${toDisplayDate(from)}${isRange ? ` ~ ${toDisplayDate(to)}` : ""} 기록`
-            : "오늘의 기록"}
-          <span className="ml-2 text-xs text-[var(--color-text-faint)]">{rows.length}건</span>
-        </h2>
-        <label className="relative flex items-center h-6 rounded border border-[var(--home-btn-border)] text-[10px] text-[var(--color-text-body)]">
-          <select
-            value={teamFilter}
-            onChange={(e) => setTeamFilter(e.target.value)}
-            aria-label="팀 필터"
-            className="appearance-none bg-[var(--home-main-bg)] h-full pl-2.5 pr-6 outline-none cursor-pointer rounded"
-            style={{ WebkitAppearance: "none", MozAppearance: "none" }}
-          >
-            <option value="all">전체 팀</option>
-            {teamOptions.map((name) => (
-              <option key={name} value={name}>
-                {name}
-              </option>
-            ))}
-          </select>
-          <ChevronDownIcon className="absolute right-2 size-[11px] pointer-events-none" />
-        </label>
       </div>
 
       <div className="mt-3 bg-[var(--home-table-bg)] border border-[var(--home-card-border)] rounded-lg overflow-x-auto">

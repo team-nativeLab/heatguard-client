@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import AuthCardLayout from "../components/auth/AuthCardLayout";
-import { ArrowRightIcon, BarChartIcon, FileTextIcon } from "../components/auth/AuthIcons";
+import { ArrowRightIcon, BarChartIcon, FileTextIcon, MapPinIcon } from "../components/auth/AuthIcons";
 
 const FEATURES = [
   {
@@ -37,12 +37,12 @@ const COPY = {
   signup: {
     side: "signup" as const,
     eyebrow: "관리자 회원가입",
-    titleLines: ["본사 계정부터", "가입해 주세요"],
-    heading: "본사 관리자부터 가입하세요",
-    sub: "가입 후 현장과 현장관리자 계정을 함께 만들 수 있어요.",
+    titleLines: ["본사와 현장", "관리자 모두 가입할 수 있어요"],
+    heading: "가입 유형을 선택하세요",
+    sub: "본사 관리자 또는 현장 관리자 계정으로 가입할 수 있어요.",
     cta: "가입하기",
-    hq: { to: "/hq/signup", desc: ["관리자 발급 코드로", "가입해요"] },
-    site: { to: "/auth/signup", desc: ["담당 현장 정보로", "가입해요"] },
+    hq: { to: "/hq/signup", desc: ["회사를 등록하고", "현장과 관리자를 관리해요"] },
+    site: { to: "/auth/signup", desc: ["회사와 현장 정보를 입력해", "현장 관리자 계정을 만들어요"] },
     footerText: "이미 계정이 있으신가요?",
     footerLink: "로그인",
     footerTo: "/auth/select",
@@ -126,9 +126,16 @@ export default function RoleSelectPage({ mode }: { mode: Mode }) {
         <p className="text-sm leading-[1.4] text-[var(--auth-text-muted)]">{c.sub}</p>
       </div>
 
-      <div className="mx-auto mt-7 w-full max-w-[310px]">
-        <RoleCard to={c.hq.to} from={mode} tone="blue" icon={<BarChartIcon size={24} />} title={mode === "login" ? "관리자 로그인" : "본사 관리자"} desc={c.hq.desc} cta={c.cta} />
-      </div>
+      {mode === "signup" ? (
+        <div className="mt-7 grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
+          <RoleCard to={c.site.to} from={mode} tone="orange" icon={<MapPinIcon size={24} />} title="현장 관리자" desc={c.site.desc} cta={c.cta} />
+          <RoleCard to={c.hq.to} from={mode} tone="blue" icon={<BarChartIcon size={24} />} title="본사 관리자" desc={c.hq.desc} cta={c.cta} />
+        </div>
+      ) : (
+        <div className="mx-auto mt-7 w-full max-w-[310px]">
+          <RoleCard to={c.hq.to} from={mode} tone="blue" icon={<BarChartIcon size={24} />} title="관리자 로그인" desc={c.hq.desc} cta={c.cta} />
+        </div>
+      )}
 
       <p className="mt-7 flex justify-center gap-3 text-sm leading-[1.4]">
         <span className="text-[var(--auth-text-muted)]">{c.footerText}</span>
