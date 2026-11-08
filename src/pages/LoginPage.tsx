@@ -102,6 +102,7 @@ export default function LoginPage() {
       footerLabel="폭염가드 관리자 포털"
       cardTitle="폭염가드"
       cardSubtitle="관리자 계정으로 로그인해주세요."
+      hideBackButton
     >
       <form className="mt-14 flex flex-col gap-1" onSubmit={handleSubmit} noValidate>
         <AuthField

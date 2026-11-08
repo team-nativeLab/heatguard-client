@@ -68,7 +68,7 @@ function RoleCard({
 }) {
   return (
     <div
-      className="flex flex-col rounded-2xl border px-[18px] pb-[18px] pt-[22px]"
+      className="flex h-full flex-col rounded-2xl border px-[18px] pb-[18px] pt-[22px]"
       style={{ background: "var(--auth-secondary-bg)", borderColor: "var(--auth-input-border)" }}
     >
       <div
@@ -89,15 +89,17 @@ function RoleCard({
         ))}
       </p>
       {/* 호버 효과는 버튼에만 — 카드는 고정 */}
-      <Link
-        to={to}
-        state={{ authFrom: from }}
-        className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-[10px] bg-[var(--auth-accent)] py-[11px] text-sm font-medium leading-[1.4] text-white transition hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:brightness-95"
-        style={{ boxShadow: "var(--auth-btn-shadow)" }}
-      >
+      <div className="mt-auto pt-6">
+        <Link
+          to={to}
+          state={{ authFrom: from }}
+          className="flex w-full items-center justify-center gap-1.5 rounded-[10px] bg-[var(--auth-accent)] py-[11px] text-sm font-medium leading-[1.4] text-white transition hover:-translate-y-0.5 hover:brightness-110 active:translate-y-0 active:brightness-95"
+          style={{ boxShadow: "var(--auth-btn-shadow)" }}
+        >
         {cta}
-        <ArrowRightIcon size={14} />
-      </Link>
+          <ArrowRightIcon size={14} />
+        </Link>
+      </div>
     </div>
   );
 }
