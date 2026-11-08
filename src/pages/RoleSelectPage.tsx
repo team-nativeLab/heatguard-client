@@ -37,11 +37,12 @@ const COPY = {
   signup: {
     side: "signup" as const,
     eyebrow: "관리자 회원가입",
-    titleLines: ["본사에서 현장관리자를", "초대해 가입합니다"],
-    heading: "본사 계정부터 가입하세요",
-    sub: "현장관리자는 본사에서 받은 초대 링크로 가입해요.",
+    titleLines: ["원하는 관리자 계정으로", "가입하세요"],
+    heading: "어떤 계정으로 가입할까요?",
+    sub: "가입할 계정 유형을 선택해주세요.",
     cta: "가입하기",
     hq: { to: "/hq/signup", desc: ["회사를 등록하고", "현장과 관리자를 관리해요"] },
+    site: { to: "/auth/signup", desc: ["회사와 현장 정보를 입력해", "현장 관리자 계정을 만들어요"] },
     footerText: "이미 계정이 있으신가요?",
     footerLink: "로그인",
     footerTo: "/auth/select",
@@ -128,9 +129,9 @@ export default function RoleSelectPage({ mode }: { mode: Mode }) {
       </div>
 
       {mode === "signup" ? (
-        <div className="mx-auto mt-7 w-full max-w-[310px]">
+        <div className="mt-7 grid grid-cols-1 gap-3 min-[420px]:grid-cols-2">
+          <RoleCard to={c.site.to} from={mode} tone="orange" icon={<FileTextIcon size={24} />} title="현장 관리자" desc={c.site.desc} cta={c.cta} />
           <RoleCard to={c.hq.to} from={mode} tone="blue" icon={<BarChartIcon size={24} />} title="본사 관리자" desc={c.hq.desc} cta={c.cta} />
-          <p className="mt-4 text-center text-xs text-[var(--auth-text-muted)]">현장관리자는 본사 초대 링크로만 가입할 수 있어요.</p>
         </div>
       ) : (
         <div className="mx-auto mt-7 w-full max-w-[310px]">
