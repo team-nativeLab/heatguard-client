@@ -106,7 +106,7 @@ export default function SiteInvitationPage() {
           <NewPasswordAuthField
             label="비밀번호"
             icon={<AnimatedLockIcon open={!!password} />}
-            placeholder="10자 이상 입력하세요"
+            placeholder="8자 이상 입력하세요"
             minimumLength={SIGNUP_PASSWORD_MIN_LENGTH}
             policyHint={SIGNUP_PASSWORD_POLICY_HINT}
             value={password}

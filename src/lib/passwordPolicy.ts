@@ -1,9 +1,9 @@
 export const PASSWORD_MIN_LENGTH = 8;
 export const PASSWORD_POLICY_HINT =
   "영문·숫자·특수문자로 8자 이상 입력해 주세요. 한글과 공백은 사용할 수 없어요.";
-export const SIGNUP_PASSWORD_MIN_LENGTH = 10;
+export const SIGNUP_PASSWORD_MIN_LENGTH = PASSWORD_MIN_LENGTH;
 export const SIGNUP_PASSWORD_POLICY_HINT =
-  "영문·숫자·특수문자로 10자 이상 입력해 주세요. 한글과 공백은 사용할 수 없어요.";
+  "영문·숫자·특수문자로 8자 이상 입력해 주세요. 한글과 공백은 사용할 수 없어요.";
 
 export function getPasswordCharacterError(password: string): string | undefined {
   if (/[^!-~]/.test(password)) {
