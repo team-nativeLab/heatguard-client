@@ -4,7 +4,6 @@ import { ApiError, errorMessage } from "../api/client";
 
 const EMPTY = { email: "", expiresAt: 0, resendAt: 0 };
 const RESEND_INTERVAL_MS = 60_000;
-const CODE_VALIDITY_MS = 600_000;
 const NO_PROOF = { email: "", token: "", expiresAt: 0 };
 
 export function useEmailVerification(email: string) {
@@ -56,10 +55,11 @@ export function useEmailVerification(email: string) {
     setProof(NO_PROOF);
     setError("");
     try {
-      await sendEmailCode(address);
+      const expiresAtValue = await sendEmailCode(address);
       if (id !== requestId.current) return;
       const time = Date.now();
-      const expiresAt = time + CODE_VALIDITY_MS;
+      const expiresAt = Date.parse(expiresAtValue);
+      if (!Number.isFinite(expiresAt) || expiresAt <= time) throw new Error("Invalid email-code expiry");
       setChallenge({ email: address, expiresAt, resendAt: time + RESEND_INTERVAL_MS });
       setCode("");
       setNow(time);
