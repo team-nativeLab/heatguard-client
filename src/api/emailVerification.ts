@@ -32,16 +32,19 @@ async function requestEmailCode(url: string, body: { email: string; verification
     throw new ApiError(response.status, message, code);
   }
   if (response.status !== expectedStatus) throw new Error("Unexpected email verification status");
-  if (expectedStatus === 202) return undefined;
   if (!isRecord(result) || result.success !== true || !("data" in result)) {
     throw new Error("Invalid email verification response");
   }
-  return result.data;
+  const data = result.data;
+  if (expectedStatus === 202 && (!isRecord(data) || typeof data.expiresAt !== "string")) throw new Error("Invalid email-code response");
+  return data;
 }
 
 /** 202는 발송 접수이며 인증 완료는 verify 응답으로 확인한다. */
-export async function sendEmailCode(email: string): Promise<void> {
-  await requestEmailCode(EMAIL_CODE_URL, { email }, 202);
+export async function sendEmailCode(email: string): Promise<string> {
+  const result = await requestEmailCode(EMAIL_CODE_URL, { email }, 202);
+  if (!isRecord(result) || typeof result.expiresAt !== "string") throw new Error("Invalid email-code response");
+  return result.expiresAt;
 }
 
 export function verifyEmailCode(email: string, verificationCode: string) {
