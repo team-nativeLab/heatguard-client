@@ -4,6 +4,8 @@ import type {
   UpdateProfilePayload,
   LoginPayload,
   SiteLoginResponse,
+  SiteRegisterPayload,
+  SiteRegisterResponse,
   SiteUser,
 } from "./types";
 
