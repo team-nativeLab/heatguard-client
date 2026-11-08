@@ -65,7 +65,7 @@ export default function AuthField({
             type="button"
             onClick={() => setRevealed((v) => !v)}
             aria-label={revealed ? "비밀번호 숨기기" : "비밀번호 보기"}
-            className="flex shrink-0 items-center text-[var(--auth-text-muted)] transition-colors hover:text-[var(--auth-text-strong)]"
+            className="flex size-9 shrink-0 items-center justify-center rounded-md text-[var(--auth-text-muted)] transition-colors hover:bg-[var(--auth-secondary-bg)] hover:text-[var(--auth-text-strong)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--auth-accent)]"
           >
             {revealed ? <EyeIcon /> : <EyeOffIcon />}
           </button>
