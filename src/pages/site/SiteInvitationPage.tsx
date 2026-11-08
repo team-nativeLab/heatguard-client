@@ -24,6 +24,8 @@ export default function SiteInvitationPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [accepting, setAccepting] = useState(false);
   const [accepted, setAccepted] = useState(false);
   const composition = usePasswordComposition();
@@ -32,12 +34,14 @@ export default function SiteInvitationPage() {
     event.preventDefault();
     if (accepting || composition.isComposing()) return;
     if (!invitationId) return setError("초대 링크가 올바르지 않아요. 본사 관리자에게 새 링크를 요청해주세요.");
-    if (!EMAIL_RE.test(email.trim())) return setError("이메일 주소를 확인해주세요.");
+    if (!EMAIL_RE.test(email.trim())) { setEmailError("이메일 주소를 확인해주세요."); return; }
     const passwordError = getPasswordError(password, SIGNUP_PASSWORD_MIN_LENGTH) || getPasswordConfirmationError(password, confirmPassword);
     if (passwordError) return setError(passwordError);
 
     setAccepting(true);
     setError("");
+    setEmailError("");
+    setPasswordError("");
     try {
       await authApi.acceptSiteInvitation({ invitationId, email: email.trim(), password, confirmPassword });
       setAccepted(true);
@@ -56,9 +60,12 @@ export default function SiteInvitationPage() {
       if (err instanceof ApiError && err.status === 404) {
         setError("초대가 만료되었거나 이미 사용됐어요. 본사 관리자에게 새 링크를 요청해주세요.");
       } else if (err instanceof ApiError && err.status === 401) {
-        setError("이미 같은 회사의 현장 관리자 계정이 있다면 현재 비밀번호를 입력해주세요.");
+        setPasswordError("비밀번호를 확인해주세요.");
+        setError("같은 회사의 기존 현장 관리자 계정이면 현재 비밀번호를 입력해주세요.");
+      } else if (err instanceof ApiError && err.status === 409 && err.code === "EMAIL_ALREADY_EXISTS") {
+        setEmailError("이미 사용 중인 이메일이에요.");
       } else if (err instanceof ApiError && err.status === 409) {
-        setError("이 현장에 관리자가 이미 연결됐거나 이 이메일을 현장 관리자 계정으로 사용할 수 없어요. 본사 관리자에게 확인해주세요.");
+        setError("이 현장에 관리자가 이미 연결됐어요. 본사 관리자에게 확인해주세요.");
       } else {
         setError(errorMessage(err, "초대를 수락하지 못했어요."));
       }
@@ -95,7 +102,7 @@ export default function SiteInvitationPage() {
         <>
         <p className="mt-6 text-xs leading-5 text-[var(--auth-text-muted)]">같은 회사의 현장 관리자 계정이 이미 있다면 그 계정의 이메일과 현재 비밀번호를 입력해주세요. 새 계정은 여기서 비밀번호를 설정합니다.</p>
         <form className="mt-3 flex flex-col gap-1" onSubmit={submit} noValidate>
-          <AuthField label="이메일" type="email" icon={<MailIcon />} placeholder="manager@example.com" autoComplete="username" value={email} onChange={(e) => { setEmail(e.target.value); setError(""); }} />
+          <AuthField label="이메일" type="email" icon={<MailIcon />} placeholder="manager@example.com" autoComplete="username" value={email} error={emailError} onChange={(e) => { setEmail(e.target.value); setError(""); setEmailError(""); }} />
           <NewPasswordAuthField
             label="비밀번호"
             icon={<AnimatedLockIcon open={!!password} />}
@@ -103,7 +110,8 @@ export default function SiteInvitationPage() {
             minimumLength={SIGNUP_PASSWORD_MIN_LENGTH}
             policyHint={SIGNUP_PASSWORD_POLICY_HINT}
             value={password}
-            onChange={(e) => { setPassword(e.target.value); setError(""); }}
+            error={passwordError}
+            onChange={(e) => { setPassword(e.target.value); setError(""); setPasswordError(""); }}
             {...composition.inputProps}
           />
           <NewPasswordAuthField
