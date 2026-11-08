@@ -29,6 +29,8 @@ interface AuthCardLayoutProps {
   cardSubtitle?: string;
   /** true면 카드 상단의 로고·제목 헤더를 그리지 않는다(소속 선택 화면처럼 children이 제목까지 직접 그릴 때) */
   hideCardHeader?: boolean;
+  /** 로그인 화면에서는 역할 선택 단계가 없으므로 뒤로가기를 숨긴다. */
+  hideBackButton?: boolean;
   /** 카드 안 테마 버튼 위치 (기본 오른쪽) */
   themeButtonSide?: "left" | "right";
   children: ReactNode;
@@ -64,6 +66,7 @@ export default function AuthCardLayout({
   cardTitle,
   cardSubtitle,
   hideCardHeader = false,
+  hideBackButton = false,
   themeButtonSide = "right",
   children,
 }: AuthCardLayoutProps) {
@@ -163,7 +166,7 @@ export default function AuthCardLayout({
         >
           <AuthThemeButton className={`absolute top-7 ${themeButtonSide === "left" ? "left-7" : "right-7"}`} />
           {/* 소속 선택 화면으로 돌아가는 뒤로가기 (소속 선택 화면 자신에는 표시하지 않는다) */}
-          {!hideCardHeader && themeButtonSide === "right" && (
+          {!hideCardHeader && !hideBackButton && themeButtonSide === "right" && (
             <Link
               to={side === "signup" ? "/auth/select/signup" : "/auth/select"}
               state={{ authFrom: side }}

@@ -52,7 +52,7 @@ export default function App() {
       <Routes>
         {/* 첫 화면: 스플래시 → 소속 선택. 이후 각 로그인/회원가입은 스플래시 없이 이동 */}
         <Route path="/" element={<Navigate to="/auth/login" replace />} />
-        <Route path="/auth/select" element={<RoleSelectPage mode="login" />} />
+        <Route path="/auth/select" element={<Navigate to="/auth/login" replace />} />
         <Route path="/auth/select/signup" element={<RoleSelectPage mode="signup" />} />
 
         {/* 현장 관리자 */}
@@ -82,7 +82,7 @@ export default function App() {
         <Route path="/hq/account" element={<ProtectedHq><ScreenHQAccount /></ProtectedHq>} />
         <Route path="/hq/contact" element={<ProtectedHq><ScreenHQContact /></ProtectedHq>} />
 
-        <Route path="*" element={<Navigate to="/auth/select" replace />} />
+        <Route path="*" element={<Navigate to="/auth/login" replace />} />
       </Routes>
     </>
   );
