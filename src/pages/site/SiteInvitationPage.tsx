@@ -32,13 +32,11 @@ export default function SiteInvitationPage() {
     event.preventDefault();
     if (accepting || composition.isComposing()) return;
     if (!invitationId) return setError("초대 링크가 올바르지 않아요. 본사 관리자에게 새 링크를 요청해주세요.");
-    if (!EMAIL_RE.test(email.trim())) { setEmailError("이메일 주소를 확인해주세요."); return; }
+    if (!EMAIL_RE.test(email.trim())) { setError("이메일 주소를 확인해주세요."); return; }
     const passwordError = getPasswordError(password, SIGNUP_PASSWORD_MIN_LENGTH) || getPasswordConfirmationError(password, confirmPassword);
     if (passwordError) return setError(passwordError);
     setAccepting(true);
     setError("");
-    setEmailError("");
-    setPasswordError("");
     try {
       await authApi.acceptSiteInvitation({ invitationId, email: email.trim(), password, confirmPassword });
       setAccepted(true);
@@ -59,7 +57,7 @@ export default function SiteInvitationPage() {
       } else if (err instanceof ApiError && err.status === 401) {
         setError("현재 계정 비밀번호를 확인해주세요.");
       } else if (err instanceof ApiError && err.status === 409 && err.code === "EMAIL_ALREADY_EXISTS") {
-        setEmailError("이미 사용 중인 이메일이에요.");
+        setError("이미 사용 중인 이메일이에요.");
       } else if (err instanceof ApiError && err.status === 409) {
         setError("이 현장에 관리자가 이미 연결됐어요. 본사 관리자에게 확인해주세요.");
       } else {
@@ -77,7 +75,7 @@ export default function SiteInvitationPage() {
       side="signup"
       eyebrow="현장 관리자 초대"
       titleLines={["초대받은 현장에", "연결합니다"]}
-      descriptionLines={["가입한한 이메일과 비밀번호를 입력하면", "현장 관리자 계정에 현장이 연결됩니다."]}
+      descriptionLines={["가입한 이메일과 비밀번호를 입력하면", "현장 관리자 계정에 현장이 연결됩니다."]}
       features={[]}
       step={2}
       footerLabel="폭염가드 관리자 포털"
@@ -106,7 +104,6 @@ export default function SiteInvitationPage() {
             minimumLength={SIGNUP_PASSWORD_MIN_LENGTH}
             policyHint={SIGNUP_PASSWORD_POLICY_HINT}
             value={password}
-            
             onChange={(e) => { setPassword(e.target.value); setError(""); }}
             {...composition.inputProps}
           />
