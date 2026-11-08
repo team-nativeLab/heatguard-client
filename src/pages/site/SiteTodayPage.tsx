@@ -257,7 +257,7 @@ export default function SiteTodayPage() {
           })}
           {teams.length === 0 && (
             <p className="md:col-span-3 text-[var(--color-text-faint)] text-sm py-6">
-              등록된 팀이 없어요. ‘현장’ 탭에서 팀을 추가해주세요.
+              등록된 팀이 없어요. ‘현장 관리’ 탭에서 팀을 추가해주세요.
             </p>
           )}
         </div>
