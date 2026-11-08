@@ -8,7 +8,7 @@ import AuthSubmitButton from "../../components/auth/AuthSubmitButton";
 import { hqApi, ApiError, errorMessage } from "../../api";
 import { useToast } from "../../shared/ui/Toast";
 import { AnimatedLockIcon, BuildingIcon, MailIcon, MapPinIcon, UserIcon, UsersIcon } from "../../components/auth/AuthIcons";
-import { getPasswordConfirmationError, getPasswordError } from "../../lib/passwordPolicy";
+import { getPasswordConfirmationError, getPasswordError, SIGNUP_PASSWORD_MIN_LENGTH, SIGNUP_PASSWORD_POLICY_HINT } from "../../lib/passwordPolicy";
 import { NewPasswordAuthField } from "../../components/auth/NewPasswordField";
 import { usePasswordComposition } from "../../components/auth/usePasswordComposition";
 
@@ -44,7 +44,7 @@ function validate(v: Values): Partial<Record<keyof Values, string>> {
   if (!v.manager.trim()) errors.manager = REQUIRED;
   if (!v.email.trim()) errors.email = REQUIRED;
   else if (!EMAIL_RE.test(v.email.trim())) errors.email = "이메일 형식을 확인해주세요";
-  const passwordError = getPasswordError(v.password);
+  const passwordError = getPasswordError(v.password, SIGNUP_PASSWORD_MIN_LENGTH);
   const confirmationError = getPasswordConfirmationError(v.password, v.confirm);
   if (passwordError) errors.password = passwordError;
   if (confirmationError) errors.confirm = confirmationError;
@@ -194,6 +194,8 @@ export default function ScreenHQSignup({ validation = false }: { validation?: bo
                 label="비밀번호"
                 icon={<AnimatedLockIcon key={`password-${shakeKey}`} open={focusedPassword === "password"} shake={!!errors.password} />}
                 placeholder="10자 이상 입력하세요"
+                minimumLength={SIGNUP_PASSWORD_MIN_LENGTH}
+                policyHint={SIGNUP_PASSWORD_POLICY_HINT}
                 revealable
                 value={values.password}
                 onChange={set("password")}

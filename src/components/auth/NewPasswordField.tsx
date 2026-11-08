@@ -14,18 +14,22 @@ function getDraftError(password: string, confirmation: boolean, minimumLength?: 
 type NewPasswordAuthFieldProps = Omit<ComponentProps<typeof AuthField>, "type" | "autoComplete" | "value"> & {
   value: string;
   confirmation?: boolean;
+  minimumLength?: number;
+  policyHint?: string;
 };
 
 export function NewPasswordAuthField({
   value,
   confirmation = false,
   error,
+  minimumLength,
+  policyHint = PASSWORD_POLICY_HINT,
   id,
   ...fieldProps
 }: NewPasswordAuthFieldProps) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
-  const draftError = getDraftError(value, confirmation) ?? error;
+  const draftError = getDraftError(value, confirmation, minimumLength) ?? error;
   const describedBy = [
     draftError ? `${inputId}-error` : "",
     !confirmation ? `${inputId}-policy` : "",
@@ -46,7 +50,7 @@ export function NewPasswordAuthField({
       />
       {!confirmation && (
         <p id={`${inputId}-policy`} className="mb-4 -mt-2 text-xs leading-5 text-[var(--auth-text-muted)]">
-          {PASSWORD_POLICY_HINT}
+          {policyHint}
         </p>
       )}
     </div>
@@ -72,7 +76,7 @@ export function NewPasswordInput({
 }: NewPasswordInputProps) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
-  const draftError = getDraftError(value, confirmation) ?? error;
+  const draftError = getDraftError(value, confirmation, minimumLength) ?? error;
   const describedBy = [
     draftError ? `${inputId}-error` : "",
     !confirmation ? `${inputId}-policy` : "",
