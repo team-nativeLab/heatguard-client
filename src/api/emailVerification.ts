@@ -1,6 +1,6 @@
-import { ApiError, NetworkError } from "./client";
+import { API_BASE_URL, ApiError, NetworkError } from "./client";
 
-const EMAIL_CODE_URL = "https://d2f845gr2v9cs2.cloudfront.net/api/v1/auth/team/email-codes";
+const EMAIL_CODE_URL = `${API_BASE_URL}/api/v1/auth/email-codes`;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
