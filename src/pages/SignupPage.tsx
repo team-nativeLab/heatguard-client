@@ -5,10 +5,10 @@ import { Link, useNavigate } from "react-router-dom";
 import AuthCardLayout from "../components/auth/AuthCardLayout";
 import AuthField from "../components/auth/AuthField";
 import AuthSubmitButton from "../components/auth/AuthSubmitButton";
-import { AnimatedLockIcon, BuildingIcon, MailIcon, MapPinIcon, UserIcon, UsersIcon } from "../components/auth/AuthIcons";
+import { AnimatedLockIcon, MailIcon, UserIcon, UsersIcon, MapPinIcon } from "../components/auth/AuthIcons";
 import { useToast } from "../shared/ui/Toast";
 import { authApi, ApiError, errorMessage } from "../api";
-import { getPasswordConfirmationError, getPasswordError, SIGNUP_PASSWORD_MIN_LENGTH, SIGNUP_PASSWORD_POLICY_HINT } from "../lib/passwordPolicy";
+import { getPasswordConfirmationError, getPasswordError } from "../lib/passwordPolicy";
 import { NewPasswordAuthField } from "../components/auth/NewPasswordField";
 import { usePasswordComposition } from "../components/auth/usePasswordComposition";
 
@@ -19,21 +19,19 @@ const FEATURES = [
   {
     icon: <UsersIcon />,
     tone: "blue" as const,
-    title: "작업자 계정 추가",
-    description: "현장 작업자를 팀에 초대하세요",
+    title: "현장 관리자 계정",
+    description: "이메일 인증 후 미소속 계정으로 가입해요",
   },
   {
     icon: <MapPinIcon />,
     tone: "orange" as const,
-    title: "소속 현장 관리",
-    description: "현장별 기록과 알림을 관리하세요",
+    title: "나중에 현장 연결",
+    description: "본사 초대를 수락해 현장에 연결해요",
   },
 ];
 
 interface Values {
-  companyName: string;
   managerName: string;
-  siteName: string;
   email: string;
   password: string;
   passwordConfirm: string;
@@ -42,19 +40,17 @@ type Errors = Partial<Record<keyof Values, string>>;
 
 function validate(v: Values): Errors {
   const errors: Errors = {};
-  if (!v.companyName.trim()) errors.companyName = REQUIRED;
   if (!v.managerName.trim()) errors.managerName = REQUIRED;
-  if (!v.siteName.trim()) errors.siteName = REQUIRED;
   if (!v.email.trim()) errors.email = REQUIRED;
   else if (!EMAIL_RE.test(v.email.trim())) errors.email = "이메일 형식을 확인해주세요";
-  const passwordError = getPasswordError(v.password, SIGNUP_PASSWORD_MIN_LENGTH);
+  const passwordError = getPasswordError(v.password);
   const confirmationError = getPasswordConfirmationError(v.password, v.passwordConfirm);
   if (passwordError) errors.password = passwordError;
   if (confirmationError) errors.passwordConfirm = confirmationError;
   return errors;
 }
 
-const STEP1_KEYS: (keyof Values)[] = ["companyName", "managerName", "siteName"];
+const STEP1_KEYS: (keyof Values)[] = ["managerName"];
 const PASSWORD_KEYS: (keyof Values)[] = ["password", "passwordConfirm"];
 
 function pick(errors: Errors, keys: (keyof Values)[]): Errors {
@@ -71,9 +67,7 @@ export default function SignupPage() {
   const { showToast } = useToast();
 
   const [values, setValues] = useState<Values>({
-    companyName: "",
     managerName: "",
-    siteName: "",
     email: "",
     password: "",
     passwordConfirm: "",
@@ -147,10 +141,8 @@ export default function SignupPage() {
 
     setSubmitting(true);
     try {
-      await authApi.register({
-        companyName: values.companyName.trim(),
+      await authApi.registerUnassigned({
         managerName: values.managerName.trim(),
-        siteName: values.siteName.trim(),
         email: values.email.trim(),
         password: values.password,
         confirmPassword: values.passwordConfirm,
@@ -159,11 +151,7 @@ export default function SignupPage() {
       showToast("가입이 완료됐어요. 로그인해주세요.", "success");
       navigate("/auth/login", { state: { authFrom: "signup" } });
     } catch (err) {
-      if (err instanceof ApiError && err.code === "SILO_COMPANY_MISMATCH") {
-        // 서버에 등록된(활성) 회사명과 입력한 회사명이 다름
-        setErrors({ companyName: "회사명을 확인해주세요" });
-        setStep(1);
-      } else if (err instanceof ApiError && (err.code === "EMAIL_ALREADY_EXISTS" || (err.status === 409 && !err.code))) {
+      if (err instanceof ApiError && (err.code === "EMAIL_ALREADY_EXISTS" || (err.status === 409 && !err.code))) {
         setErrors({ email: "이미 가입된 이메일이에요" });
         setStep(2);
       } else if (err instanceof ApiError && (err.code === "INVALID_VERIFICATION_CODE" || err.code === "INVALID_VERIFICATION_TOKEN")) {
@@ -182,23 +170,19 @@ export default function SignupPage() {
     <AuthCardLayout
       side="signup"
       eyebrow="관리자 회원가입"
-      titleLines={["가입 즉시", "현장 관리자가 됩니다"]}
-      descriptionLines={["현장관리자 계정 생성 후, 작업자 계정을 추가하고", "소속 현장을 관리할 수 있습니다."]}
+      titleLines={["이메일 인증 후", "현장 관리자 계정을 만드세요"]}
+      descriptionLines={["먼저 미소속 계정을 만들고", "본사 초대를 받아 현장에 연결합니다."]}
       features={FEATURES}
       step={2}
       footerLabel="폭염가드 관리자 포털"
       cardTitle="관리자 회원가입"
-      cardSubtitle={step === 1 ? "가입 시 관리자 계정이 생성됩니다." : step === 2 ? "이메일 인증을 완료해주세요." : "로그인에 사용할 비밀번호를 설정해주세요."}
+      cardSubtitle={step === 1 ? "이름을 입력해 계정 가입을 시작합니다." : step === 2 ? "이메일 인증을 완료해주세요." : "로그인에 사용할 비밀번호를 설정해주세요."}
     >
       <form className="mt-[22px] flex flex-col" onSubmit={handleSubmit} noValidate>
         <p className="sr-only" role="status" aria-live="polite">{step === 1 ? "기본 정보 입력" : step === 2 ? "이메일 인증" : "비밀번호 설정"}</p>
         <div ref={stepFields} key={step} className="auth-fade-in flex min-h-[340px] flex-col">
           {step === 1 ? (
-            <>
-              <AuthField size="md" label="회사 이름" icon={<BuildingIcon />} placeholder="탑세이프티컨설팅" autoComplete="organization" {...bind("companyName")} />
-              <AuthField size="md" label="담당자 이름" icon={<UserIcon />} placeholder="홍길동" autoComplete="name" {...bind("managerName")} />
-              <AuthField size="md" label="현장 이름" icon={<MapPinIcon size={18} />} placeholder="울산 석유화학 플랜트 증설" {...bind("siteName")} />
-            </>
+            <AuthField size="md" label="담당자 이름" icon={<UserIcon />} placeholder="홍길동" autoComplete="name" {...bind("managerName")} />
           ) : step === 2 ? (
             <>
               <AuthField size="md" label="이메일" type="email" icon={<MailIcon />} placeholder="manager@example.com" autoComplete="username" {...bind("email")} />
@@ -211,8 +195,6 @@ export default function SignupPage() {
                 label="비밀번호"
                 icon={<AnimatedLockIcon key={`password-${shakeKey}`} open={focusedPassword === "password"} shake={!!errors.password} />}
                 placeholder="8자 이상 입력하세요"
-                minimumLength={SIGNUP_PASSWORD_MIN_LENGTH}
-                policyHint={SIGNUP_PASSWORD_POLICY_HINT}
                 revealable
                 {...bind("password")}
                 onFocus={() => setFocusedPassword("password")}
