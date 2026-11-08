@@ -172,7 +172,7 @@ export default function AuthCardLayout({
               state={{ authFrom: side }}
               aria-label="소속 선택으로 돌아가기"
               title="소속 선택으로 돌아가기"
-              className="group absolute left-7 top-7 flex size-9 items-center justify-center rounded-[10px] border border-[var(--auth-input-border)] bg-[var(--auth-card-bg)] text-[var(--auth-text-body)] transition-colors hover:border-[var(--auth-accent)] hover:text-[var(--auth-accent)]"
+              className="group absolute left-7 top-7 z-20 flex size-9 items-center justify-center rounded-[10px] border border-[var(--auth-input-border)] bg-[var(--auth-card-bg)] text-[var(--auth-text-body)] transition-colors hover:border-[var(--auth-accent)] hover:text-[var(--auth-accent)]"
             >
               <ArrowLeftIcon size={18} className="transition-transform group-hover:-translate-x-0.5" />
             </Link>
