@@ -1,6 +1,6 @@
 export const PASSWORD_MIN_LENGTH = 8;
 export const PASSWORD_POLICY_HINT =
-  "영문·숫자·특수문자로 8자 이상 입력해 주세요. 한글과 공백은 사용할 수 없어요.";
+  "8자 이상 · 한글·공백 제외";
 export const SIGNUP_PASSWORD_MIN_LENGTH = PASSWORD_MIN_LENGTH;
 export const SIGNUP_PASSWORD_POLICY_HINT =
   "영문·숫자·특수문자로 8자 이상 입력해 주세요. 한글과 공백은 사용할 수 없어요.";
