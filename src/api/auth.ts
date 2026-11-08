@@ -13,6 +13,20 @@ export function register(payload: SiteRegisterPayload) {
   return apiFetch<SiteRegisterResponse>("/api/v1/auth/site/register", { method: "POST", body: payload });
 }
 
+export interface UnassignedSiteRegisterPayload {
+  managerName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  verificationToken: string;
+}
+
+export function registerUnassigned(payload: UnassignedSiteRegisterPayload) {
+  return apiFetch<{ userId: string; email: string; name: string; role: "SITE_MANAGER"; companyId: string | null; siteId: string | null; membershipStatus: "UNASSIGNED"; createdAt: string }>(
+    "/api/v1/auth/site/register-unassigned", { method: "POST", body: payload },
+  );
+}
+
 export interface ManagedSite {
   siteId: string;
   siteName: string;
@@ -62,7 +76,6 @@ export function acceptSiteInvitation(payload: {
   email: string;
   password: string;
   confirmPassword: string;
-  verificationToken: string;
 }) {
   return apiFetch<unknown>("/api/v1/auth/site/invitations/accept", { method: "POST", body: payload });
 }
@@ -88,7 +101,7 @@ export function updateProfile(payload: UpdateProfilePayload) {
   return apiFetch<SiteUser>("/api/v1/auth/site/me", { method: "PATCH", body: payload });
 }
 
-export interface AdminLoginResponse { user: { userId: string; name: string; role: "HQ_MANAGER" | "SITE_MANAGER" | string }; siteId?: string; sites?: { siteId: string; siteName: string }[] }
+export interface AdminLoginResponse { user: { userId: string; name: string; role: "HQ_MANAGER" | "SITE_MANAGER" | string; membershipStatus?: "JOINED" | "UNASSIGNED" | string }; siteId?: string | null; sites?: { siteId: string; siteName: string }[]; membershipStatus?: "JOINED" | "UNASSIGNED" | string }
 export function adminLogin(payload: LoginPayload) {
   return apiFetch<AdminLoginResponse>("/api/v1/auth/admin/login", { method: "POST", body: payload });
 }
