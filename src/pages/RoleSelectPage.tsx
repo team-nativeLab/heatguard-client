@@ -42,7 +42,7 @@ const COPY = {
     sub: "가입할 계정 유형을 선택해주세요.",
     cta: "가입하기",
     hq: { to: "/hq/signup", desc: ["회사를 등록하고", "현장과 관리자를 관리해요"] },
-    site: { to: "/auth/signup", desc: ["회사와 현장 정보를 입력해", "현장 관리자 계정을 만들어요"] },
+    site: { to: "/auth/signup", desc: ["이메일 인증 후 미소속 계정으로", "가입하고 현장에 연결해요"] },
     footerText: "이미 계정이 있으신가요?",
     footerLink: "로그인",
     footerTo: "/auth/select",
@@ -137,6 +137,10 @@ export default function RoleSelectPage({ mode }: { mode: Mode }) {
         <div className="mx-auto mt-7 w-full max-w-[310px]">
           <RoleCard to={c.hq.to} from={mode} tone="blue" icon={<BarChartIcon size={24} />} title="관리자 로그인" desc={c.hq.desc} cta={c.cta} />
         </div>
+      )}
+
+      {mode === "signup" && (
+        <p className="mt-4 text-xs leading-5 text-[var(--auth-text-muted)]">현장 관리자는 먼저 미소속 계정을 만들고, 본사 초대를 받으면 기존 계정으로 현장에 연결할 수 있어요.</p>
       )}
 
       <p className="mt-7 flex justify-center gap-3 text-sm leading-[1.4]">
