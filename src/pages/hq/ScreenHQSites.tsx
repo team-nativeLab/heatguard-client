@@ -172,7 +172,7 @@ export default function ScreenHQSites() {
                   <Link to={`/hq/sites/${encodeURIComponent(site.id)}`} className="rounded border border-[var(--color-checkbox-border)] px-3 py-1.5 text-xs text-[var(--color-text-label)]">
                     상세 · 연동 상태
                   </Link>
-                  <button type="button" onClick={() => setDeleting(site)} className="rounded border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-text-body)] transition hover:border-[var(--color-danger-border)] hover:text-[var(--color-danger-text)]">
+                  <button type="button" onClick={() => setDeleting(site)} className="rounded border border-[var(--color-danger-border)] bg-transparent px-3 py-1.5 text-xs text-[var(--color-danger-text)] transition-colors hover:bg-[var(--color-danger-text)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-danger-text)]">
                     삭제
                   </button>
                 </div>
