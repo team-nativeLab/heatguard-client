@@ -62,6 +62,7 @@ export function acceptSiteInvitation(payload: {
   email: string;
   password: string;
   confirmPassword: string;
+  verificationToken: string;
 }) {
   return apiFetch<unknown>("/api/v1/auth/site/invitations/accept", { method: "POST", body: payload });
 }
