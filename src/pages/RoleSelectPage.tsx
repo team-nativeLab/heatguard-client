@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import AuthCardLayout from "../components/auth/AuthCardLayout";
-import { ArrowRightIcon, BarChartIcon, FileTextIcon, MapPinIcon } from "../components/auth/AuthIcons";
+import { ArrowRightIcon, BarChartIcon, FileTextIcon } from "../components/auth/AuthIcons";
 
 const FEATURES = [
   {
