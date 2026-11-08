@@ -171,6 +171,7 @@ export default function ScreenHQSignup({ validation = false }: { validation?: bo
       descriptionLines={["본사 계정 생성 후, 현장관리자 계정을 추가하고", "소속 현장을 등록할 수 있습니다."]}
       features={FEATURES}
       step={2}
+      hideBackButton
       cardTitle="본사 회원가입"
       cardSubtitle={step === 1 ? "가입 시 회사와 본사 계정이 함께 생성됩니다." : step === 2 ? "이메일 인증을 완료해주세요." : "로그인에 사용할 비밀번호를 설정해주세요."}
     >

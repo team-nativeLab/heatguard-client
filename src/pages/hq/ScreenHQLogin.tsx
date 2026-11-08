@@ -88,6 +88,7 @@ export default function ScreenHQLogin() {
       descriptionLines={["소속 현장 전체의 폭염 상황 · 기록 · 긴급호출을", "실시간으로 모니터링합니다."]}
       features={FEATURES.map((f) => ({ ...f }))}
       step={2}
+      hideBackButton
       cardTitle="폭염가드"
       cardSubtitle="본사 계정으로 로그인해주세요."
     >
