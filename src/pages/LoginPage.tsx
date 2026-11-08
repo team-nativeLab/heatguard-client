@@ -75,6 +75,7 @@ export default function LoginPage() {
       setUnlocked(true);
       await new Promise((r) => setTimeout(r, 650));
       if (role === "HQ_MANAGER") enter(redirectTo.startsWith("/hq") ? redirectTo : "/hq/dashboard");
+      else if (session.membershipStatus === "UNASSIGNED" || session.user?.membershipStatus === "UNASSIGNED") enter("/manager/unassigned");
       else {
         const sites = session.sites ?? [];
         if (sites.length > 1) enter("/manager/select-site");

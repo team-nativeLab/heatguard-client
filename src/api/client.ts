@@ -4,6 +4,9 @@ import { configureApiClient } from "../shared/api/client";
 export * from "../shared/api/client";
 
 configureApiClient({ authPaths: [
+    "/api/v1/auth/email-codes",
+    "/api/v1/auth/email-codes/verify",
+    "/api/v1/auth/site/register-unassigned",
     "/api/v1/auth/team/email-codes",
     "/api/v1/auth/team/email-codes/verify",
     "/api/v1/auth/site/login",

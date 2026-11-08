@@ -17,7 +17,12 @@ export interface SiteUser {
   name: string;
   email: string;
   role: "SITE_MANAGER";
-  siteId?: string;
+  companyId?: string | null;
+  siteId?: string | null;
+  selectedSiteId?: string | null;
+  scopeId?: string | null;
+  membershipStatus?: "JOINED" | "UNASSIGNED" | string;
+  sites?: Array<{ siteId: string; siteName: string }>;
 }
 
 export interface UpdateProfilePayload {
@@ -27,6 +32,9 @@ export interface UpdateProfilePayload {
 
 export interface SiteLoginResponse {
   user: SiteUser;
+  siteId?: string | null;
+  sites?: Array<{ siteId: string; siteName: string }>;
+  membershipStatus?: "JOINED" | "UNASSIGNED" | string;
 }
 
 export interface SiteRegisterPayload {
