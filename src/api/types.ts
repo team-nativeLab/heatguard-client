@@ -29,23 +29,6 @@ export interface SiteLoginResponse {
   user: SiteUser;
 }
 
-export interface SiteRegisterPayload {
-  verificationToken: string;
-  confirmPassword: string;
-  companyName: string;
-  managerName: string;
-  siteName: string;
-  email: string;
-  password: string;
-}
-
-export interface SiteRegisterResponse {
-  userId: string;
-  siteId: string;
-  defaultTeamId: string;
-  createdAt: string;
-}
-
 export interface LoginPayload {
   email: string;
   password: string;
