@@ -42,7 +42,7 @@ const COPY = {
     sub: "본사 관리자 또는 현장 관리자 계정으로 가입할 수 있어요.",
     cta: "가입하기",
     hq: { to: "/hq/signup", desc: ["회사를 등록하고", "현장과 관리자를 관리해요"] },
-    site: { to: "/auth/signup", desc: ["회사와 현장 정보를 입력해", "현장 관리자 계정을 만들어요"] },
+    site: { to: "/site-invitation", desc: ["본사에서 받은 초대 링크로", "현장관리자 계정을 연결해요"] },
     footerText: "이미 계정이 있으신가요?",
     footerLink: "로그인",
     footerTo: "/auth/select",
