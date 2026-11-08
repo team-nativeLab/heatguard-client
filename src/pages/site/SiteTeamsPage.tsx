@@ -10,7 +10,7 @@ import { TeamMemberIcon } from "../../components/icons/Icons";
 import { teamsApi, isDemoFallback, errorMessage, type TeamSummary } from "../../api";
 import { validateTeamForm, type TeamFormValues } from "../../lib/teamForm";
 import { LoadError, SkeletonList } from "../../shared/ui/Skeleton";
-import { getPasswordError } from "../../lib/passwordPolicy";
+import { getPasswordError, PASSWORD_MIN_LENGTH, PASSWORD_POLICY_HINT } from "../../lib/passwordPolicy";
 import { NewPasswordInput } from "../../components/auth/NewPasswordField";
 import { usePasswordComposition } from "../../components/auth/usePasswordComposition";
 import { useSiteMe } from "../../hooks/useSiteMe";
@@ -256,12 +256,12 @@ export default function SiteTeamsPage() {
                   <input disabled={submitting} type="text" value={form.workLocation} onChange={setField("workLocation")} maxLength={50} className={inputCls} />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="leading-4 text-[var(--color-text-body)] text-xs">초기 비밀번호 * (10자 이상)</span>
+                  <span className="leading-4 text-[var(--color-text-body)] text-xs">초기 비밀번호 * (8자 이상)</span>
                   <NewPasswordInput
                     aria-label="초기 비밀번호"
                     disabled={submitting}
-                    minimumLength={10}
-                    policyHint="영문·숫자·특수문자로 10자 이상 입력해 주세요. 한글과 공백은 사용할 수 없어요."
+                    minimumLength={PASSWORD_MIN_LENGTH}
+                    policyHint={PASSWORD_POLICY_HINT}
                     value={form.initialPassword}
                     onChange={setField("initialPassword")}
                     className={inputCls}
