@@ -7,6 +7,10 @@ import type {
   SiteUser,
 } from "./types";
 
+export function register(payload: SiteRegisterPayload) {
+  return apiFetch<SiteRegisterResponse>("/api/v1/auth/site/register", { method: "POST", body: payload });
+}
+
 export interface ManagedSite {
   siteId: string;
   siteName: string;
