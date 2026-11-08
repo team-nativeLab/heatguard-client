@@ -9,7 +9,6 @@ import SiteWithdrawnPage from "./pages/site/SiteWithdrawnPage";
 import AccountPage from "./pages/AccountPage";
 import ContactPage from "./pages/ContactPage";
 import PrintSummaryPage from "./pages/PrintSummaryPage";
-import RoleSelectPage from "./pages/RoleSelectPage";
 import ScreenHQLogin from "./pages/hq/ScreenHQLogin";
 import ScreenHQSignup from "./pages/hq/ScreenHQSignup";
 import ScreenHQDashboard from "./pages/hq/ScreenHQDashboard";
@@ -49,14 +48,14 @@ export default function App() {
     <>
       <SessionGuard />
       <Routes>
-        {/* 첫 화면: 스플래시 → 소속 선택. 이후 각 로그인/회원가입은 스플래시 없이 이동 */}
+        {/* 가입은 본사에서 시작하고, 현장관리자는 본사 초대 링크로 가입한다. */}
         <Route path="/" element={<Navigate to="/auth/login" replace />} />
         <Route path="/auth/select" element={<Navigate to="/auth/login" replace />} />
-        <Route path="/auth/select/signup" element={<RoleSelectPage mode="signup" />} />
+        <Route path="/auth/select/signup" element={<Navigate to="/hq/signup" replace />} />
 
         {/* 현장 관리자 */}
         <Route path="/auth/login" element={<LoginPage />} />
-        <Route path="/auth/signup" element={<Navigate to="/auth/select/signup" replace />} />
+        <Route path="/auth/signup" element={<Navigate to="/hq/signup" replace />} />
         <Route path="/site-invitation" element={<SiteInvitationPage />} />
         <Route path="/auth/site/invitation" element={<SiteInvitationPage />} />
         <Route path="/manager" element={<Protected><DashboardPage /></Protected>} />
@@ -86,4 +85,3 @@ export default function App() {
     </>
   );
 }
-

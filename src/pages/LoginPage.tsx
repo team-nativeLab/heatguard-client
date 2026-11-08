@@ -139,7 +139,7 @@ export default function LoginPage() {
 
       <p className="mt-6 flex justify-center gap-3 text-sm leading-[1.4]">
         <span className="text-[var(--auth-text-muted)]">관리자 계정이 없으신가요?</span>
-        <Link to="/auth/select/signup" state={{ authFrom: "login" }} className="font-bold text-[var(--auth-accent)] hover:underline">
+        <Link to="/hq/signup" state={{ authFrom: "login" }} className="font-bold text-[var(--auth-accent)] hover:underline">
           회원가입
         </Link>
       </p>
