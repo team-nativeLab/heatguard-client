@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import HQLayout, { HQContent } from "../../components/hq/HQLayout";
 import { SiteHeatBadge } from "../../components/hq/RecordTable";
@@ -128,11 +128,29 @@ export default function ScreenHQDashboard() {
   }, [selectedSiteId]);
   const [now, setNow] = useState(() => new Date());
   const [search, setSearch] = useState("");
+  const [siteMenuOpen, setSiteMenuOpen] = useState(false);
+  const sitePickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(new Date()), 1000);
     return () => window.clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    if (!siteMenuOpen) return;
+    const closeOutside = (event: MouseEvent) => {
+      if (!sitePickerRef.current?.contains(event.target as Node)) setSiteMenuOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSiteMenuOpen(false);
+    };
+    document.addEventListener("mousedown", closeOutside);
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("mousedown", closeOutside);
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [siteMenuOpen]);
 
   const dateText = `${now.getFullYear()}. ${pad(now.getMonth() + 1)}. ${pad(now.getDate())}. (${WEEKDAYS[now.getDay()]})`;
   const timeText = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
@@ -187,14 +205,48 @@ export default function ScreenHQDashboard() {
             style={{ background: `linear-gradient(110deg, color-mix(in srgb, ${glowColor} 32%, var(--home-card-bg)) 0%, var(--home-card-bg) 100%)` }}
           >
             <div className="relative flex flex-wrap items-center justify-start gap-2">
-              <label className="relative flex h-[30px] max-w-full items-center gap-1.5 rounded-full border border-[var(--home-pill-border)] bg-[var(--home-pill-bg)] pl-[11px] pr-2 text-xs font-medium text-[var(--home-pill-fg)]">
-                <PinStatIcon />
-                <span className="sr-only">현장 선택</span>
-                <select aria-label="현장 선택" value={selectedSiteId} onChange={(event) => setSelectedSiteId(event.target.value)} className="max-w-[180px] cursor-pointer appearance-none truncate bg-transparent pr-4 outline-none">
-                  {sites.map((site) => <option key={site.id} value={site.id}>{site.name}</option>)}
-                </select>
-                <ChevronDownIcon className="pointer-events-none absolute right-2 size-3.5 text-[var(--color-text-body)]" />
-              </label>
+              <div className="relative" ref={sitePickerRef}>
+                <button
+                  type="button"
+                  aria-label="현장 선택"
+                  aria-haspopup="listbox"
+                  aria-expanded={siteMenuOpen}
+                  onClick={() => setSiteMenuOpen((open) => !open)}
+                  className="flex h-[30px] max-w-[220px] items-center gap-1.5 rounded-full border border-[var(--home-pill-border)] bg-[var(--home-pill-bg)] pl-[11px] pr-2 text-xs font-medium text-[var(--home-pill-fg)] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+                >
+                  <PinStatIcon />
+                  <span className="max-w-[170px] truncate">{selectedSite?.name ?? "현장 없음"}</span>
+                  <ChevronDownIcon className={`size-3.5 shrink-0 text-[var(--color-text-body)] transition-transform ${siteMenuOpen ? "rotate-180" : ""}`} />
+                </button>
+                {siteMenuOpen && (
+                  <div
+                    role="listbox"
+                    aria-label="현장 선택"
+                    className="absolute left-0 top-[calc(100%+8px)] z-30 max-h-64 min-w-[220px] overflow-y-auto rounded-xl border border-[var(--home-card-border)] bg-[var(--home-card-bg)] p-1.5 shadow-[0_12px_30px_rgba(15,23,42,0.16)]"
+                  >
+                    {sites.map((site) => {
+                      const selected = site.id === selectedSiteId;
+                      return (
+                        <button
+                          key={site.id}
+                          type="button"
+                          role="option"
+                          aria-selected={selected}
+                          onClick={() => {
+                            setSelectedSiteId(site.id);
+                            setSiteMenuOpen(false);
+                          }}
+                          className={`flex w-full items-center justify-between gap-4 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-[var(--home-nav-active-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] ${selected ? "bg-[var(--home-nav-active-bg)]" : ""}`}
+                        >
+                          <span className="min-w-0 truncate text-sm font-medium text-[var(--color-text-heading)]">{site.name}</span>
+                          <span className="shrink-0 text-xs tabular-nums text-[var(--color-text-body)]">{site.temperature != null ? `${site.temperature.toFixed(1)}°C` : "미측정"}</span>
+                        </button>
+                      );
+                    })}
+                    {sites.length === 0 && <p className="px-3 py-2 text-xs text-[var(--color-text-faint)]">등록된 현장이 없어요.</p>}
+                  </div>
+                )}
+              </div>
               <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-[var(--color-heat-badge-bg)] px-2.5 py-1 text-xs font-medium leading-4 text-[#ff6800]">
                 <SunStatusIcon />
                 {weatherStatus}
