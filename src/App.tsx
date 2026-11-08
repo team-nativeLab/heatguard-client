@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
 import DashboardPage from "./pages/DashboardPage";
 import SiteTodayPage from "./pages/site/SiteTodayPage";
 import SiteTeamsPage from "./pages/site/SiteTeamsPage";
@@ -51,11 +52,11 @@ export default function App() {
         {/* 가입은 본사에서 시작하고, 현장관리자는 본사 초대 링크로 가입한다. */}
         <Route path="/" element={<Navigate to="/auth/login" replace />} />
         <Route path="/auth/select" element={<Navigate to="/auth/login" replace />} />
-        <Route path="/auth/select/signup" element={<Navigate to="/hq/signup" replace />} />
+        <Route path="/auth/select/signup" element={<RoleSelectPage mode="signup" />} />
 
         {/* 현장 관리자 */}
         <Route path="/auth/login" element={<LoginPage />} />
-        <Route path="/auth/signup" element={<Navigate to="/hq/signup" replace />} />
+        <Route path="/auth/signup" element={<SignupPage />} />
         <Route path="/site-invitation" element={<SiteInvitationPage />} />
         <Route path="/auth/site/invitation" element={<SiteInvitationPage />} />
         <Route path="/manager" element={<Protected><DashboardPage /></Protected>} />
