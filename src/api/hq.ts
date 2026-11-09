@@ -65,6 +65,11 @@ export function updateProfile(payload: { phone: string }) {
   return apiFetch<HqProfile>("/api/v1/hq/profile", { method: "PATCH", body: payload });
 }
 
+/** 계정 비활성화 및 본사 로그인 세션 폐기 */
+export function withdraw(payload: { currentPassword: string }) {
+  return apiFetch<void>("/api/v1/hq/profile", { method: "DELETE", body: payload });
+}
+
 /* ───────────── 데이터 정규화 (응답 필드가 일부 달라도 화면이 깨지지 않게) ───────────── */
 
 type Raw = Record<string, unknown>;
