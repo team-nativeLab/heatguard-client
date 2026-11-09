@@ -50,7 +50,7 @@ export default function SiteSettingsPage() {
       <section aria-busy={loading} className={`w-full max-w-[720px] pt-8 self-start ${loading ? "animate-pulse pointer-events-none" : ""}`}>
         <h2 className="font-medium text-[var(--color-text-heading)] text-sm">온도 체크 시간</h2>
         <p className="text-[var(--color-text-body)] text-xs pt-1">선택한 시간마다 팀에 온도 측정 알림이 가요.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 pt-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 pt-3 max-w-[560px]">
           {[TIME_SLOTS.slice(0, 12), TIME_SLOTS.slice(12, 24)].map((column, columnIndex) => (
             <div key={columnIndex} className="flex flex-col gap-1">
               {column.map((slot) => (
