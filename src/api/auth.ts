@@ -16,6 +16,7 @@ export function register(payload: SiteRegisterPayload) {
 export interface UnassignedSiteRegisterPayload {
   managerName: string;
   email: string;
+  managerPhone: string;
   password: string;
   confirmPassword: string;
   verificationToken: string;
