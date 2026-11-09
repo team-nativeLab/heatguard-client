@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import AuthCardLayout from "../components/auth/AuthCardLayout";
 import AuthField from "../components/auth/AuthField";
 import AuthSubmitButton from "../components/auth/AuthSubmitButton";
-import { AnimatedLockIcon, MailIcon, UserIcon, UsersIcon, MapPinIcon } from "../components/auth/AuthIcons";
+import { AnimatedLockIcon, UserIcon, UsersIcon, MapPinIcon } from "../components/auth/AuthIcons";
 import { useToast } from "../shared/ui/Toast";
 import { authApi, ApiError, errorMessage } from "../api";
 import { getPasswordConfirmationError, getPasswordError } from "../lib/passwordPolicy";
@@ -185,8 +185,7 @@ export default function SignupPage() {
             <AuthField size="md" label="담당자 이름" icon={<UserIcon />} placeholder="홍길동" autoComplete="name" {...bind("managerName")} />
           ) : step === 2 ? (
             <>
-              <AuthField size="md" label="이메일" type="email" icon={<MailIcon />} placeholder="manager@example.com" autoComplete="username" {...bind("email")} />
-              <EmailVerification email={values.email} verification={verification} disabled={submitting} error={codeError} onEdit={() => setCodeError("")} />
+              <EmailVerification email={values.email} onEmailChange={bind("email").onChange} emailError={errors.email} verification={verification} disabled={submitting} error={codeError} onEdit={() => setCodeError("")} />
             </>
           ) : (
             <>
