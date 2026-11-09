@@ -7,7 +7,7 @@ import AuthField from "../../components/auth/AuthField";
 import AuthSubmitButton from "../../components/auth/AuthSubmitButton";
 import { hqApi, ApiError, errorMessage } from "../../api";
 import { useToast } from "../../shared/ui/Toast";
-import { AnimatedLockIcon, BuildingIcon, MailIcon, MapPinIcon, UserIcon, UsersIcon } from "../../components/auth/AuthIcons";
+import { AnimatedLockIcon, BuildingIcon, MapPinIcon, UserIcon, UsersIcon } from "../../components/auth/AuthIcons";
 import { getPasswordConfirmationError, getPasswordError, SIGNUP_PASSWORD_MIN_LENGTH, SIGNUP_PASSWORD_POLICY_HINT } from "../../lib/passwordPolicy";
 import { NewPasswordAuthField } from "../../components/auth/NewPasswordField";
 import { usePasswordComposition } from "../../components/auth/usePasswordComposition";
@@ -185,8 +185,7 @@ export default function ScreenHQSignup({ validation = false }: { validation?: bo
             </>
           ) : step === 2 ? (
             <>
-              <AuthField size="md" label="이메일" type="email" icon={<MailIcon />} placeholder="hq@example.com" autoComplete="username" value={values.email} onChange={set("email")} error={errors.email} />
-              <EmailVerification email={values.email} verification={verification} disabled={submitting} error={codeError} onEdit={() => setCodeError("")} />
+              <EmailVerification email={values.email} onEmailChange={set("email")} emailError={errors.email} verification={verification} disabled={submitting} error={codeError} onEdit={() => setCodeError("")} />
             </>
           ) : (
             <>
