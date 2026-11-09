@@ -7,7 +7,7 @@ import { hqApi, errorMessage, type HqDashboard, type HqSite, type HqSiteWeather 
 import { useHqMe } from "../../hooks/useHqMe";
 import { usePolling } from "../../shared/hooks/usePolling";
 import { doneText, heatLabel, heatTone, tempText } from "../../lib/hqFormat";
-import { ChevronDownIcon } from "../../components/home/HomeIcons";
+import { ChevronRightIcon } from "../../components/home/HomeIcons";
 import {
   AlertStatIcon,
   BuildingStatIcon,
@@ -212,11 +212,11 @@ export default function ScreenHQDashboard() {
                   aria-haspopup="listbox"
                   aria-expanded={siteMenuOpen}
                   onClick={() => setSiteMenuOpen((open) => !open)}
-                  className="flex h-[30px] max-w-[220px] items-center gap-1.5 rounded-full border border-[var(--home-pill-border)] bg-[var(--home-pill-bg)] pl-[11px] pr-2 text-xs font-medium text-[var(--home-pill-fg)] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+                  className="flex h-10 max-w-[240px] items-center gap-2.5 rounded-full border border-[var(--home-card-border)] bg-[var(--home-card-bg)] pl-4 pr-3 text-[15px] font-medium text-[var(--color-text-heading)] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
                 >
                   <PinStatIcon />
-                  <span className="max-w-[170px] truncate">{selectedSite?.name ?? "현장 없음"}</span>
-                  <ChevronDownIcon className={`size-3.5 shrink-0 text-[var(--color-text-body)] transition-transform ${siteMenuOpen ? "rotate-180" : ""}`} />
+                  <span className="max-w-[180px] truncate">{selectedSite?.name ?? "현장 없음"}</span>
+                  <ChevronRightIcon className="size-4 shrink-0 text-[var(--color-text-body)]" />
                 </button>
                 {siteMenuOpen && (
                   <div
@@ -267,11 +267,9 @@ export default function ScreenHQDashboard() {
               <p className="relative text-[15px] font-medium leading-5 text-[var(--color-text-label)]">선택 현장 온도</p>
               <div className="relative flex h-[64px] items-end gap-3 pt-1">
                 <span className="text-[56px] font-semibold leading-[56px] tracking-[-1.5px] text-[var(--color-text-heading)]">{topTemp != null ? topTemp.toFixed(1) : "-"}</span>
-                {topTemp != null && (
-                  <div className="flex items-center gap-2 pb-1.5">
-                    <span className="text-[24px] font-medium leading-8 text-[var(--color-text-heading)]">°C</span>
-                  </div>
-                )}
+                <div className="flex items-center gap-2 pb-1.5">
+                  <span className="text-[24px] font-medium leading-8 text-[var(--color-text-heading)]">°C</span>
+                </div>
               </div>
               <p className="relative whitespace-pre pt-2 text-[15px] font-medium leading-5 text-[var(--color-text-label)]">
                 {`습도 ${weather?.humidity != null ? `${weather.humidity}%` : "-"}  |  체감온도 ${tempText(weather?.apparentTemperature) || "-"}`}
@@ -297,7 +295,7 @@ export default function ScreenHQDashboard() {
               <h2 className="text-sm font-medium leading-5 text-[var(--color-text-label)]">오늘의 현황</h2>
               <div className="flex flex-col items-end text-right">
                 <p className="whitespace-nowrap text-sm leading-5 text-[var(--color-text-body)]">{dateText}</p>
-                <p className="pt-1 text-[28px] font-light leading-[34px] tracking-[-1.2px] tabular-nums text-[var(--color-text-heading)]">{timeText}</p>
+                <p className="pt-1 text-[36px] font-light leading-[42px] tracking-[-1.2px] tabular-nums text-[var(--color-text-heading)]">{timeText}</p>
               </div>
             </div>
             <div className="mt-auto grid grid-cols-2 gap-3 pb-2 pt-6 sm:grid-cols-4">

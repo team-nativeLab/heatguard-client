@@ -133,7 +133,7 @@ export function HQContent({
 }) {
   const width = maxWidth ?? (narrow ? 448 : 1024);
   return (
-    <div className="mx-auto w-full p-8" style={{ maxWidth: width + 64 }}>
+    <div className="mx-auto w-full p-4 md:p-8" style={{ maxWidth: width + 64 }}>
       {children}
     </div>
   );
