@@ -172,17 +172,6 @@ export default function SiteTeamsPage() {
         <div className="flex flex-col gap-2 w-full pt-8">
           {!loaded && !failed && <SkeletonList count={3} itemClassName="h-[66px]" />}
           {failed && <LoadError message="팀 목록을 불러오지 못했어요." onRetry={() => setAttempt((n) => n + 1)} />}
-          {teams.length > 0 && (
-            <div className="hidden md:flex gap-4 px-5 text-xs text-[var(--color-text-faint)]">
-              <span className="size-8 shrink-0" aria-hidden="true" />
-              <div className="grid grid-cols-3 gap-x-4 flex-1 min-w-0">
-                <span>이름</span>
-                <span className="text-center">인원</span>
-                <span>이메일</span>
-              </div>
-              <span className="w-[132px] shrink-0" aria-hidden="true" />
-            </div>
-          )}
           {teams.map((team) => (
             <div
               key={team.id}
@@ -192,17 +181,9 @@ export default function SiteTeamsPage() {
                 <TeamMemberIcon className="size-4" />
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2 flex-1 min-w-0 w-full">
-                <div>
-                  <p className="font-medium leading-5 text-sm text-[var(--color-text-heading)]">{me.site.name || team.name || "현장"}</p>
-                  <p className="leading-4 text-[var(--color-text-body)] text-xs">팀장 {team.leaderName} · {team.workLocation || "작업 장소 미입력"}</p>
-                </div>
-                                <p className="leading-4 text-center text-[var(--color-text-label)] text-xs self-center">
-                  {team.memberCount ? `${team.memberCount}명` : "-"}
-                </p>
-                <p className="font-['JetBrains_Mono',monospace] leading-4 text-[var(--color-text-body)] text-[11px] self-center truncate" title={team.loginEmail ?? undefined}>
-                  {team.loginEmail || "로그인 계정 미등록"}
-                </p>
+              <div className="flex min-w-0 flex-1 flex-col gap-1 w-full">
+                <p className="font-medium leading-5 text-sm text-[var(--color-text-heading)]">{me.site.name || team.name || "현장"}</p>
+                <p className="leading-4 text-[var(--color-text-body)] text-xs">팀장 {team.leaderName} · {team.workLocation || "작업 장소 미입력"}</p>
               </div>
 
               <div className="flex gap-2 shrink-0">
