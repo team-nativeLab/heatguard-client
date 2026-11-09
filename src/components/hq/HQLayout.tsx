@@ -2,7 +2,7 @@ import { useCallback, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
 import sidebarWave from "../../assets/images/sidebar-wave.png";
-import { DashboardIcon, SiteManageIcon, ContactIcon, PrintIcon, DefaultProfileAvatar, AccountIcon } from "../icons/Icons";
+import { DashboardIcon, SiteManageIcon, ContactIcon, PrintIcon, DefaultProfileAvatar } from "../icons/Icons";
 import { usePolling } from "../../shared/hooks/usePolling";
 import { hqApi } from "../../api";
 import { useHqMe } from "../../hooks/useHqMe";
@@ -105,7 +105,7 @@ function HQSidebar() {
             <p className="text-xs leading-4 text-[var(--color-text-body)]">{me ? `${me.user.name} 님` : " "}</p>
             <p className="truncate pt-px text-[11px] leading-[16.5px] text-[var(--color-text-faint)]">{me?.company.companyName ?? " "}</p>
           </div>
-          <AccountIcon className="mr-1 size-5 shrink-0 text-[var(--color-text-faint)] transition-colors group-hover:text-[var(--color-text-heading)]" />
+          <span aria-hidden="true" className="mr-1 shrink-0 text-[20px] leading-none text-[var(--color-text-faint)] transition-colors group-hover:text-[var(--color-text-heading)]">⚙︎</span>
         </Link>
       </div>
     </aside>
