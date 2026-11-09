@@ -16,7 +16,6 @@ export function register(payload: SiteRegisterPayload) {
 export interface UnassignedSiteRegisterPayload {
   managerName: string;
   email: string;
-  managerPhone: string;
   password: string;
   confirmPassword: string;
   verificationToken: string;
@@ -75,6 +74,7 @@ export function listManagedSites({ refresh = false }: { refresh?: boolean } = {}
 export function acceptSiteInvitation(payload: {
   invitationId: string;
   email: string;
+  managerPhone: string;
   password: string;
   confirmPassword: string;
   verificationToken?: string;
