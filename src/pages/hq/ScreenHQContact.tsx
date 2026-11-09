@@ -177,9 +177,12 @@ function InquiryDetailModal({
     if (!content || busy) return;
     setBusy(true);
     try {
-      await inquiriesApi.replyToHqInquiry(inquiry.inquiryId, content);
+      if (!Number.isFinite(inquiry.version)) throw new Error("문의 버전 정보를 불러오지 못했어요. 상세를 다시 열어주세요.");
+      await inquiriesApi.replyToHqInquiry(inquiry.inquiryId, content, inquiry.version);
       if (inquiry.status !== "ANSWERED") {
-        await inquiriesApi.updateHqInquiryStatus(inquiry.inquiryId, "ANSWERED");
+        const latest = await inquiriesApi.getHqInquiry(inquiry.inquiryId);
+        if (!Number.isFinite(latest.version)) throw new Error("문의 버전 정보를 불러오지 못했어요. 상세를 다시 열어주세요.");
+        await inquiriesApi.updateHqInquiryStatus(inquiry.inquiryId, "ANSWERED", latest.version);
       }
       await onUpdated();
       setReply("");
@@ -195,7 +198,8 @@ function InquiryDetailModal({
     if (busy || status === inquiry.status) return;
     setBusy(true);
     try {
-      await inquiriesApi.updateHqInquiryStatus(inquiry.inquiryId, status);
+      if (!Number.isFinite(inquiry.version)) throw new Error("문의 버전 정보를 불러오지 못했어요. 상세를 다시 열어주세요.");
+      await inquiriesApi.updateHqInquiryStatus(inquiry.inquiryId, status, inquiry.version);
       await onUpdated();
       showToast("문의 상태를 변경했어요.", "success");
     } catch (error) {
