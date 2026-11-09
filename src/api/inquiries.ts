@@ -14,6 +14,7 @@ function normalizeInquiry(inquiry: BackendInquiry): Inquiry {
     status: inquiry.status,
     reply: inquiry.reply ?? inquiry.replies?.at(-1)?.content ?? null,
     createdAt: inquiry.createdAt,
+    version: inquiry.version,
   };
 }
 
@@ -60,16 +61,16 @@ export function getHqInquiry(inquiryId: string) {
   return apiFetch<BackendInquiry>(`/api/v1/hq/inquiries/${encodeURIComponent(inquiryId)}`).then(normalizeInquiry);
 }
 
-export function replyToHqInquiry(inquiryId: string, content: string) {
+export function replyToHqInquiry(inquiryId: string, content: string, version: number) {
   return apiFetch<unknown>(`/api/v1/hq/inquiries/${encodeURIComponent(inquiryId)}/replies`, {
     method: "POST",
-    body: { content },
+    body: { content, version },
   });
 }
 
-export function updateHqInquiryStatus(inquiryId: string, status: InquiryStatus) {
+export function updateHqInquiryStatus(inquiryId: string, status: InquiryStatus, version: number) {
   return apiFetch<unknown>(`/api/v1/hq/inquiries/${encodeURIComponent(inquiryId)}/status`, {
     method: "PATCH",
-    body: { status },
+    body: { status, version },
   });
 }
