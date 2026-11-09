@@ -16,6 +16,17 @@ import { useTheme } from "../shared/theme/ThemeContext";
 
 const PHONE_RE = /^0\d{1,2}-?\d{3,4}-?\d{4}$/;
 
+function formatPhoneNumber(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (!digits) return "";
+  const prefixLength = digits.startsWith("02") ? 2 : 3;
+  const middleLength = prefixLength === 2 || digits.length >= 11 ? 4 : 3;
+  const prefix = digits.slice(0, prefixLength);
+  const middle = digits.slice(prefixLength, prefixLength + middleLength);
+  const last = digits.slice(prefixLength + middleLength, prefixLength + middleLength + 4);
+  return [prefix, middle, last].filter(Boolean).join("-");
+}
+
 const smallBtn =
   "shrink-0 rounded border border-black bg-[var(--home-card-bg)] px-3.5 py-1.5 text-[13px] font-normal leading-[1.45] text-[var(--color-text-heading)] transition hover:bg-[var(--color-bg-tile)]";
 const destructiveBtn =
@@ -125,7 +136,7 @@ export default function AccountPage() {
                 </button>
               }
             />
-            <Row label="아이디" value={me.user.email || "-"} action={fixedNote} />
+            <Row label="이메일" value={me.user.email || "-"} action={fixedNote} />
             <Row
               label="연락처"
               value={me.user.phone || "등록된 연락처가 없어요"}
@@ -233,7 +244,7 @@ export default function AccountPage() {
 
 function NameModal({ initial, onClose }: { initial: string; onClose: () => void }) {
   const { showToast } = useToast();
-  const [value, setValue] = useState(initial);
+  const [value, setValue] = useState(formatPhoneNumber(initial));
   const [submitting, setSubmitting] = useState(false);
 
   const handleSave = async () => {
@@ -337,7 +348,7 @@ function PhoneModal({ initial, onClose }: { initial: string; onClose: () => void
           maxLength={13}
           value={value}
           onChange={(e) => {
-            setValue(e.target.value);
+            setValue(formatPhoneNumber(e.target.value));
             setError("");
           }}
           onKeyDown={(e) => e.key === "Enter" && handleSave()}
