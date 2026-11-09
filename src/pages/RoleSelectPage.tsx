@@ -139,10 +139,6 @@ export default function RoleSelectPage({ mode }: { mode: Mode }) {
         </div>
       )}
 
-      {mode === "signup" && (
-        <p className="mt-4 text-xs leading-5 text-[var(--auth-text-muted)]">현장 관리자는 먼저 미소속 계정을 만들고, 본사 초대를 받으면 기존 계정으로 현장에 연결할 수 있어요.</p>
-      )}
-
       <p className="mt-7 flex justify-center gap-3 text-sm leading-[1.4]">
         <span className="text-[var(--auth-text-muted)]">{c.footerText}</span>
         <Link to={c.footerTo} state={{ authFrom: mode }} className="font-bold text-[var(--auth-accent)] hover:underline">
