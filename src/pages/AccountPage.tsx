@@ -16,7 +16,9 @@ import { usePasswordComposition } from "../components/auth/usePasswordCompositio
 const PHONE_RE = /^0\d{1,2}-?\d{3,4}-?\d{4}$/;
 
 const smallBtn =
-  "shrink-0 rounded border border-[var(--home-card-border)] bg-[var(--home-card-bg)] px-3.5 py-1.5 text-[13px] font-normal leading-[1.45] text-[var(--color-text-label)] transition hover:bg-[var(--color-bg-tile)]";
+  "shrink-0 rounded border border-black bg-[var(--home-card-bg)] px-3.5 py-1.5 text-[13px] font-normal leading-[1.45] text-[var(--color-text-heading)] transition hover:bg-[var(--color-bg-tile)]";
+const destructiveBtn =
+  "shrink-0 rounded border border-[var(--color-danger-text)] bg-[var(--color-danger-text)] px-3.5 py-1.5 text-[13px] font-medium leading-[1.45] text-white transition hover:brightness-90";
 
 function Card({ title, description, children }: { title: string; description: string; children: ReactNode }) {
   return (
@@ -158,7 +160,7 @@ export default function AccountPage() {
           <Card title="회원 탈퇴" description="탈퇴 시 계정·현장·팀은 비활성화되고, 기록·사진은 365일 보관 후 삭제됩니다.">
             <div className="flex items-center justify-between gap-4 border-t border-[var(--home-card-border)] px-5 py-3.5">
               <span className="text-xs text-[var(--color-text-body)]">탈퇴하려면 현재 비밀번호를 확인해야 합니다.</span>
-              <button type="button" onClick={() => setConfirmingWithdrawal(true)} className={`${smallBtn} !border-[var(--color-danger-text)] !text-[var(--color-danger-text)] hover:!bg-[var(--color-danger-soft-bg)]`} style={{ color: "var(--color-danger-text)", borderColor: "var(--color-danger-text)" }}>
+              <button type="button" onClick={() => setConfirmingWithdrawal(true)} className={destructiveBtn}>
                 회원 탈퇴
               </button>
             </div>
