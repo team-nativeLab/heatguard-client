@@ -98,9 +98,9 @@ export default function SiteTeamInvitationModal({ team, onClose, autoGenerate = 
             />
           </label>
           <div className="flex flex-wrap gap-2">
-            <button type="button" className={btnSecondary} disabled={busy} onClick={() => void copy()}>링크 복사</button>
+            <button type="button" className={`${btnSecondary} border-[var(--color-accent)]`} disabled={busy} onClick={() => void copy()}>링크 복사</button>
             {typeof navigator.share === "function" && (
-              <button type="button" className={btnSecondary} disabled={busy} onClick={() => void share()}>공유하기</button>
+              <button type="button" className={`${btnSecondary} border-[var(--color-accent)]`} disabled={busy} onClick={() => void share()}>공유하기</button>
             )}
           </div>
           <p className="text-xs leading-5 text-[var(--color-text-body)]">링크 발급만으로 참여가 완료되지는 않아요. 팀원이 앱에서 초대를 수락해야 합니다.</p>
