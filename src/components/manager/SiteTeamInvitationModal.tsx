@@ -75,35 +75,50 @@ export default function SiteTeamInvitationModal({ team, onClose, autoGenerate = 
       busy={busy}
       footer={<button type="button" className={btnSecondary} disabled={busy} onClick={onClose}>닫기</button>}
     >
-      <p className="leading-6 text-sm text-[var(--color-text-body)]">
-        초대 링크를 발급해 팀원에게 전달해 주세요. 팀원이 앱에서 초대를 수락하면 이 팀에 참여합니다.
+      <p className="text-sm leading-6 text-[var(--color-text-body)]">
+        앱에서 초대를 수락하면 이 현장에 참여합니다.
       </p>
-      <p className="text-xs leading-5 text-[var(--color-text-body)]">
-        초대 링크는 앱 계정을 만드는 링크가 아니에요. 앱 계정이 없다면 먼저 앱에서 가입한 뒤 초대를 수락해야 합니다.
-      </p>
-      <button type="button" className={btnPrimary} disabled={busy} onClick={() => void generate()}>
-        {busy ? "발급 중..." : inviteUrl ? "새 링크 발급" : "초대 링크 발급"}
-      </button>
+      {!inviteUrl && (
+        <button type="button" className={btnPrimary} disabled={busy} onClick={() => void generate()}>
+          {busy ? "발급 중..." : "초대 링크 발급"}
+        </button>
+      )}
       {error && <p role="alert" className="text-sm text-[var(--color-danger-text)]">{error}</p>}
       {inviteUrl && (
         <>
           <label className="flex flex-col gap-2 text-sm text-[var(--color-text-label)]">
             초대 링크
-            <input
-              className={inputCls}
-              readOnly
-              value={inviteUrl}
-              onFocus={(event) => event.currentTarget.select()}
-              aria-label={`${inviteDisplayName} 초대 링크`}
-            />
+            <div className="relative">
+              <input
+                className={`${inputCls} pr-11`}
+                readOnly
+                value={inviteUrl}
+                onFocus={(event) => event.currentTarget.select()}
+                aria-label={`${inviteDisplayName} 초대 링크`}
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 flex w-10 items-center justify-center rounded-r border-l border-[var(--home-card-border)] text-[var(--color-accent)] transition hover:bg-[var(--color-bg-tile)] disabled:opacity-60"
+                disabled={busy}
+                onClick={() => void copy()}
+                aria-label="초대 링크 복사"
+                title="초대 링크 복사"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="8" y="8" width="13" height="13" rx="2" />
+                  <path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3" />
+                </svg>
+              </button>
+            </div>
           </label>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" className={`${btnSecondary} border-[var(--color-accent)]`} disabled={busy} onClick={() => void copy()}>링크 복사</button>
-            {typeof navigator.share === "function" && (
-              <button type="button" className={`${btnSecondary} border-[var(--color-accent)]`} disabled={busy} onClick={() => void share()}>공유하기</button>
-            )}
-          </div>
-          <p className="text-xs leading-5 text-[var(--color-text-body)]">링크 발급만으로 참여가 완료되지는 않아요. 팀원이 앱에서 초대를 수락해야 합니다.</p>
+          <button type="button" className={btnPrimary} disabled={busy} onClick={() => void generate()}>
+            {busy ? "발급 중..." : "새 링크 발급"}
+          </button>
+          {typeof navigator.share === "function" && (
+            <button type="button" className={`${btnSecondary} border-[var(--color-accent)]`} disabled={busy} onClick={() => void share()}>
+              공유하기
+            </button>
+          )}
         </>
       )}
     </ModalShell>
