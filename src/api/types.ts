@@ -262,6 +262,7 @@ export interface Inquiry {
   status: InquiryStatus;
   reply?: string | null;
   createdAt: string;
+  version?: number;
 }
 
 export interface CreateInquiryPayload {
