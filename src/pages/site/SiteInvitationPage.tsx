@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import AuthCardLayout from "../../components/auth/AuthCardLayout";
 import AuthField from "../../components/auth/AuthField";
 import AuthSubmitButton from "../../components/auth/AuthSubmitButton";
-import { AnimatedLockIcon, MailIcon } from "../../components/auth/AuthIcons";
+import { AnimatedLockIcon, MailIcon, MapPinIcon } from "../../components/auth/AuthIcons";
 import { NewPasswordAuthField } from "../../components/auth/NewPasswordField";
 import { usePasswordComposition } from "../../components/auth/usePasswordComposition";
 import { ApiError, authApi, errorMessage } from "../../api";
@@ -20,6 +20,7 @@ export default function SiteInvitationPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const invitationId = searchParams.get("invitationId")?.trim() ?? "";
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -32,6 +33,7 @@ export default function SiteInvitationPage() {
     event.preventDefault();
     if (accepting || composition.isComposing()) return;
     if (!invitationId) return setError("초대 링크가 올바르지 않아요. 본사 관리자에게 새 링크를 요청해주세요.");
+    if (!/^01[016789]\\d{7,8}$/.test(phone.replace(/\\D/g, ""))) { setError("휴대전화 번호를 확인해주세요."); return; }
     if (!EMAIL_RE.test(email.trim())) { setError("이메일 주소를 확인해주세요."); return; }
     const passwordError = getPasswordError(password, SIGNUP_PASSWORD_MIN_LENGTH) || getPasswordConfirmationError(password, confirmPassword);
     if (passwordError) return setError(passwordError);
@@ -41,7 +43,7 @@ export default function SiteInvitationPage() {
       // An invitation must only connect an already-created, unassigned manager account.
       // Authenticate first so the accept endpoint cannot create an account as a side effect.
       await authApi.login({ email: email.trim(), password });
-      await authApi.acceptSiteInvitation({ invitationId, email: email.trim(), password, confirmPassword });
+      await authApi.acceptSiteInvitation({ invitationId, email: email.trim(), managerPhone: phone.replace(/\\D/g, ""), password, confirmPassword });
       setAccepted(true);
       clearSiteMeCache();
       authApi.clearManagedSitesCache();
@@ -95,6 +97,7 @@ export default function SiteInvitationPage() {
         <p className="mt-6 text-xs leading-5 text-[var(--auth-text-muted)]">먼저 미소속 현장 관리자 계정을 회원가입하세요. 가입한 이메일과 비밀번호로 로그인한 뒤 초대를 수락하면 현장에 연결됩니다.</p>
         <p className="mt-2 text-xs text-[var(--auth-text-muted)]">계정이 없으신가요? <a href="/auth/signup" target="_blank" rel="noreferrer" className="font-semibold text-[var(--auth-accent)] hover:underline">먼저 회원가입</a></p>
         <form className="mt-3 flex flex-col gap-1" onSubmit={submit} noValidate>
+          <AuthField label="전화번호" type="tel" icon={<MapPinIcon />} placeholder="010-1234-5678" autoComplete="tel" inputMode="numeric" value={phone} onChange={(e) => { const digits = e.target.value.replace(/\\D/g, "").slice(0, 11); const formatted = digits.length <= 3 ? digits : digits.length <= 7 ? `${digits.slice(0, 3)}-${digits.slice(3)}` : `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`; setPhone(formatted); setError(""); }} />
           <AuthField label="계정 이메일" type="email" icon={<MailIcon />} placeholder="manager@example.com" autoComplete="username" value={email} onChange={(e) => { setEmail(e.target.value); setError(""); }} />
           <NewPasswordAuthField
             label="현재 비밀번호"
