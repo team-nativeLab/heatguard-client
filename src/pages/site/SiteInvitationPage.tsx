@@ -1,6 +1,4 @@
 import { useState, type FormEvent } from "react";
-import EmailVerification from "../../components/auth/EmailVerification";
-import { useEmailVerification } from "../../hooks/useEmailVerification";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import AuthCardLayout from "../../components/auth/AuthCardLayout";
 import AuthField from "../../components/auth/AuthField";
@@ -15,7 +13,7 @@ import { clearSiteMeCache } from "../../hooks/useSiteMe";
 import { markSignedIn } from "../../shared/auth/RequireAuth";
 import { useToast } from "../../shared/ui/Toast";
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_RE = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
 
 export default function SiteInvitationPage() {
   const [searchParams] = useSearchParams();
@@ -23,7 +21,6 @@ export default function SiteInvitationPage() {
   const { showToast } = useToast();
   const invitationId = searchParams.get("invitationId")?.trim() ?? "";
   const [email, setEmail] = useState("");
-  const verification = useEmailVerification(email);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -36,14 +33,12 @@ export default function SiteInvitationPage() {
     if (accepting || composition.isComposing()) return;
     if (!invitationId) return setError("초대 링크가 올바르지 않아요. 본사 관리자에게 새 링크를 요청해주세요.");
     if (!EMAIL_RE.test(email.trim())) { setError("이메일 주소를 확인해주세요."); return; }
-    const verificationToken = verification.getToken();
-    if (!verification.verified || !verificationToken) { setError("이메일 인증을 완료해주세요."); return; }
     const passwordError = getPasswordError(password, SIGNUP_PASSWORD_MIN_LENGTH) || getPasswordConfirmationError(password, confirmPassword);
     if (passwordError) return setError(passwordError);
     setAccepting(true);
     setError("");
     try {
-      await authApi.acceptSiteInvitation({ invitationId, email: email.trim(), password, confirmPassword, verificationToken });
+      await authApi.acceptSiteInvitation({ invitationId, email: email.trim(), password, confirmPassword });
       setAccepted(true);
       try {
         await authApi.login({ email: email.trim(), password });
@@ -59,13 +54,10 @@ export default function SiteInvitationPage() {
     } catch (err) {
       if (err instanceof ApiError && err.status === 404) {
         setError("초대가 만료되었거나 이미 사용됐어요. 본사 관리자에게 새 링크를 요청해주세요.");
-      } else if (err instanceof ApiError && err.status === 400 && (err.code === "INVALID_VERIFICATION_CODE" || err.code === "INVALID_VERIFICATION_TOKEN")) {
-        verification.reset();
-        setError("이메일 인증이 만료됐어요. 다시 인증해주세요.");
       } else if (err instanceof ApiError && err.status === 401) {
-        setError("현재 계정 비밀번호를 확인해주세요.");
+        setError("가입할 때 설정한 계정 비밀번호를 확인해주세요.");
       } else if (err instanceof ApiError && err.status === 409 && err.code === "EMAIL_ALREADY_EXISTS") {
-        setError("이미 사용 중인 이메일이에요.");
+        setError("이 이메일 계정을 현장 관리자 계정으로 연결할 수 없어요. 본사 관리자에게 확인해주세요.");
       } else if (err instanceof ApiError && err.status === 409) {
         setError("이 현장에 관리자가 이미 연결됐어요. 본사 관리자에게 확인해주세요.");
       } else {
@@ -83,12 +75,12 @@ export default function SiteInvitationPage() {
       side="signup"
       eyebrow="현장 관리자 초대"
       titleLines={["초대받은 현장에", "연결합니다"]}
-      descriptionLines={["이메일을 인증하고 비밀번호를 입력하면", "현장 관리자 계정에 현장이 연결됩니다."]}
+      descriptionLines={["가입한 계정의 이메일과 비밀번호로", "초대를 수락해 현장에 연결합니다."]}
       features={[]}
       step={2}
       footerLabel="폭염가드 관리자 포털"
       cardTitle="현장 초대 수락"
-      cardSubtitle="현장 관리자 계정을 연결해주세요."
+      cardSubtitle="가입한 현장 관리자 계정으로 연결해주세요."
     >
       {accepted ? (
         <div className="mt-8 rounded-xl border border-[var(--auth-input-border)] bg-[var(--auth-secondary-bg)] p-5 text-sm leading-6 text-[var(--auth-text-muted)]">
@@ -102,14 +94,13 @@ export default function SiteInvitationPage() {
         </div>
       ) : (
         <>
-        <p className="mt-6 text-xs leading-5 text-[var(--auth-text-muted)]">먼저 현장 관리자 계정을 가입한 뒤, 가입할 때 사용한 이메일과 현재 비밀번호로 현장을 연결해주세요.</p>
+        <p className="mt-6 text-xs leading-5 text-[var(--auth-text-muted)]">미소속 현장 관리자 계정 가입 때 사용한 이메일과 현재 비밀번호를 입력해주세요.</p>
         <form className="mt-3 flex flex-col gap-1" onSubmit={submit} noValidate>
-          <AuthField label="이메일" type="email" icon={<MailIcon />} placeholder="manager@example.com" autoComplete="username" value={email} onChange={(e) => { verification.reset(); setEmail(e.target.value); setError(""); }} />
-          <EmailVerification email={email} verification={verification} disabled={accepting} onEdit={() => setError("")} />
+          <AuthField label="계정 이메일" type="email" icon={<MailIcon />} placeholder="manager@example.com" autoComplete="username" value={email} onChange={(e) => { setEmail(e.target.value); setError(""); }} />
           <NewPasswordAuthField
-            label="비밀번호"
+            label="현재 비밀번호"
             icon={<AnimatedLockIcon open={!!password} />}
-            placeholder="8자 이상 입력하세요"
+            placeholder="가입할 때 설정한 비밀번호"
             minimumLength={SIGNUP_PASSWORD_MIN_LENGTH}
             policyHint={SIGNUP_PASSWORD_POLICY_HINT}
             value={password}
@@ -126,7 +117,7 @@ export default function SiteInvitationPage() {
             {...composition.inputProps}
           />
           {error ? <p role="alert" className="mb-2 text-sm text-[var(--color-danger-text)]">{error}</p> : null}
-          <AuthSubmitButton disabled={accepting || !verification.verified}>{accepting ? "초대 확인 중..." : "초대 수락하고 로그인"}</AuthSubmitButton>
+          <AuthSubmitButton disabled={accepting}>{accepting ? "초대 확인 중..." : "초대 수락하고 로그인"}</AuthSubmitButton>
         </form>
         </>
       )}
