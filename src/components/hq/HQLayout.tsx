@@ -29,7 +29,6 @@ function HQSidebar() {
     }
   }, []);
   usePolling(poll, 10_000, 60_000);
-  const accountActive = location.pathname.startsWith("/hq/account");
 
   return (
     <aside
@@ -95,18 +94,30 @@ function HQSidebar() {
             긴급호출 {emergencyCount}건
           </Link>
         )}
-        <Link
-          to="/hq/account"
-          aria-current={accountActive ? "page" : undefined}
-          title="계정 설정"
-          className={`flex w-full items-center gap-2 rounded px-1.5 py-1.5 -mx-1.5 text-left transition-colors ${accountActive ? "bg-[var(--home-nav-active-bg)]" : "hover:bg-[var(--home-nav-active-bg)]"} focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]`}
-        >
-          <DefaultProfileAvatar className="size-8 shrink-0" />
-          <div className="flex min-w-0 flex-1 flex-col">
-            <p className="text-xs leading-4 text-[var(--color-text-body)]">{me ? `${me.user.name} 님` : " "}</p>
-            <p className="truncate pt-px text-[11px] leading-[16.5px] text-[var(--color-text-faint)]">{me?.company.companyName ?? " "}</p>
-          </div>
-        </Link>
+        <div className="flex w-full items-center gap-1">
+          <Link
+            to="/hq/account"
+            title="계정 설정"
+            className="flex min-w-0 flex-1 items-center gap-2 rounded px-1.5 py-1.5 text-left transition-colors hover:bg-[var(--home-nav-active-bg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
+          >
+            <DefaultProfileAvatar className="size-8 shrink-0" />
+            <div className="flex min-w-0 flex-1 flex-col">
+              <p className="text-xs leading-4 text-[var(--color-text-body)]">{me ? `${me.user.name} 님` : " "}</p>
+              <p className="truncate pt-px text-[11px] leading-[16.5px] text-[var(--color-text-faint)]">{me?.company.companyName ?? " "}</p>
+            </div>
+          </Link>
+          <Link
+            to="/hq/account"
+            aria-label="계정 설정"
+            title="계정 설정"
+            className="flex size-8 shrink-0 items-center justify-center rounded text-[var(--color-text-faint)] transition-colors hover:bg-[var(--home-nav-active-bg)] hover:text-[var(--color-text-heading)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="size-4">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.7 2.94-.08-.03a1.7 1.7 0 0 0-1.78.25l-.07.05h-3.4l-.02-.09a1.7 1.7 0 0 0-1.24-1.3l-.09-.02-1.7-2.94.06-.06A1.7 1.7 0 0 0 10 14l-.02-.09V10.5l.09-.02a1.7 1.7 0 0 0 1.3-1.24l.02-.09 2.94-1.7.06.06a1.7 1.7 0 0 0 1.88.34l.06-.03 2.94 1.7-.03.08a1.7 1.7 0 0 0 .25 1.78l.05.07v3.4l-.09.02A1.7 1.7 0 0 0 19.4 15Z" transform="translate(-2 -1) scale(1.15)" />
+            </svg>
+          </Link>
+        </div>
       </div>
     </aside>
   );
