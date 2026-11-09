@@ -423,7 +423,7 @@ export default function HomeDashboard() {
 
       <section className="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-0.5">
         <div
-          className="relative overflow-hidden rounded-xl border border-[var(--home-card-border)] p-5 min-h-[275px] flex flex-col"
+          className="home-dashboard-card relative overflow-hidden rounded-xl border border-[var(--home-card-border)] p-5 min-h-[275px] flex flex-col"
           style={{
             background: `linear-gradient(110deg, color-mix(in srgb, ${glowColor} 32%, var(--home-card-bg)) 0%, var(--home-card-bg) 100%)`,
           }}
@@ -515,7 +515,7 @@ export default function HomeDashboard() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-[var(--home-card-border)] bg-[var(--home-card-bg)] p-5 min-h-[275px] flex flex-col">
+        <div className="home-dashboard-card rounded-xl border border-[var(--home-card-border)] bg-[var(--home-card-bg)] p-5 min-h-[275px] flex flex-col">
           <div className="flex items-start justify-between">
             <h2 className="text-sm font-medium leading-5 text-[var(--color-text-label)]">오늘의 현황</h2>
             <div className="flex flex-col items-start mt-[13px] mr-[18px]">
@@ -603,7 +603,7 @@ export default function HomeDashboard() {
           </div>
       </div>
 
-      <div className="mt-3 bg-[var(--home-table-bg)] border border-[var(--home-card-border)] rounded-lg overflow-x-auto">
+      <div className="home-dashboard-card mt-3 bg-[var(--home-table-bg)] border border-[var(--home-card-border)] rounded-lg overflow-x-auto">
         <table className="w-full min-w-[720px] table-fixed border-collapse text-left">
           <colgroup>
             <col style={{ width: "19.3%" }} />

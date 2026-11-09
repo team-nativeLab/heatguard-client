@@ -48,10 +48,11 @@
   --home-main-bg: #0a0b0e;
   --home-nav-active-bg: rgba(59, 130, 246, 0.16);
   --home-nav-active-fg: #7cacf8;
-  --home-search-bg: #15181e;
-  --home-search-border: #22262e;
+  --home-search-bg: #13161b;
+  --home-search-border: #2a303a;
   --home-card-bg: #13161b;
-  --home-card-border: #1e2229;
+  --home-card-border: #2a303a;
+  --home-card-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
   --home-mini-tile-bg: #1a1d24;
   --home-weather-tile-bg: rgba(255, 255, 255, 0.04);
   --home-weather-tile-border: rgba(255, 255, 255, 0.06);
@@ -132,10 +133,11 @@
   --home-main-bg: #f3f8ff;
   --home-nav-active-bg: #eef2fd;
   --home-nav-active-fg: #2563eb;
-  --home-search-bg: #ffffff;
-  --home-search-border: transparent;
+  --home-search-bg: #f9fbff;
+  --home-search-border: #e1e7f0;
   --home-card-bg: #f9fbff;
-  --home-card-border: transparent;
+  --home-card-border: #e1e7f0;
+  --home-card-shadow: 0 3px 12px rgba(31, 41, 55, 0.07);
   --home-mini-tile-bg: #fffbf6;
   --home-weather-tile-bg: rgba(255, 255, 255, 0.72);
   --home-weather-tile-border: rgba(255, 255, 255, 0.9);
@@ -171,6 +173,10 @@
   --home-wave-img-filter: none;
   --home-tagline: #999ea6;
   --home-avatar-bg: #e6e8f0;
+}
+
+.home-dashboard-card {
+  box-shadow: var(--home-card-shadow);
 }
 
 /*
