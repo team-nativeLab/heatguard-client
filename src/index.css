@@ -132,7 +132,7 @@
   --home-main-bg: #f3f8ff;
   --home-nav-active-bg: #eef2fd;
   --home-nav-active-fg: #2563eb;
-  --home-search-bg: #f5f5f6;
+  --home-search-bg: #ffffff;
   --home-search-border: transparent;
   --home-card-bg: #f9fbff;
   --home-card-border: transparent;
@@ -345,7 +345,7 @@ body {
     --home-main-bg: #f3f8ff;
     --home-nav-active-bg: #eef2fd;
     --home-nav-active-fg: #2563eb;
-    --home-search-bg: #f5f5f6;
+    --home-search-bg: #ffffff;
     --home-search-border: transparent;
     --home-card-bg: #f9fbff;
     --home-card-border: transparent;
