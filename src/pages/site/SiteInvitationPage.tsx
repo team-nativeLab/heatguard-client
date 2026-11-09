@@ -92,7 +92,8 @@ export default function SiteInvitationPage() {
         </div>
       ) : (
         <>
-        <p className="mt-6 text-xs leading-5 text-[var(--auth-text-muted)]">먼저 미소속 현장 관리자 계정을 회원가입하세요. 가입한 이메일과 비밀번호로 로그인한 뒤 초대를 수락하면 현장에 연결됩니다.</p>\n        <p className="mt-2 text-xs text-[var(--auth-text-muted)]">계정이 없으신가요? <a href="/auth/signup" target="_blank" rel="noreferrer" className="font-semibold text-[var(--auth-accent)] hover:underline">먼저 회원가입</a></p>
+        <p className="mt-6 text-xs leading-5 text-[var(--auth-text-muted)]">먼저 미소속 현장 관리자 계정을 회원가입하세요. 가입한 이메일과 비밀번호로 로그인한 뒤 초대를 수락하면 현장에 연결됩니다.</p>
+        <p className="mt-2 text-xs text-[var(--auth-text-muted)]">계정이 없으신가요? <a href="/auth/signup" target="_blank" rel="noreferrer" className="font-semibold text-[var(--auth-accent)] hover:underline">먼저 회원가입</a></p>
         <form className="mt-3 flex flex-col gap-1" onSubmit={submit} noValidate>
           <AuthField label="계정 이메일" type="email" icon={<MailIcon />} placeholder="manager@example.com" autoComplete="username" value={email} onChange={(e) => { setEmail(e.target.value); setError(""); }} />
           <NewPasswordAuthField
