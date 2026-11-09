@@ -2,7 +2,7 @@ import { useCallback, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
 import sidebarWave from "../../assets/images/sidebar-wave.png";
-import { DashboardIcon, SiteManageIcon, ContactIcon, PrintIcon, DefaultProfileAvatar } from "../icons/Icons";
+import { DashboardIcon, SiteManageIcon, ContactIcon, PrintIcon, DefaultProfileAvatar, AccountIcon } from "../icons/Icons";
 import { usePolling } from "../../shared/hooks/usePolling";
 import { hqApi } from "../../api";
 import { useHqMe } from "../../hooks/useHqMe";
@@ -105,10 +105,7 @@ function HQSidebar() {
             <p className="text-xs leading-4 text-[var(--color-text-body)]">{me ? `${me.user.name} 님` : " "}</p>
             <p className="truncate pt-px text-[11px] leading-[16.5px] text-[var(--color-text-faint)]">{me?.company.companyName ?? " "}</p>
           </div>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="mr-1 size-[18px] shrink-0 text-[var(--color-text-faint)] transition-colors group-hover:text-[var(--color-text-heading)]">
-            <path d="M12.22 2h-.44a2 2 0 0 0-2 1.72l-.08.57a2 2 0 0 1-1.18 1.55l-.53.27a2 2 0 0 1-1.93-.1l-.48-.29a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.48.29a2 2 0 0 1 .97 1.67v.54a2 2 0 0 1-.97 1.67l-.48.29a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.48-.29a2 2 0 0 1 1.93-.1l.53.27a2 2 0 0 1 1.18 1.55l.08.57a2 2 0 0 0 2 1.72h.44a2 2 0 0 0 2-1.72l.08-.57a2 2 0 0 1 1.18-1.55l.53-.27a2 2 0 0 1 1.93.1l.48.29a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.48-.29a2 2 0 0 1-.97-1.67v-.54a2 2 0 0 1 .97-1.67l.48-.29a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.48.29a2 2 0 0 1-1.93-.1l-.53-.27a2 2 0 0 1-1.18-1.55l-.08-.57a2 2 0 0 0-2-1.72Z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
+          <AccountIcon className="mr-1 size-5 shrink-0 text-[var(--color-text-faint)] transition-colors group-hover:text-[var(--color-text-heading)]" />
         </Link>
       </div>
     </aside>
