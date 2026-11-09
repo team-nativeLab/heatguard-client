@@ -38,24 +38,22 @@ export default function SiteInvitationPage() {
     setAccepting(true);
     setError("");
     try {
+      // An invitation must only connect an already-created, unassigned manager account.
+      // Authenticate first so the accept endpoint cannot create an account as a side effect.
+      await authApi.login({ email: email.trim(), password });
       await authApi.acceptSiteInvitation({ invitationId, email: email.trim(), password, confirmPassword });
       setAccepted(true);
-      try {
-        await authApi.login({ email: email.trim(), password });
-        clearSiteMeCache();
-        authApi.clearManagedSitesCache();
-        clearSelectedSiteId();
-        markSignedIn();
-        showToast("현장 연결과 로그인이 완료됐어요.", "success");
-        navigate("/manager", { replace: true });
-      } catch {
-        showToast("현장 연결은 완료됐어요. 새 비밀번호로 로그인해주세요.", "success");
-      }
+      clearSiteMeCache();
+      authApi.clearManagedSitesCache();
+      clearSelectedSiteId();
+      markSignedIn();
+      showToast("현장 연결과 로그인이 완료됐어요.", "success");
+      navigate("/manager", { replace: true });
     } catch (err) {
-      if (err instanceof ApiError && err.status === 404) {
+      if (err instanceof ApiError && err.status === 401) {
+        setError("계정이 없거나 이메일 또는 비밀번호가 맞지 않아요. 먼저 현장관리자 회원가입을 완료한 뒤 이 초대 화면으로 돌아와주세요.");
+      } else if (err instanceof ApiError && err.status === 404) {
         setError("초대가 만료되었거나 이미 사용됐어요. 본사 관리자에게 새 링크를 요청해주세요.");
-      } else if (err instanceof ApiError && err.status === 401) {
-        setError("가입할 때 설정한 계정 비밀번호를 확인해주세요.");
       } else if (err instanceof ApiError && err.status === 409 && err.code === "EMAIL_ALREADY_EXISTS") {
         setError("이 이메일 계정을 현장 관리자 계정으로 연결할 수 없어요. 본사 관리자에게 확인해주세요.");
       } else if (err instanceof ApiError && err.status === 409) {
@@ -80,7 +78,7 @@ export default function SiteInvitationPage() {
       step={2}
       footerLabel="폭염가드 관리자 포털"
       cardTitle="현장 초대 수락"
-      cardSubtitle="가입한 현장 관리자 계정으로 연결해주세요."
+      cardSubtitle="회원가입한 현장 관리자 계정으로 로그인한 뒤 연결해주세요."
     >
       {accepted ? (
         <div className="mt-8 rounded-xl border border-[var(--auth-input-border)] bg-[var(--auth-secondary-bg)] p-5 text-sm leading-6 text-[var(--auth-text-muted)]">
@@ -94,7 +92,7 @@ export default function SiteInvitationPage() {
         </div>
       ) : (
         <>
-        <p className="mt-6 text-xs leading-5 text-[var(--auth-text-muted)]">미소속 현장 관리자 계정 가입 때 사용한 이메일과 현재 비밀번호를 입력해주세요.</p>
+        <p className="mt-6 text-xs leading-5 text-[var(--auth-text-muted)]">먼저 미소속 현장 관리자 계정을 회원가입하세요. 가입한 이메일과 비밀번호로 로그인한 뒤 초대를 수락하면 현장에 연결됩니다.</p>\n        <p className="mt-2 text-xs text-[var(--auth-text-muted)]">계정이 없으신가요? <a href="/auth/signup" target="_blank" rel="noreferrer" className="font-semibold text-[var(--auth-accent)] hover:underline">먼저 회원가입</a></p>
         <form className="mt-3 flex flex-col gap-1" onSubmit={submit} noValidate>
           <AuthField label="계정 이메일" type="email" icon={<MailIcon />} placeholder="manager@example.com" autoComplete="username" value={email} onChange={(e) => { setEmail(e.target.value); setError(""); }} />
           <NewPasswordAuthField
@@ -117,7 +115,7 @@ export default function SiteInvitationPage() {
             {...composition.inputProps}
           />
           {error ? <p role="alert" className="mb-2 text-sm text-[var(--color-danger-text)]">{error}</p> : null}
-          <AuthSubmitButton disabled={accepting}>{accepting ? "초대 확인 중..." : "초대 수락하고 로그인"}</AuthSubmitButton>
+          <AuthSubmitButton disabled={accepting}>{accepting ? "계정 확인 및 연결 중..." : "로그인 후 초대 수락"}</AuthSubmitButton>
         </form>
         </>
       )}
