@@ -7,7 +7,7 @@ import { hqApi, errorMessage, type HqDashboard, type HqSite, type HqSiteWeather 
 import { useHqMe } from "../../hooks/useHqMe";
 import { usePolling } from "../../shared/hooks/usePolling";
 import { doneText, heatLabel, heatTone, tempText } from "../../lib/hqFormat";
-import { ChevronDownIcon, ChevronRightIcon } from "../../components/home/HomeIcons";
+import { ChevronRightIcon } from "../../components/home/HomeIcons";
 import {
   AlertStatIcon,
   BuildingStatIcon,
