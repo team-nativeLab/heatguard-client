@@ -50,10 +50,10 @@ export default function SiteSettingsPage() {
       <section aria-busy={loading} className={`w-full max-w-[720px] pt-8 self-start ${loading ? "animate-pulse pointer-events-none" : ""}`}>
         <h2 className="font-medium text-[var(--color-text-heading)] text-sm">온도 체크 시간</h2>
         <p className="text-[var(--color-text-body)] text-xs pt-1">선택한 시간마다 팀에 온도 측정 알림이 가요.</p>
-        <div className="flex flex-col gap-2 pt-3">
-          {[TIME_SLOTS.slice(0, 12), TIME_SLOTS.slice(12, 24)].map((row, rowIndex) => (
-            <div key={rowIndex} className="grid grid-cols-6 sm:grid-cols-12 gap-x-1">
-              {row.map((slot) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 pt-3">
+          {[TIME_SLOTS.slice(0, 12), TIME_SLOTS.slice(12, 24)].map((column, columnIndex) => (
+            <div key={columnIndex} className="flex flex-col gap-1">
+              {column.map((slot) => (
                 <button
                   key={slot}
                   type="button"
@@ -61,12 +61,12 @@ export default function SiteSettingsPage() {
                   aria-checked={!!checked[slot]}
                   aria-label={`${slot} 온도 체크`}
                   onClick={() => setChecked((previous) => ({ ...previous, [slot]: !previous[slot] }))}
-                  className="flex min-w-0 gap-1 items-center justify-center h-8 rounded-md hover:bg-[var(--color-bg-tile)]/60 transition"
+                  className="flex gap-3 items-center h-8 px-1 -mx-1 rounded-md hover:bg-[var(--color-bg-tile)]/60 transition text-left"
                 >
-                  <span className={`flex shrink-0 items-center justify-center size-3.5 rounded border transition ${checked[slot] ? "bg-[var(--color-accent)] border-[var(--color-accent)]" : "border-[var(--color-checkbox-border)]"}`}>
+                  <span className={`flex items-center justify-center size-4 rounded border transition ${checked[slot] ? "bg-[var(--color-accent)] border-[var(--color-accent)]" : "border-[var(--color-checkbox-border)]"}`}>
                     {checked[slot] && <CheckboxCheckIcon className="size-2.5 text-white" />}
                   </span>
-                  <span className="font-['JetBrains_Mono',monospace] text-[var(--color-text-value)] text-[11px] sm:text-xs">{slot}</span>
+                  <span className="font-['JetBrains_Mono',monospace] text-[var(--color-text-value)] text-sm">{slot}</span>
                 </button>
               ))}
             </div>
