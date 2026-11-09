@@ -92,22 +92,28 @@ export default function ScreenHQAccount() {
           <Card title="화면 테마" description="원하는 화면 모드를 선택할 수 있어요.">
             <div className="flex items-center justify-between gap-4 border-t border-[var(--home-card-border)] px-5 py-3.5">
               <span className="text-[13px] text-[var(--color-text-body)]">화면 모드</span>
-              <div role="group" aria-label="화면 모드 선택" className="flex gap-2">
+              <div className="flex items-center gap-3">
+                <span className="text-[13px] text-[var(--color-text-label)]">{theme === "dark" ? "다크" : "라이트"}</span>
                 <button
                   type="button"
-                  aria-pressed={theme === "light"}
-                  onClick={() => theme !== "light" && toggleTheme()}
-                  className={`rounded border px-3.5 py-1.5 text-[13px] transition ${theme === "light" ? "border-[var(--color-accent)] bg-[var(--color-accent)] text-white" : "border-[var(--home-card-border)] bg-[var(--home-card-bg)] text-[var(--color-text-label)] hover:bg-[var(--color-bg-tile)]"}`}
+                  role="switch"
+                  aria-label="다크 모드"
+                  aria-checked={theme === "dark"}
+                  onClick={toggleTheme}
+                  className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] ${theme === "dark" ? "border-[var(--color-accent)] bg-[var(--color-accent)]" : "border-[var(--home-card-border)] bg-[var(--color-bg-tile)]"}`}
                 >
-                  라이트
-                </button>
-                <button
-                  type="button"
-                  aria-pressed={theme === "dark"}
-                  onClick={() => theme !== "dark" && toggleTheme()}
-                  className={`rounded border px-3.5 py-1.5 text-[13px] transition ${theme === "dark" ? "border-[var(--color-accent)] bg-[var(--color-accent)] text-white" : "border-[var(--home-card-border)] bg-[var(--home-card-bg)] text-[var(--color-text-label)] hover:bg-[var(--color-bg-tile)]"}`}
-                >
-                  다크
+                  <span className={`flex size-5 items-center justify-center rounded-full bg-white shadow-sm transition-transform ${theme === "dark" ? "translate-x-[22px]" : "translate-x-1"}`}>
+                    {theme === "dark" ? (
+                      <svg viewBox="0 0 24 24" className="size-3 text-slate-700" fill="currentColor" aria-hidden="true">
+                        <path d="M20.2 15.4A8.5 8.5 0 0 1 8.6 3.8 8.6 8.6 0 1 0 20.2 15.4Z" />
+                      </svg>
+                    ) : (
+                      <svg viewBox="0 0 24 24" className="size-3 text-amber-500" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4" />
+                        <path strokeLinecap="round" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                      </svg>
+                    )}
+                  </span>
                 </button>
               </div>
             </div>
