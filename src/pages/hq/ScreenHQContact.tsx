@@ -177,12 +177,14 @@ function InquiryDetailModal({
     if (!content || busy) return;
     setBusy(true);
     try {
-      if (!Number.isFinite(inquiry.version)) throw new Error("문의 버전 정보를 불러오지 못했어요. 상세를 다시 열어주세요.");
-      await inquiriesApi.replyToHqInquiry(inquiry.inquiryId, content, inquiry.version);
+      const version = inquiry.version;
+      if (version == null || !Number.isFinite(version)) throw new Error("문의 버전 정보를 불러오지 못했어요. 상세를 다시 열어주세요.");
+      await inquiriesApi.replyToHqInquiry(inquiry.inquiryId, content, version);
       if (inquiry.status !== "ANSWERED") {
         const latest = await inquiriesApi.getHqInquiry(inquiry.inquiryId);
-        if (!Number.isFinite(latest.version)) throw new Error("문의 버전 정보를 불러오지 못했어요. 상세를 다시 열어주세요.");
-        await inquiriesApi.updateHqInquiryStatus(inquiry.inquiryId, "ANSWERED", latest.version);
+        const latestVersion = latest.version;
+        if (latestVersion == null || !Number.isFinite(latestVersion)) throw new Error("문의 버전 정보를 불러오지 못했어요. 상세를 다시 열어주세요.");
+        await inquiriesApi.updateHqInquiryStatus(inquiry.inquiryId, "ANSWERED", latestVersion);
       }
       await onUpdated();
       setReply("");
@@ -198,8 +200,9 @@ function InquiryDetailModal({
     if (busy || status === inquiry.status) return;
     setBusy(true);
     try {
-      if (!Number.isFinite(inquiry.version)) throw new Error("문의 버전 정보를 불러오지 못했어요. 상세를 다시 열어주세요.");
-      await inquiriesApi.updateHqInquiryStatus(inquiry.inquiryId, status, inquiry.version);
+      const version = inquiry.version;
+      if (version == null || !Number.isFinite(version)) throw new Error("문의 버전 정보를 불러오지 못했어요. 상세를 다시 열어주세요.");
+      await inquiriesApi.updateHqInquiryStatus(inquiry.inquiryId, status, version);
       await onUpdated();
       showToast("문의 상태를 변경했어요.", "success");
     } catch (error) {
