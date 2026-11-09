@@ -520,7 +520,7 @@ export default function HomeDashboard() {
             <h2 className="text-sm font-medium leading-5 text-[var(--color-text-label)]">오늘의 현황</h2>
             <div className="flex flex-col items-start mt-[13px] mr-[18px]">
               <p className="text-sm leading-5 text-[var(--color-text-body)] whitespace-nowrap">{dateText}</p>
-              <p className="font-light text-[28px] leading-[34px] pt-1 tracking-[-1.2px] text-[var(--color-text-heading)] tabular-nums">
+              <p className="font-light text-[36px] leading-[42px] pt-1 tracking-[-1.2px] text-[var(--color-text-heading)] tabular-nums">
                 {timeText}
               </p>
             </div>
