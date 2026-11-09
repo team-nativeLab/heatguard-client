@@ -13,6 +13,17 @@ import { usePasswordComposition } from "../../components/auth/usePasswordComposi
 
 const PHONE_RE = /^0\d{1,2}-?\d{3,4}-?\d{4}$/;
 
+function formatPhoneNumber(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (!digits) return "";
+  const prefixLength = digits.startsWith("02") ? 2 : 3;
+  const middleLength = prefixLength === 2 || digits.length >= 11 ? 4 : 3;
+  const prefix = digits.slice(0, prefixLength);
+  const middle = digits.slice(prefixLength, prefixLength + middleLength);
+  const last = digits.slice(prefixLength + middleLength, prefixLength + middleLength + 4);
+  return [prefix, middle, last].filter(Boolean).join("-");
+}
+
 const smallBtn =
   "shrink-0 rounded border border-[var(--home-card-border)] bg-[var(--home-card-bg)] px-3.5 py-1.5 text-[13px] font-normal leading-[1.45] text-[var(--color-text-label)] transition hover:bg-[var(--color-bg-tile)]";
 
@@ -63,7 +74,7 @@ export default function ScreenHQAccount() {
 
           <Card title="기본 정보" description="본사 관리자 계정 정보예요.">
             <Row label="이름" value={me?.user.name ?? "-"} action={fixedNote} />
-            <Row label="아이디" value={me?.user.email ?? "-"} action={fixedNote} />
+            <Row label="이메일" value={me?.user.email ?? "-"} action={fixedNote} />
             <Row
               label="연락처"
               value={phone || "등록된 연락처가 없어요"}
@@ -130,7 +141,7 @@ export default function ScreenHQAccount() {
 /** 본사 연락처 = 회사 대표 연락처(작업자 홈에 표시됨). 빈 값으로 저장하면 해제된다. */
 function PhoneModal({ initial, onClose }: { initial: string; onClose: () => void }) {
   const { showToast } = useToast();
-  const [value, setValue] = useState(initial);
+  const [value, setValue] = useState(formatPhoneNumber(initial));
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -176,7 +187,7 @@ function PhoneModal({ initial, onClose }: { initial: string; onClose: () => void
           maxLength={13}
           value={value}
           onChange={(e) => {
-            setValue(e.target.value);
+            setValue(formatPhoneNumber(e.target.value));
             setError("");
           }}
           onKeyDown={(e) => e.key === "Enter" && handleSave()}
