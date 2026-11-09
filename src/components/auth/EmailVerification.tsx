@@ -14,7 +14,7 @@ export default function EmailVerification({ email, onEmailChange, emailError, ve
   const emailId = useId();
   const codeId = useId();
   const codeError = v.error || error;
-  const canSend = !disabled && !v.sending && !v.verifying && v.cooldown <= 0;
+  const canSend = !disabled && !v.sending && !v.verifying && !v.verified && v.cooldown <= 0;
 
   return (
     <div className="mb-3 flex flex-col gap-5">
