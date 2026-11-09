@@ -74,6 +74,7 @@ export function listManagedSites({ refresh = false }: { refresh?: boolean } = {}
 export function acceptSiteInvitation(payload: {
   invitationId: string;
   email: string;
+  managerPhone: string;
   password: string;
   confirmPassword: string;
   verificationToken?: string;
