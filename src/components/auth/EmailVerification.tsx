@@ -13,7 +13,8 @@ export default function EmailVerification({ email, onEmailChange, emailError, ve
 }) {
   const emailId = useId();
   const codeId = useId();
-  const codeError = v.error || error;
+  const emailFieldError = emailError || (!v.sent ? v.error : undefined);
+  const codeError = error || (v.sent ? v.error : undefined);
   const canSend = !disabled && !v.sending && !v.verifying && !v.verified && v.cooldown <= 0;
 
   return (
@@ -22,7 +23,7 @@ export default function EmailVerification({ email, onEmailChange, emailError, ve
         <label htmlFor={emailId} className="mb-1.5 block text-[13px] font-medium leading-[1.4] text-[var(--auth-text-strong)]">이메일</label>
         <div className="flex items-center gap-2">
           <div className={`flex h-11 min-w-0 flex-1 items-center gap-3 rounded-[10px] border bg-[var(--auth-input-bg)] px-4 transition-colors ${
-            emailError ? "border-[var(--auth-danger)]" : "border-[var(--auth-input-border)] focus-within:border-[var(--auth-accent)]"
+            emailFieldError ? "border-[var(--auth-danger)]" : "border-[var(--auth-input-border)] focus-within:border-[var(--auth-accent)]"
           }`}>
             <span className="flex shrink-0 items-center text-[var(--auth-text-muted)]"><MailIcon /></span>
             <input
@@ -33,8 +34,8 @@ export default function EmailVerification({ email, onEmailChange, emailError, ve
               value={email}
               disabled={disabled || v.sending || v.verifying}
               onChange={onEmailChange}
-              aria-invalid={emailError ? true : undefined}
-              aria-describedby={emailError ? `${emailId}-error` : undefined}
+              aria-invalid={emailFieldError ? true : undefined}
+              aria-describedby={emailFieldError ? `${emailId}-error` : undefined}
               className="min-w-0 flex-1 bg-transparent text-sm font-normal leading-[1.4] text-[var(--auth-text-strong)] outline-none placeholder:text-[var(--auth-text-muted)]"
             />
           </div>
@@ -47,7 +48,7 @@ export default function EmailVerification({ email, onEmailChange, emailError, ve
             {v.sending ? "발송 중..." : "인증코드발송"}
           </button>
         </div>
-        {emailError && <p id={`${emailId}-error`} role="alert" className="mt-1.5 text-xs leading-[1.4] text-[var(--auth-danger)]">{emailError}</p>}
+        {emailFieldError && <p id={`${emailId}-error`} role="alert" className="mt-1.5 text-xs leading-[1.4] text-[var(--auth-danger)]">{emailFieldError}</p>}
       </div>
 
       <div>
