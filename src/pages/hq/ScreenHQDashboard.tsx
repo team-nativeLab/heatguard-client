@@ -201,7 +201,7 @@ export default function ScreenHQDashboard() {
 
         <section className="mt-0.5 grid grid-cols-1 gap-4 xl:grid-cols-2">
           <div
-            className="relative flex min-h-[275px] flex-col overflow-hidden rounded-xl border border-[var(--home-card-border)] p-5"
+            className="home-dashboard-card relative flex min-h-[275px] flex-col overflow-hidden rounded-xl border border-[var(--home-card-border)] p-5"
             style={{ background: `linear-gradient(110deg, color-mix(in srgb, ${glowColor} 32%, var(--home-card-bg)) 0%, var(--home-card-bg) 100%)` }}
           >
             <div className="relative flex flex-wrap items-center justify-start gap-2">
@@ -292,7 +292,7 @@ export default function ScreenHQDashboard() {
             </div>
           </div>
 
-          <div className="flex min-h-[275px] flex-col rounded-xl border border-[var(--home-card-border)] bg-[var(--home-card-bg)] p-5">
+          <div className="home-dashboard-card flex min-h-[275px] flex-col rounded-xl border border-[var(--home-card-border)] bg-[var(--home-card-bg)] p-5">
             <div className="flex items-start justify-between">
               <h2 className="text-sm font-medium leading-5 text-[var(--color-text-label)]">오늘의 현황</h2>
               <div className="flex flex-col items-end text-right">
@@ -331,7 +331,7 @@ export default function ScreenHQDashboard() {
               <Link
                 key={site.id}
                 to={`/hq/sites/${encodeURIComponent(site.id)}`}
-                className="flex min-h-[74px] items-center gap-4 rounded-lg border border-[var(--home-card-border)] bg-[var(--home-card-bg)] px-5 py-4 transition-colors hover:bg-[var(--color-bg-surface)]"
+                className="home-dashboard-card flex min-h-[74px] items-center gap-4 rounded-lg border border-[var(--home-card-border)] bg-[var(--home-card-bg)] px-5 py-4 transition-colors hover:bg-[var(--color-bg-surface)]"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
