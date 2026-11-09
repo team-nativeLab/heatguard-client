@@ -94,30 +94,22 @@ function HQSidebar() {
             긴급호출 {emergencyCount}건
           </Link>
         )}
-        <div className="flex w-full items-center gap-1">
-          <Link
-            to="/hq/account"
-            title="계정 설정"
-            className="flex min-w-0 flex-1 items-center gap-2 rounded px-1.5 py-1.5 text-left transition-colors hover:bg-[var(--home-nav-active-bg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
-          >
-            <DefaultProfileAvatar className="size-8 shrink-0" />
-            <div className="flex min-w-0 flex-1 flex-col">
-              <p className="text-xs leading-4 text-[var(--color-text-body)]">{me ? `${me.user.name} 님` : " "}</p>
-              <p className="truncate pt-px text-[11px] leading-[16.5px] text-[var(--color-text-faint)]">{me?.company.companyName ?? " "}</p>
-            </div>
-          </Link>
-          <Link
-            to="/hq/account"
-            aria-label="계정 설정"
-            title="계정 설정"
-            className="flex size-8 shrink-0 items-center justify-center rounded text-[var(--color-text-faint)] transition-colors hover:bg-[var(--home-nav-active-bg)] hover:text-[var(--color-text-heading)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="size-[18px]">
-              <path d="M12.22 2h-.44a2 2 0 0 0-2 1.72l-.08.57a2 2 0 0 1-1.18 1.55l-.53.27a2 2 0 0 1-1.93-.1l-.48-.29a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.48.29a2 2 0 0 1 .97 1.67v.54a2 2 0 0 1-.97 1.67l-.48.29a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.48-.29a2 2 0 0 1 1.93-.1l.53.27a2 2 0 0 1 1.18 1.55l.08.57a2 2 0 0 0 2 1.72h.44a2 2 0 0 0 2-1.72l.08-.57a2 2 0 0 1 1.18-1.55l.53-.27a2 2 0 0 1 1.93.1l.48.29a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.48-.29a2 2 0 0 1-.97-1.67v-.54a2 2 0 0 1 .97-1.67l.48-.29a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.48.29a2 2 0 0 1-1.93-.1l-.53-.27a2 2 0 0 1-1.18-1.55l-.08-.57a2 2 0 0 0-2-1.72Z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-          </Link>
-        </div>
+        <Link
+          to="/hq/account"
+          aria-label="계정 설정"
+          title="계정 설정"
+          className="group flex w-full min-w-0 items-center gap-2 rounded px-1.5 py-1.5 text-left transition-colors hover:bg-[var(--home-nav-active-bg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
+        >
+          <DefaultProfileAvatar className="size-8 shrink-0" />
+          <div className="flex min-w-0 flex-1 flex-col">
+            <p className="text-xs leading-4 text-[var(--color-text-body)]">{me ? `${me.user.name} 님` : " "}</p>
+            <p className="truncate pt-px text-[11px] leading-[16.5px] text-[var(--color-text-faint)]">{me?.company.companyName ?? " "}</p>
+          </div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="mr-1 size-[18px] shrink-0 text-[var(--color-text-faint)] transition-colors group-hover:text-[var(--color-text-heading)]">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 1.72l-.08.57a2 2 0 0 1-1.18 1.55l-.53.27a2 2 0 0 1-1.93-.1l-.48-.29a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.48.29a2 2 0 0 1 .97 1.67v.54a2 2 0 0 1-.97 1.67l-.48.29a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.48-.29a2 2 0 0 1 1.93-.1l.53.27a2 2 0 0 1 1.18 1.55l.08.57a2 2 0 0 0 2 1.72h.44a2 2 0 0 0 2-1.72l.08-.57a2 2 0 0 1 1.18-1.55l.53-.27a2 2 0 0 1 1.93.1l.48.29a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.48-.29a2 2 0 0 1-.97-1.67v-.54a2 2 0 0 1 .97-1.67l.48-.29a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.48.29a2 2 0 0 1-1.93-.1l-.53-.27a2 2 0 0 1-1.18-1.55l-.08-.57a2 2 0 0 0-2-1.72Z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        </Link>
       </div>
     </aside>
   );
