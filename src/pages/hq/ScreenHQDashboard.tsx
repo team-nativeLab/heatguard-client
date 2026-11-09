@@ -212,11 +212,11 @@ export default function ScreenHQDashboard() {
                   aria-haspopup="listbox"
                   aria-expanded={siteMenuOpen}
                   onClick={() => setSiteMenuOpen((open) => !open)}
-                  className="flex h-10 max-w-[240px] items-center gap-2.5 rounded-full border border-[var(--home-card-border)] bg-[var(--home-card-bg)] pl-4 pr-3 text-[15px] font-medium text-[var(--color-text-heading)] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+                  className="flex h-[26px] max-w-[220px] items-center gap-1.5 rounded-full border border-[var(--home-card-border)] bg-[var(--home-card-bg)] pl-[11px] pr-2 text-xs font-medium text-[var(--color-text-heading)] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
                 >
                   <PinStatIcon />
-                  <span className="max-w-[180px] truncate">{selectedSite?.name ?? "현장 없음"}</span>
-                  <ChevronRightIcon className="size-4 shrink-0 text-[var(--color-text-body)]" />
+                  <span className="max-w-[160px] truncate">{selectedSite?.name ?? "현장 없음"}</span>
+                  <ChevronRightIcon className="size-3 shrink-0 text-[var(--color-text-body)]" />
                 </button>
                 {siteMenuOpen && (
                   <div
