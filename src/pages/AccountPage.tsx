@@ -12,6 +12,7 @@ import { clearSelectedSiteId } from "../lib/siteSelection";
 import { getPasswordConfirmationError, getPasswordError } from "../lib/passwordPolicy";
 import { NewPasswordInput } from "../components/auth/NewPasswordField";
 import { usePasswordComposition } from "../components/auth/usePasswordComposition";
+import { useTheme } from "../shared/theme/ThemeContext";
 
 const PHONE_RE = /^0\d{1,2}-?\d{3,4}-?\d{4}$/;
 
@@ -48,6 +49,7 @@ function Row({ label, value, sub, action }: { label: string; value: ReactNode; s
 const fixedNote = <span className="shrink-0 text-xs leading-[1.45] text-[var(--color-text-faint)]">변경 불가</span>;
 
 export default function AccountPage() {
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const { showToast } = useToast();
   const me = useSiteMe();
@@ -134,6 +136,30 @@ export default function AccountPage() {
               }
             />
             <Row label="현재 선택 현장" value={me.site.name || "-"} sub="여러 현장을 관리하는 경우 왼쪽 메뉴에서 전환할 수 있어요." action={fixedNote} />
+          </Card>
+
+          <Card title="화면 테마" description="원하는 화면 모드를 선택할 수 있어요.">
+            <div className="flex items-center justify-between gap-4 border-t border-[var(--home-card-border)] px-5 py-3.5">
+              <span className="text-[13px] text-[var(--color-text-body)]">화면 모드</span>
+              <div role="group" aria-label="화면 모드 선택" className="flex gap-2">
+                <button
+                  type="button"
+                  aria-pressed={theme === "light"}
+                  onClick={() => theme !== "light" && toggleTheme()}
+                  className={`rounded border px-3.5 py-1.5 text-[13px] transition ${theme === "light" ? "border-[var(--color-accent)] bg-[var(--color-accent)] text-white" : "border-[var(--home-card-border)] bg-[var(--home-card-bg)] text-[var(--color-text-label)] hover:bg-[var(--color-bg-tile)]"}`}
+                >
+                  라이트
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={theme === "dark"}
+                  onClick={() => theme !== "dark" && toggleTheme()}
+                  className={`rounded border px-3.5 py-1.5 text-[13px] transition ${theme === "dark" ? "border-[var(--color-accent)] bg-[var(--color-accent)] text-white" : "border-[var(--home-card-border)] bg-[var(--home-card-bg)] text-[var(--color-text-label)] hover:bg-[var(--color-bg-tile)]"}`}
+                >
+                  다크
+                </button>
+              </div>
+            </div>
           </Card>
 
           <Card title="로그인 보안" description="주기적으로 비밀번호를 바꾸면 계정을 안전하게 지킬 수 있어요.">
