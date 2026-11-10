@@ -193,7 +193,11 @@ export default function AccountPage() {
               label="로그아웃"
               value=""
               action={
-                <button type="button" onClick={() => setConfirmingLogout(true)} className={smallBtn}>
+                <button
+                  type="button"
+                  onClick={() => setConfirmingLogout(true)}
+                  className={`${smallBtn} border-[var(--color-danger-border)] text-[var(--color-danger-text)] hover:bg-[var(--color-danger-soft-bg)]`}
+                >
                   로그아웃
                 </button>
               }
