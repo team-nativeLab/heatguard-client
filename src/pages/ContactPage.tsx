@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import HomeLayout from "../components/home/HomeLayout";
 import ModalShell, { btnPrimary, btnSecondary, inputCls } from "../components/home/ModalShell";
 import { useToast } from "../shared/ui/Toast";
@@ -149,6 +149,8 @@ export default function ContactPage() {
 function NewInquiryModal({ onClose, onCreated }: { onClose: () => void; onCreated: (i: Inquiry) => void }) {
   const { showToast } = useToast();
   const [type, setType] = useState<InquiryType | "">("");
+  const [typeMenuOpen, setTypeMenuOpen] = useState(false);
+  const typeMenuRef = useRef<HTMLDivElement>(null);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -178,6 +180,22 @@ function NewInquiryModal({ onClose, onCreated }: { onClose: () => void; onCreate
 
   const label = "text-xs font-medium leading-[1.45] text-[var(--color-text-label)]";
 
+  useEffect(() => {
+    if (!typeMenuOpen) return;
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (event.target instanceof Node && !typeMenuRef.current?.contains(event.target)) setTypeMenuOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setTypeMenuOpen(false);
+    };
+    document.addEventListener("mousedown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("mousedown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [typeMenuOpen]);
+
   return (
     <ModalShell
       title="새 문의"
@@ -196,24 +214,40 @@ function NewInquiryModal({ onClose, onCreated }: { onClose: () => void; onCreate
     >
       <label className="flex flex-col gap-1.5">
         <span className={label}>문의 유형</span>
-        <div className="relative">
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value as InquiryType)}
-            className={`${inputCls} appearance-none pr-9 ${type ? "" : "text-[var(--color-text-faint)]"}`}
+        <div className="relative" ref={typeMenuRef}>
+          <button
+            type="button"
+            role="combobox"
+            aria-label="문의 유형"
+            aria-haspopup="listbox"
+            aria-expanded={typeMenuOpen}
+            onClick={() => setTypeMenuOpen((open) => !open)}
+            className={`${inputCls} flex items-center justify-between text-left ${type ? "" : "text-[var(--color-text-faint)]"}`}
           >
-            <option value="" disabled>
-              유형을 선택해 주세요
-            </option>
-            {TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-          <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-body)]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="m6 9 6 6 6-6" />
-          </svg>
+            <span>{type || "유형을 선택해 주세요"}</span>
+            <svg className={`ml-2 size-3.5 shrink-0 text-[var(--color-text-body)] transition-transform ${typeMenuOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+          {typeMenuOpen && (
+            <div role="listbox" aria-label="문의 유형" className="absolute left-0 right-0 top-[calc(100%+4px)] z-[100] overflow-hidden rounded border border-[var(--home-card-border)] bg-[var(--color-bg-surface)] p-1 shadow-[0_8px_20px_rgba(15,23,42,0.16)]">
+              {TYPES.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  role="option"
+                  aria-selected={type === option}
+                  onClick={() => {
+                    setType(option);
+                    setTypeMenuOpen(false);
+                  }}
+                  className={`flex h-8 w-full items-center rounded px-2.5 text-left text-[13px] leading-[1.45] transition-colors ${type === option ? "bg-[var(--color-accent-soft-bg)] text-[var(--color-accent)]" : "text-[var(--color-text-heading)] hover:bg-[var(--color-bg-tile)]"}`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </label>
 
@@ -287,3 +321,4 @@ function InquiryDetailModal({ inquiry, onClose }: { inquiry: Inquiry; onClose: (
     </ModalShell>
   );
 }
+
