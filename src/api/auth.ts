@@ -104,19 +104,6 @@ export function updateEmail(payload: { email: string; currentPassword: string; v
   return apiFetch<SiteUser>("/api/v1/auth/site/email", { method: "PATCH", body: payload });
 }
 
-/** 로그인한 독립 현장 관리자를 기존 현장과 함께 본사에 연결한다. */
-export interface AcceptCompanyInvitationResponse {
-  userId: string;
-  companyId: string;
-  sites: ManagedSite[];
-  selectedSiteId: string | null;
-  membershipStatus: "JOINED" | string;
-  sessionUpdated: boolean;
-}
-export function acceptCompanyInvitation(payload: { invitationId: string; currentPassword: string }) {
-  return apiFetch<AcceptCompanyInvitationResponse>("/api/v1/auth/site/company-invitations/accept", { method: "POST", body: payload });
-}
-
 export function login(payload: LoginPayload) {
   return apiFetch<SiteLoginResponse>("/api/v1/auth/site/login", { method: "POST", body: payload });
 }
