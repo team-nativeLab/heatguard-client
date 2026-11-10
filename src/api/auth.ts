@@ -71,6 +71,22 @@ export function listManagedSites({ refresh = false }: { refresh?: boolean } = {}
   return managedSitesRequest;
 }
 
+export interface CreateManagedSiteResponse {
+  site: { siteId: string; siteName: string };
+  defaultTeam: { teamId: string; teamName?: string };
+  items: Array<{ siteId: string; siteName: string }>;
+  selectedSiteId: string;
+  membershipStatus: "JOINED" | string;
+}
+
+/** 미연동 현장 관리자가 독립 현장과 기본팀을 생성한다. */
+export function createManagedSite(payload: { siteName: string; managerPhone: string }) {
+  return apiFetch<CreateManagedSiteResponse>("/api/v1/auth/site/sites", {
+    method: "POST",
+    body: payload,
+  });
+}
+
 export function acceptSiteInvitation(payload: {
   invitationId: string;
   email: string;
