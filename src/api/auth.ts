@@ -99,6 +99,23 @@ export function acceptSiteInvitation(payload: {
   return apiFetch<unknown>("/api/v1/auth/site/invitations/accept", { method: "POST", body: payload });
 }
 
+export interface AcceptCompanyInvitationResponse {
+  userId: string;
+  companyId: string;
+  sites: Array<{ siteId: string; siteName: string }>;
+  selectedSiteId: string;
+  membershipStatus: "JOINED" | string;
+  sessionUpdated: boolean;
+}
+
+/** 기존 미연동 현장관리자 계정을 본사 초대에 연결한다. */
+export function acceptCompanyInvitation(payload: { invitationId: string; currentPassword: string }) {
+  return apiFetch<AcceptCompanyInvitationResponse>("/api/v1/auth/site/company-invitations/accept", {
+    method: "POST",
+    body: payload,
+  });
+}
+
 export function login(payload: LoginPayload) {
   return apiFetch<SiteLoginResponse>("/api/v1/auth/site/login", { method: "POST", body: payload });
 }
