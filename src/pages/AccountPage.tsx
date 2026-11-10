@@ -13,6 +13,7 @@ import { getPasswordConfirmationError, getPasswordError } from "../lib/passwordP
 import { NewPasswordInput } from "../components/auth/NewPasswordField";
 import { usePasswordComposition } from "../components/auth/usePasswordComposition";
 import { useTheme } from "../shared/theme/ThemeContext";
+import EmailChangeModal from "../components/account/EmailChangeModal";
 
 const PHONE_RE = /^0\d{1,2}-?\d{3,4}-?\d{4}$/;
 
@@ -67,6 +68,7 @@ export default function AccountPage() {
   const [changingPw, setChangingPw] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [editingPhone, setEditingPhone] = useState(false);
+  const [editingEmail, setEditingEmail] = useState(false);
   const [confirmingWithdrawal, setConfirmingWithdrawal] = useState(false);
   const [withdrawalPassword, setWithdrawalPassword] = useState("");
   const [withdrawing, setWithdrawing] = useState(false);
@@ -136,7 +138,7 @@ export default function AccountPage() {
                 </button>
               }
             />
-            <Row label="이메일" value={me.user.email || "-"} action={fixedNote} />
+            <Row label="이메일" value={me.user.email || "-"} action={<button type="button" onClick={() => setEditingEmail(true)} className={smallBtn}>변경</button>} />
             <Row
               label="연락처"
               value={me.user.phone || "등록된 연락처가 없어요"}
@@ -215,6 +217,7 @@ export default function AccountPage() {
         </div>
       </div>
 
+      {editingEmail && <EmailChangeModal currentEmail={me.user.email || ""} onClose={() => setEditingEmail(false)} onSave={async (payload) => { const updated = await authApi.updateEmail(payload); patchSiteMeUser({ email: updated.email || payload.email }); showToast("이메일을 변경했어요.", "success"); }} />}
       {editingName && <NameModal initial={me.user.name} onClose={() => setEditingName(false)} />}
       {changingPw && <PasswordModal onClose={() => setChangingPw(false)} />}
       {editingPhone && <PhoneModal initial={me.user.phone ?? ""} onClose={() => setEditingPhone(false)} />}
