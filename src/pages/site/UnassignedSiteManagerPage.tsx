@@ -10,7 +10,7 @@ import { clearSiteMeCache } from "../../hooks/useSiteMe";
 import { setSelectedSiteId } from "../../lib/siteSelection";
 
 function formatPhone(value: string) {
-  const digits = value.replace(/\\D/g, "").slice(0, 11);
+  const digits = value.replace(/\D/g, "").slice(0, 11);
   if (digits.length <= 3) return digits;
   if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
   return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
@@ -47,12 +47,12 @@ export default function UnassignedSiteManagerPage() {
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (submitting) return;
-    const normalizedPhone = phone.replace(/\\D/g, "");
+    const normalizedPhone = phone.replace(/\D/g, "");
     if (!siteName.trim()) {
       setError("현장 이름을 입력해주세요.");
       return;
     }
-    if (!/^01[016789]\\d{7,8}$/.test(normalizedPhone)) {
+    if (!/^01[016789]\d{7,8}$/.test(normalizedPhone)) {
       setError("휴대전화 번호를 확인해주세요.");
       return;
     }
