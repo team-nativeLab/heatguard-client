@@ -12,7 +12,21 @@ import { heatLabel, heatTone, sortByRisk } from "../../lib/hqFormat";
 const inputCls =
   "h-[38px] rounded border border-[var(--color-border)] bg-[var(--color-bg-app)] px-3 text-sm text-[var(--color-text-heading)] outline-none focus:border-[var(--color-accent)]";
 
-const EMPTY_FORM = { siteName: "", managerName: "" };
+const EMPTY_FORM = { siteName: "", managerName: "", managerPhone: "" };
+const PHONE_RE = /^0\d{1,2}-?\d{3,4}-?\d{4}$/;
+
+function formatPhoneNumber(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (!digits) return "";
+  if (digits.startsWith("02")) {
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 6) return `02-${digits.slice(2)}`;
+    return `02-${digits.slice(2, -4)}-${digits.slice(-4)}`;
+  }
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, -4)}-${digits.slice(-4)}`;
+}
 
 function makeInvitationUrl(invitationId: string) {
   const url = new URL("/site-invitation", window.location.origin);
@@ -63,13 +77,15 @@ export default function ScreenHQSites() {
   const handleCreate = async (e: FormEvent) => {
     e.preventDefault();
     if (creating) return;
-    const v = { ...form, siteName: form.siteName.trim(), managerName: form.managerName.trim() };
+    const v = { ...form, siteName: form.siteName.trim(), managerName: form.managerName.trim(), managerPhone: form.managerPhone.trim() };
     if (!v.siteName) return showToast("현장 이름을 입력해 주세요.", "error");
     if (!v.managerName) return showToast("현장관리자 이름을 입력해 주세요.", "error");
+    if (!v.managerPhone) return showToast("현장관리자 전화번호를 입력해 주세요.", "error");
+    if (!PHONE_RE.test(v.managerPhone)) return showToast("현장관리자 전화번호 형식을 확인해 주세요.", "error");
 
     setCreating(true);
     try {
-      const result = await hqApi.createSite({ siteName: v.siteName, managerName: v.managerName });
+      const result = await hqApi.createSite({ siteName: v.siteName, managerName: v.managerName, managerPhone: v.managerPhone });
       setForm(EMPTY_FORM);
       setAdding(false);
       const invitationId = result.managerInvitationId || result.invitationId;
@@ -191,7 +207,7 @@ export default function ScreenHQSites() {
             </>}
           >
             <form id="add-site" onSubmit={handleCreate} noValidate>
-              <p className="mb-4 text-xs leading-5 text-[var(--color-text-body)]">현장을 만든 뒤 현장관리자 초대 링크를 발급합니다. 초대받은 관리자가 링크에서 이메일과 비밀번호를 설정해 현장에 연결합니다.</p>
+              <p className="mb-4 text-xs leading-5 text-[var(--color-text-body)]">현장관리자 전화번호는 앱에서 초대를 수락할 때 본인 확인에 사용합니다.</p>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <label className="flex flex-col gap-1.5">
                   <span className="text-xs text-[var(--color-text-body)]">현장 이름 *</span>
@@ -200,6 +216,20 @@ export default function ScreenHQSites() {
                 <label className="flex flex-col gap-1.5">
                   <span className="text-xs text-[var(--color-text-body)]">현장관리자 이름 *</span>
                   <input disabled={creating} className={inputCls} value={form.managerName} onChange={setField("managerName")} autoComplete="off" />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-xs text-[var(--color-text-body)]">현장관리자 전화번호 *</span>
+                  <input
+                    disabled={creating}
+                    type="tel"
+                    inputMode="numeric"
+                    autoComplete="tel"
+                    maxLength={13}
+                    className={inputCls}
+                    value={form.managerPhone}
+                    onChange={(event) => setForm((previous) => ({ ...previous, managerPhone: formatPhoneNumber(event.target.value) }))}
+                    placeholder="010-0000-0000"
+                  />
                 </label>
               </div>
             </form>
