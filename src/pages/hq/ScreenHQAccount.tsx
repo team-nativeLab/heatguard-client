@@ -156,20 +156,22 @@ export default function ScreenHQAccount() {
                 </button>
               }
             />
+            <Row
+              label="로그아웃"
+              value="계정에서 로그아웃할 수 있어요."
+              action={
+                <button
+                  type="button"
+                  onClick={() => setConfirmingLogout(true)}
+                  className="rounded border border-[var(--color-danger-border)] bg-transparent px-3.5 py-1.5 text-[13px] text-[var(--color-danger-text)] transition hover:bg-[var(--color-danger-soft-bg)]"
+                >
+                  로그아웃
+                </button>
+              }
+            />
           </Card>
 
-          <Card title="계정" description="계정에서 로그아웃할 수 있어요.">
-            <div className="flex justify-end border-t border-[var(--home-card-border)] px-5 py-4">
-              <button
-                type="button"
-                onClick={() => setConfirmingLogout(true)}
-                className="rounded border border-[var(--color-danger-border)] bg-transparent px-3.5 py-1.5 text-[13px] text-[var(--color-danger-text)] transition hover:bg-[var(--color-danger-soft-bg)]"
-              >
-                로그아웃
-              </button>
-            </div>
-          </Card>
-          
+
           <Card
             title="회원 탈퇴"
             description="본사 계정이 비활성화되고 모든 로그인 세션이 종료됩니다. 회사·현장·작업자 데이터는 유지됩니다."
