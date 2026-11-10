@@ -151,7 +151,7 @@ export default function ScreenHQSites() {
     event.preventDefault();
     if (companyInviteBusy) return;
     const email = companyInviteEmail.trim();
-    if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       showToast("현장 관리자 계정 이메일을 확인해주세요.", "error");
       return;
     }
