@@ -132,6 +132,11 @@ export function changePassword(payload: ChangePasswordPayload) {
   return apiFetch<{ changedAt: string }>("/api/v1/auth/site/password", { method: "PUT", body: payload });
 }
 
+/** 인증된 새 이메일로 현장 관리자 계정 이메일을 변경한다. */
+export function updateEmail(payload: { email: string; currentPassword: string; verificationToken: string }) {
+  return apiFetch<SiteUser>("/api/v1/auth/site/email", { method: "PATCH", body: payload });
+}
+
 /** 내 정보(이름·연락처) 수정 */
 export function updateProfile(payload: UpdateProfilePayload) {
   return apiFetch<SiteUser>("/api/v1/auth/site/me", { method: "PATCH", body: payload });
