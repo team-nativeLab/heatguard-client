@@ -66,7 +66,6 @@ export default function AccountPage() {
   const { showToast } = useToast();
   const me = useSiteMe();
   const [changingPw, setChangingPw] = useState(false);
-  const [editingName, setEditingName] = useState(false);
   const [editingPhone, setEditingPhone] = useState(false);
   const [editingEmail, setEditingEmail] = useState(false);
   const [confirmingWithdrawal, setConfirmingWithdrawal] = useState(false);
@@ -129,15 +128,7 @@ export default function AccountPage() {
           </div>
 
           <Card title="기본 정보" description="현장 관리자 계정 정보예요.">
-            <Row
-              label="이름"
-              value={me.user.name}
-              action={
-                <button type="button" onClick={() => setEditingName(true)} className={smallBtn}>
-                  변경
-                </button>
-              }
-            />
+            <Row label="이름" value={me.user.name} action={fixedNote} />
             <Row label="이메일" value={me.user.email || "-"} action={<button type="button" onClick={() => setEditingEmail(true)} className={smallBtn}>변경</button>} />
             <Row
               label="연락처"
@@ -218,7 +209,6 @@ export default function AccountPage() {
       </div>
 
       {editingEmail && <EmailChangeModal currentEmail={me.user.email || ""} onClose={() => setEditingEmail(false)} onSave={async (payload) => { const updated = await authApi.updateEmail(payload); patchSiteMeUser({ email: updated.email || payload.email }); showToast("이메일을 변경했어요.", "success"); }} />}
-      {editingName && <NameModal initial={me.user.name} onClose={() => setEditingName(false)} />}
       {changingPw && <PasswordModal onClose={() => setChangingPw(false)} />}
       {editingPhone && <PhoneModal initial={me.user.phone ?? ""} onClose={() => setEditingPhone(false)} />}
       {confirmingLogout && (
@@ -252,62 +242,6 @@ export default function AccountPage() {
         </ConfirmDialog>
       )}
     </HomeLayout>
-  );
-}
-
-function NameModal({ initial, onClose }: { initial: string; onClose: () => void }) {
-  const { showToast } = useToast();
-  const [value, setValue] = useState(formatPhoneNumber(initial));
-  const [submitting, setSubmitting] = useState(false);
-
-  const handleSave = async () => {
-    const name = value.trim();
-    if (!name) return showToast("이름을 입력해주세요.", "error");
-    if (name.length > 20) return showToast("이름은 20자 이내로 입력해주세요.", "error");
-    if (submitting) return;
-    setSubmitting(true);
-    try {
-      const updated = await authApi.updateProfile({ name });
-      patchSiteMeUser({ name: updated.name || name });
-      showToast("이름을 변경했어요.", "success");
-      onClose();
-    } catch (err) {
-      if (isDemoFallback(err)) {
-        patchSiteMeUser({ name });
-        showToast("이름을 변경했어요. (데모)", "success");
-        onClose();
-        return;
-      }
-      showToast(errorMessage(err, "이름 변경에 실패했어요."), "error");
-      setSubmitting(false);
-    }
-  };
-
-  return (
-    <ModalShell
-      title="이름 변경"
-      maxWidth={440}
-      onClose={onClose}
-      busy={submitting}
-      footer={
-        <>
-          <button type="button" onClick={onClose} disabled={submitting} className={btnSecondary}>취소</button>
-          <button type="button" onClick={handleSave} disabled={submitting} className={btnPrimary}>{submitting ? "변경 중..." : "저장"}</button>
-        </>
-      }
-    >
-      <label className="flex flex-col gap-1.5">
-        <span className="text-xs leading-[1.45] text-[var(--color-text-label)]">이름</span>
-        <input
-          autoFocus
-          maxLength={20}
-          value={value}
-          onChange={(event) => setValue(event.target.value)}
-          onKeyDown={(event) => event.key === "Enter" && void handleSave()}
-          className={inputCls}
-        />
-      </label>
-    </ModalShell>
   );
 }
 
