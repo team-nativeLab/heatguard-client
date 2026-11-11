@@ -37,7 +37,7 @@ export default function EmailChangeModal({
 
   const sendCode = async () => {
     const normalized = email.trim();
-    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(normalized)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
       setError("새 이메일 주소를 확인해주세요.");
       return;
     }
@@ -57,7 +57,7 @@ export default function EmailChangeModal({
   };
 
   const verify = async () => {
-    if (!email.trim() || !/^\\d{6}$/.test(code.trim())) {
+    if (!email.trim() || !/^\d{6}$/.test(code.trim())) {
       setError("이메일과 6자리 인증코드를 확인해주세요.");
       return;
     }
@@ -120,7 +120,7 @@ export default function EmailChangeModal({
         <div>
           <label htmlFor="email-change-code" className="mb-1.5 block text-xs font-medium text-[var(--color-text-label)]">이메일 인증코드</label>
           <div className="flex gap-2">
-            <input id="email-change-code" inputMode="numeric" maxLength={6} className={inputCls} value={code} disabled={verified || saving} onChange={(event) => { setCode(event.target.value.replace(/\\D/g, "").slice(0, 6)); setError(""); }} placeholder="6자리 인증코드" />
+            <input id="email-change-code" inputMode="numeric" maxLength={6} className={inputCls} value={code} disabled={verified || saving} onChange={(event) => { setCode(event.target.value.replace(/\D/g, "").slice(0, 6)); setError(""); }} placeholder="6자리 인증코드" />
             <button type="button" className={btnSecondary} disabled={checking || verified || saving} onClick={verify}>{checking ? "확인 중..." : verified ? "인증 완료" : "인증 확인"}</button>
           </div>
         </div>
