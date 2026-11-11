@@ -2,6 +2,8 @@
 
 기준일: 2026-10-30 (Asia/Seoul)
 
+> ⚠️ 아래 "비밀번호 정책" 관련 서술은 작성 당시(#40) 기준입니다. 이후 #44·#46·`fix/password-minimum-eight`에서 정책을 **최소 8자만 검사**하도록 완화했습니다. 문자 종류 제한·반복·연속·흔한 비밀번호 검사는 더 이상 적용되지 않습니다. 현재 동작은 `src/lib/passwordPolicy.ts`와 `tests/password-policy.test.mjs`를 기준으로 보세요.
+
 ## 최신 후속 작업: 가입 3단계 분리
 
 - 이슈: [#42](https://github.com/team-nativeLab/heatguard-client/issues/42)
