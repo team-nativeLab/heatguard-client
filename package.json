@@ -1,5 +1,5 @@
 {
-  "name": "-",
+  "name": "heatguard-client",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
@@ -22,7 +23,6 @@
     "autoprefixer": "^10.5.5",
     "oxlint": "^1.79.0",
     "postcss": "^8.5.28",
-    "react-router-dom": "^7.18.3",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
     "vite": "^8.2.2"
