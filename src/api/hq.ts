@@ -400,7 +400,16 @@ export interface HqSiteWeather {
   weatherLocation: { latitude: number; longitude: number } | null;
 }
 export async function getSiteWeather(siteId: string): Promise<HqSiteWeather> {
-  return apiFetch<HqSiteWeather>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}/weather`);
+  const raw = await apiFetch<unknown>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}/weather`);
+  if (!isObj(raw)) return raw as HqSiteWeather;
+
+  // Site weather endpoint may wrap weather fields under "weather" and keep
+  // the optimistic-lock version on the outer site resource.
+  const weather = isObj(raw.weather) ? raw.weather : raw;
+  return {
+    ...weather,
+    version: num(raw, "version") ?? num(weather, "version") ?? 1,
+  } as HqSiteWeather;
 }
 export async function updateSiteWeatherLocation(siteId: string, payload: {
   version: number;
