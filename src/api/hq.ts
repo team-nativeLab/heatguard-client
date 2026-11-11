@@ -243,6 +243,54 @@ export function deactivateSite(siteId: string) {
   return apiFetch<void>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}`, { method: "DELETE" });
 }
 
+export interface HqWeatherLocation {
+  latitude: number | null;
+  longitude: number | null;
+}
+
+export interface HqSiteWeatherSettings {
+  version: number;
+  weatherMode: "AUTOMATIC" | "MANUAL" | string;
+  weatherLocation: HqWeatherLocation | null;
+  temperature?: number | null;
+  humidity?: number | null;
+  apparentTemperature?: number | null;
+  availability?: string;
+  errorCode?: string | null;
+}
+
+export interface UpdateHqSiteWeatherPayload {
+  version: number;
+  weatherMode: "AUTOMATIC" | "MANUAL";
+  weatherLocation: { latitude: number; longitude: number };
+}
+
+export async function getSiteWeather(siteId: string): Promise<HqSiteWeatherSettings> {
+  const raw = await apiFetch<unknown>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}/weather`);
+  const location = get(isObj(raw) ? raw : undefined, "weatherLocation", "data.weatherLocation", "site.weatherLocation");
+  const l = isObj(location) ? location : undefined;
+  return {
+    version: num(isObj(raw) ? raw : undefined, "version", "data.version") ?? 0,
+    weatherMode: str(isObj(raw) ? raw : undefined, "weatherMode", "data.weatherMode", "site.weatherMode") || "MANUAL",
+    weatherLocation: l ? {
+      latitude: num(l, "latitude"),
+      longitude: num(l, "longitude"),
+    } : null,
+    temperature: num(isObj(raw) ? raw : undefined, "temperature", "weather.temperature"),
+    humidity: num(isObj(raw) ? raw : undefined, "humidity", "weather.humidity"),
+    apparentTemperature: num(isObj(raw) ? raw : undefined, "apparentTemperature", "weather.apparentTemperature"),
+    availability: str(isObj(raw) ? raw : undefined, "availability", "weather.availability"),
+    errorCode: str(isObj(raw) ? raw : undefined, "errorCode", "weather.errorCode") || null,
+  };
+}
+
+export function updateSiteWeatherLocation(siteId: string, payload: UpdateHqSiteWeatherPayload) {
+  return apiFetch<unknown>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}/weather-location`, {
+    method: "PATCH",
+    body: payload,
+  });
+}
+
 export interface HqSiteAppLinks {
   siteId: string;
   siteName: string;
