@@ -67,6 +67,15 @@ export function configureApiClient(options: { authPaths: string[] }) {
   authPaths = options.authPaths;
 }
 
+/**
+ * 비밀번호를 함께 보내는 요청(로그인·비밀번호 변경·탈퇴·초대 수락 등)의 401은
+ * 세션 만료가 아니라 "입력한 비밀번호가 틀렸다"는 뜻이므로 로그아웃시키지 않는다.
+ */
+function carriesPassword(body: unknown): boolean {
+  if (!body || typeof body !== "object") return false;
+  return Object.keys(body).some((key) => /password/i.test(key));
+}
+
 let lastOnline: boolean | null = null;
 
 function reportConnection(online: boolean) {
@@ -158,7 +167,7 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
       throw new NetworkError();
     }
     reportConnection(true);
-    if (res.status === 401 && !authPaths.includes(path)) {
+    if (res.status === 401 && !authPaths.includes(path) && !carriesPassword(body)) {
       window.dispatchEvent(new CustomEvent(UNAUTHORIZED_EVENT));
     }
     const fallback = res.status === 404 ? "요청한 정보를 찾을 수 없어요." : `요청에 실패했어요. (${res.status})`;
