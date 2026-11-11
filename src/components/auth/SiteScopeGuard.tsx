@@ -42,9 +42,21 @@ export default function SiteScopeGuard({ children }: { children: ReactNode }) {
 
   const current = getSelectedSiteId();
   if (current && sites.some((site) => site.siteId === current)) return <>{children}</>;
-  if (sites.length === 1) {
-    setSelectedSiteId(sites[0].siteId);
-    return <>{children}</>;
-  }
+  // 현장이 하나면 자동 선택한다. 저장·이벤트 발생은 렌더가 끝난 뒤 effect에서 처리한다.
+  if (sites.length === 1) return <AutoSelectSingleSite siteId={sites[0].siteId}>{children}</AutoSelectSingleSite>;
   return <Navigate to="/manager/select-site" replace state={{ from: location.pathname + location.search }} />;
+}
+
+function AutoSelectSingleSite({ siteId, children }: { siteId: string; children: ReactNode }) {
+  const [selected, setSelected] = useState(() => getSelectedSiteId() === siteId);
+
+  useEffect(() => {
+    if (getSelectedSiteId() !== siteId) setSelectedSiteId(siteId);
+    setSelected(true);
+  }, [siteId]);
+
+  if (!selected) {
+    return <div role="status" aria-label="현장 확인 중" className="flex min-h-screen items-center justify-center bg-[var(--home-main-bg)]"><span className="size-6 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-accent)]" /></div>;
+  }
+  return <>{children}</>;
 }
