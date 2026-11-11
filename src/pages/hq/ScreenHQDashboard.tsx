@@ -7,6 +7,7 @@ import { hqApi, errorMessage, type HqDashboard, type HqSite, type HqSiteWeather 
 import { useHqMe } from "../../hooks/useHqMe";
 import { usePolling } from "../../shared/hooks/usePolling";
 import { doneText, heatLabel, heatTone, tempText } from "../../lib/hqFormat";
+import { weatherConditionLabel } from "../../lib/weatherLabels";
 import { ChevronRightIcon } from "../../components/home/HomeIcons";
 import {
   AlertStatIcon,
@@ -280,7 +281,7 @@ export default function ScreenHQDashboard() {
               {[
                 ["습도", weather?.humidity != null ? `${weather.humidity}%` : "-"],
                 ["체감온도", tempText(weather?.apparentTemperature) || "-"],
-                ["날씨", weather?.skyStatus || "-"],
+                ["날씨", weatherConditionLabel(weather?.skyStatus)],
               ].map(([label, value]) => (
                 <div key={label} className="rounded-lg border border-[var(--home-weather-tile-border)] bg-[var(--home-weather-tile-bg)] px-3 py-2 backdrop-blur-[2px]">
                   <p className="text-xs leading-4 text-[var(--color-text-body)]">{label}</p>

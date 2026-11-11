@@ -9,6 +9,7 @@ import { useEmergency } from "./EmergencyWatcher";
 import { useSiteMe } from "../../hooks/useSiteMe";
 import { authApi, dashboardApi, recordsApi, isNetworkError, isDemoFallback, type ManagedSite, type RecordItem } from "../../api";
 import { getSelectedSiteId, setSelectedSiteId, SITE_SELECTION_EVENT } from "../../lib/siteSelection";
+import { weatherConditionLabel } from "../../lib/weatherLabels";
 import {
   CalendarIcon,
   CameraIcon,
@@ -98,18 +99,6 @@ function weatherGlowColor(weather: DashboardTodayResponse["weather"], hour: numb
   if ((weather.temperature ?? 0) >= 25 || /clear|sun|맑음/.test(condition)) return "rgba(251, 146, 60, 0.42)";
   if ((weather.temperature ?? 0) <= 5) return "rgba(125, 211, 252, 0.42)";
   return "rgba(129, 140, 248, 0.36)";
-}
-
-function weatherConditionLabel(condition?: string, skyStatus?: string | null) {
-  if (condition) return condition;
-  const labels: Record<string, string> = {
-    CLEAR: "맑음",
-    PARTLY_CLOUDY: "구름 많음",
-    CLOUDY: "흐림",
-    RAIN: "비",
-    SNOW: "눈",
-  };
-  return skyStatus ? labels[skyStatus.toUpperCase()] ?? skyStatus : "-";
 }
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
