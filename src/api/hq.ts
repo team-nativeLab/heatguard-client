@@ -253,6 +253,21 @@ export function createManagerInvitation(siteId: string) {
   return apiFetch<SiteManagerInvitation>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}/manager-invitations`, { method: "POST" });
 }
 
+export interface SiteManagerCompanyInvitation {
+  invitationId: string;
+  email: string;
+  companyId?: string;
+  expiresAt?: string;
+}
+
+/** 미연동 현장관리자에게 본사 연결 초대를 발급한다. */
+export function createSiteManagerCompanyInvitation(payload: { email: string }) {
+  return apiFetch<SiteManagerCompanyInvitation>("/api/v1/hq/site-manager-invitations", {
+    method: "POST",
+    body: payload,
+  });
+}
+
 export function deactivateSite(siteId: string) {
   return apiFetch<void>(`/api/v1/hq/sites/${encodeURIComponent(siteId)}`, { method: "DELETE" });
 }

@@ -24,6 +24,7 @@ import SessionGuard from "./components/auth/SessionGuard";
 import SiteScopeGuard from "./components/auth/SiteScopeGuard";
 import SiteSelectionPage from "./pages/site/SiteSelectionPage";
 import SiteInvitationPage from "./pages/site/SiteInvitationPage";
+import SiteCompanyInvitationPage from "./pages/site/SiteCompanyInvitationPage";
 import UnassignedSiteManagerPage from "./pages/site/UnassignedSiteManagerPage";
 import RequireAuth from "./shared/auth/RequireAuth";
 import { authApi, hqApi } from "./api";
@@ -51,7 +52,8 @@ function SiteMembershipGate({ children }: { children: ReactNode }) {
   }
 
   const onUnassignedPage = location.pathname === "/manager/unassigned";
-  if (membership === "unassigned" && !onUnassignedPage) return <Navigate to={`/manager/unassigned${location.search}`} replace />;
+  const onCompanyInvitationPage = location.pathname === "/site-company-invitation";
+  if (membership === "unassigned" && !onUnassignedPage && !onCompanyInvitationPage) return <Navigate to={`/manager/unassigned${location.search}`} replace />;
   if (membership === "joined" && onUnassignedPage) return <Navigate to="/manager" replace />;
   return <>{children}</>;
 }
@@ -91,6 +93,7 @@ export default function App() {
         <Route path="/auth/signup" element={<SignupPage />} />
         <Route path="/site-invitation" element={<SiteInvitationPage />} />
         <Route path="/auth/site/invitation" element={<SiteInvitationPage />} />
+        <Route path="/site-company-invitation" element={<Protected siteSelection><SiteCompanyInvitationPage /></Protected>} />
         <Route path="/manager" element={<Protected><DashboardPage /></Protected>} />
         <Route path="/manager/select-site" element={<Protected siteSelection><SiteSelectionPage /></Protected>} />
         <Route path="/manager/sites" element={<Protected><SiteTodayPage /></Protected>} />

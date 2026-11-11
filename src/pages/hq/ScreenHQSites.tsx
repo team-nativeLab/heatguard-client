@@ -34,6 +34,12 @@ function makeInvitationUrl(invitationId: string) {
   return url.toString();
 }
 
+function makeCompanyInvitationUrl(invitationId: string) {
+  const url = new URL("/site-company-invitation", window.location.origin);
+  url.searchParams.set("invitationId", invitationId);
+  return url.toString();
+}
+
 function formatExpiry(value?: string) {
   if (!value) return "발급 후 7일 동안 사용할 수 있어요.";
   const date = new Date(value);
@@ -49,6 +55,10 @@ export default function ScreenHQSites() {
   const [creating, setCreating] = useState(false);
   const [invitation, setInvitation] = useState<{ siteId: string; siteName: string; invitationId: string; expiresAt?: string } | null>(null);
   const [invitationBusyId, setInvitationBusyId] = useState("");
+  const [companyInviteOpen, setCompanyInviteOpen] = useState(false);
+  const [companyInviteEmail, setCompanyInviteEmail] = useState("");
+  const [companyInvitation, setCompanyInvitation] = useState<{ invitationId: string; email: string; expiresAt?: string } | null>(null);
+  const [companyInviteBusy, setCompanyInviteBusy] = useState(false);
   const [deleting, setDeleting] = useState<HqSite | null>(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
 
@@ -137,6 +147,37 @@ export default function ScreenHQSites() {
     }
   };
 
+  const handleCompanyInvite = async (event: FormEvent) => {
+    event.preventDefault();
+    if (companyInviteBusy) return;
+    const email = companyInviteEmail.trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showToast("현장 관리자 계정 이메일을 확인해주세요.", "error");
+      return;
+    }
+    setCompanyInviteBusy(true);
+    try {
+      const result = await hqApi.createSiteManagerCompanyInvitation({ email });
+      if (!result.invitationId) throw new Error("초대 ID가 응답에 없어요.");
+      setCompanyInvitation({ invitationId: result.invitationId, email, expiresAt: result.expiresAt });
+      showToast("현장 관리자 본사 연결 초대를 발급했어요.", "success");
+    } catch (err) {
+      showToast(errorMessage(err, "본사 연결 초대를 발급하지 못했어요."), "error");
+    } finally {
+      setCompanyInviteBusy(false);
+    }
+  };
+
+  const copyCompanyInvitation = async () => {
+    if (!companyInvitation) return;
+    try {
+      await navigator.clipboard.writeText(makeCompanyInvitationUrl(companyInvitation.invitationId));
+      showToast("본사 연결 초대 링크를 복사했어요.", "success");
+    } catch {
+      showToast("초대 링크를 선택해 직접 복사해주세요.", "error");
+    }
+  };
+
   const handleDelete = async () => {
     if (!deleting || deleteBusy) return;
     setDeleteBusy(true);
@@ -156,7 +197,10 @@ export default function ScreenHQSites() {
     <HQLayout>
       <HQContent>
         <h1 className="text-xl font-semibold text-[var(--color-text-heading)]">현장 관리</h1>
-        <p className="pt-1 text-sm text-[var(--color-text-body)]">현장을 등록하고 앱 연동 상태를 확인합니다.</p>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <p className="pt-1 text-sm text-[var(--color-text-body)]">현장을 등록하고 앱 연동 상태를 확인합니다.</p>
+          <button type="button" onClick={() => { setCompanyInviteOpen(true); setCompanyInvitation(null); }} className={btnSecondary}>현장 관리자 본사 연결 초대</button>
+        </div>
 
         <div className="flex flex-col gap-2 pt-8">
           {error ? (
@@ -253,6 +297,41 @@ export default function ScreenHQSites() {
           </ModalShell>
         )}
       </HQContent>
+
+      {companyInviteOpen && (
+        <ModalShell
+          title={companyInvitation ? "본사 연결 초대" : "현장 관리자 본사 연결 초대"}
+          onClose={() => { if (!companyInviteBusy) { setCompanyInviteOpen(false); setCompanyInvitation(null); } }}
+          busy={companyInviteBusy}
+          maxWidth={560}
+          backdropClassName="bg-black/30"
+          footer={<button type="button" onClick={() => { setCompanyInviteOpen(false); setCompanyInvitation(null); }} disabled={companyInviteBusy} className={btnSecondary}>닫기</button>}
+        >
+          {companyInvitation ? (
+            <div className="flex flex-col gap-3">
+              <p className="text-sm leading-6 text-[var(--color-text-body)]">{companyInvitation.email} 계정으로 로그인한 현장 관리자가 링크를 열고 현재 비밀번호를 입력하면 기존 현장이 본사에 연결됩니다.</p>
+              <p className="text-xs text-[var(--color-text-faint)]">{formatExpiry(companyInvitation.expiresAt)}</p>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs text-[var(--color-text-body)]">초대 링크</span>
+                <input readOnly className={inputCls + " w-full"} value={makeCompanyInvitationUrl(companyInvitation.invitationId)} onFocus={(event) => event.currentTarget.select()} />
+              </label>
+              <div className="flex gap-2">
+                <button type="button" onClick={copyCompanyInvitation} className={btnSecondary}>링크 복사</button>
+                <button type="button" onClick={() => { setCompanyInvitation(null); }} className={btnSecondary}>다른 이메일 초대</button>
+              </div>
+            </div>
+          ) : (
+            <form id="company-invite" onSubmit={handleCompanyInvite} className="flex flex-col gap-3" noValidate>
+              <p className="text-sm leading-6 text-[var(--color-text-body)]">이미 미연동 현장과 계정을 만든 현장 관리자 이메일을 입력하세요. 수락해도 기존 현장·팀·기록은 유지됩니다.</p>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs text-[var(--color-text-body)]">현장 관리자 이메일</span>
+                <input type="email" autoComplete="email" disabled={companyInviteBusy} className={inputCls} value={companyInviteEmail} onChange={(event) => setCompanyInviteEmail(event.target.value)} placeholder="manager@example.com" />
+              </label>
+              <button type="submit" disabled={companyInviteBusy} className={btnPrimary}>{companyInviteBusy ? "초대 발급 중..." : "초대 링크 발급"}</button>
+            </form>
+          )}
+        </ModalShell>
+      )}
 
       {deleting && (
         <ConfirmDialog
