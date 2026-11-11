@@ -44,6 +44,11 @@ export function register(payload: HqRegisterPayload) {
   });
 }
 
+/** 새 이메일 인증 후 본사 관리자 계정 이메일을 변경한다. */
+export function updateEmail(payload: { email: string; currentPassword: string; verificationToken: string }) {
+  return apiFetch<HqUser>("/api/v1/auth/hq/email", { method: "PATCH", body: payload });
+}
+
 export function logout() {
   return apiFetch<void>("/api/v1/auth/hq/logout", { method: "POST", body: {} });
 }

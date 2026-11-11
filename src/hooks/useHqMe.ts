@@ -16,6 +16,13 @@ export function clearHqMeCache() {
   inFlight = null;
 }
 
+/** 이메일 변경 직후 화면에 바로 반영한다. */
+export function patchHqUser(patch: Partial<HqUser>) {
+  if (!cache) return;
+  cache = { ...cache, user: { ...cache.user, ...patch } };
+  listeners.forEach((fn) => fn(cache!));
+}
+
 /** 연락처 변경 직후 화면에 바로 반영한다. */
 export function patchHqCompany(patch: Partial<HqProfile>) {
   if (!cache) return;

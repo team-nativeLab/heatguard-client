@@ -5,12 +5,13 @@ import ModalShell, { btnPrimary, btnSecondary, inputCls } from "../../components
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 import { useToast } from "../../shared/ui/Toast";
 import { hqApi, ApiError, errorMessage } from "../../api";
-import { clearHqMeCache, patchHqCompany, useHqMe } from "../../hooks/useHqMe";
+import { clearHqMeCache, patchHqCompany, patchHqUser, useHqMe } from "../../hooks/useHqMe";
 import { markSignedOut } from "../../shared/auth/RequireAuth";
 import { getPasswordConfirmationError, getPasswordError } from "../../lib/passwordPolicy";
 import { NewPasswordInput } from "../../components/auth/NewPasswordField";
 import { usePasswordComposition } from "../../components/auth/usePasswordComposition";
 import { useTheme } from "../../shared/theme/ThemeContext";
+import EmailChangeModal from "../../components/account/EmailChangeModal";
 
 const PHONE_RE = /^0\d{1,2}-?\d{3,4}-?\d{4}$/;
 
@@ -59,6 +60,7 @@ export default function ScreenHQAccount() {
   const { theme, toggleTheme } = useTheme();
   const [changingPw, setChangingPw] = useState(false);
   const [editingPhone, setEditingPhone] = useState(false);
+  const [editingEmail, setEditingEmail] = useState(false);
   const me = useHqMe();
   const phone = me?.company.phone ?? "";
   const navigate = useNavigate();
@@ -103,7 +105,7 @@ export default function ScreenHQAccount() {
 
           <Card title="기본 정보" description="본사 관리자 계정 정보예요.">
             <Row label="이름" value={me?.user.name ?? "-"} action={fixedNote} />
-            <Row label="이메일" value={me?.user.email ?? "-"} action={fixedNote} />
+            <Row label="이메일" value={me?.user.email ?? "-"} action={<button type="button" onClick={() => setEditingEmail(true)} className={smallBtn}>변경</button>} />
             <Row
               label="연락처"
               value={phone || "등록된 연락처가 없어요"}
@@ -190,6 +192,7 @@ export default function ScreenHQAccount() {
         </div>
       </HQContent>
 
+      {editingEmail && <EmailChangeModal currentEmail={me?.user.email ?? ""} onClose={() => setEditingEmail(false)} onSave={async (payload) => { const updated = await hqApi.updateEmail(payload); patchHqUser({ email: updated.email || payload.email }); showToast("이메일을 변경했어요.", "success"); }} />}
       {changingPw && <PasswordModal onClose={() => setChangingPw(false)} />}
       {editingPhone && <PhoneModal initial={phone} onClose={() => setEditingPhone(false)} />}
       {confirmingLogout && (
