@@ -159,7 +159,8 @@ export default function SiteTodayPage() {
     return () => {
       alive = false;
     };
-  }, [attempt]);
+    // 현장명은 useSiteMe가 비동기로 채우므로, 값이 도착하면 행을 다시 만든다.
+  }, [attempt, me.site.name]);
 
   if (failed || !teams || !rows) {
     return (
