@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ApiError, errorMessage, hqApi, type HqSiteWeather } from "../../api";
 import { ChevronDownIcon } from "../home/HomeIcons";
 
@@ -22,7 +22,7 @@ export default function SiteWeatherPanel({ siteId, version, active }: { siteId: 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -37,9 +37,9 @@ export default function SiteWeatherPanel({ siteId, version, active }: { siteId: 
     } finally {
       setLoading(false);
     }
-  };
+  }, [siteId, version]);
 
-  useEffect(() => { void load(); }, [siteId, version]);
+  useEffect(() => { void load(); }, [load]);
 
   const save = async () => {
     const hasLatitude = latitude.trim() !== "";
