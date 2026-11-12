@@ -70,7 +70,8 @@ export default function LoginPage() {
       clearSiteMeCache();
       authApi.clearManagedSitesCache();
       clearSelectedSiteId();
-      markSignedIn();
+      // 본사·현장 세션은 따로 기억하므로 로그인한 역할의 스코프를 표시한다.
+      markSignedIn(role === "HQ_MANAGER" ? "hq" : "site");
       // 성공: 자물쇠가 열리는 모습을 잠깐 보여준 뒤 이동한다.
       setUnlocked(true);
       await new Promise((r) => setTimeout(r, 650));
