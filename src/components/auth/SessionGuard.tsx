@@ -12,7 +12,11 @@ export default function SessionGuard() {
   const location = useLocation();
   const { showToast } = useToast();
   const pathRef = useRef(location.pathname);
-  pathRef.current = location.pathname;
+
+  // 렌더 중에 ref를 쓰지 않는다 — 커밋되지 않은 렌더의 경로가 남을 수 있다.
+  useEffect(() => {
+    pathRef.current = location.pathname;
+  }, [location.pathname]);
 
   useEffect(() => {
     const handler = () => {
