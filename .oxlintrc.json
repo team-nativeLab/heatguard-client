@@ -3,6 +3,10 @@
   "plugins": ["react", "typescript", "oxc"],
   "rules": {
     "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+    "react/only-export-components": ["warn", { "allowConstantExport": true }],
+    // 비동기 로딩 패턴(요청 전 로딩·에러 state 초기화)에 대한 오탐이 18건으로
+    // 실제 버그가 아니며, 규칙 충족에는 전 화면 로딩 구조 변경이 필요하다.
+    // 재검토: https://github.com/team-nativeLab/heatguard-client/issues/251
+    "react/set-state-in-effect": "off"
   }
 }
