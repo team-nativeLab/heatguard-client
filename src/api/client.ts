@@ -13,6 +13,8 @@ configureApiClient({ authPaths: [
     "/api/v1/auth/site/register",
     "/api/v1/auth/site/sites",
     "/api/v1/auth/site/invitations/accept",
+    "/api/v1/auth/site/company-invitations/accept",
+    "/api/v1/auth/admin/login",
     "/api/v1/auth/hq/login",
     "/api/v1/auth/hq/register",
   ] });

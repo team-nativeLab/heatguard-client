@@ -5,7 +5,7 @@ import ModalShell, { btnPrimary, btnSecondary, inputCls } from "../components/ho
 import ConfirmDialog from "../shared/ui/ConfirmDialog";
 import { useToast } from "../shared/ui/Toast";
 import { useSiteMe, patchSiteMeUser } from "../hooks/useSiteMe";
-import { authApi, siteApi, isDemoFallback, errorMessage } from "../api";
+import { ApiError, authApi, siteApi, isDemoFallback, errorMessage } from "../api";
 import { markSignedOut } from "../shared/auth/RequireAuth";
 import { clearSiteMeCache } from "../hooks/useSiteMe";
 import { clearSelectedSiteId } from "../lib/siteSelection";
@@ -111,7 +111,12 @@ export default function AccountPage() {
         navigate("/auth/login", { replace: true });
         return;
       }
-      showToast(errorMessage(err, "탈퇴 처리에 실패했어요."), "error");
+      showToast(
+        err instanceof ApiError && err.status === 401
+          ? "현재 비밀번호가 올바르지 않아요."
+          : errorMessage(err, "탈퇴 처리에 실패했어요."),
+        "error",
+      );
       setWithdrawalPassword("");
     } finally {
       setWithdrawing(false);
@@ -334,7 +339,11 @@ function PasswordModal({ onClose }: { onClose: () => void }) {
       showToast("비밀번호를 변경했어요.", "success");
       onClose();
     } catch (err) {
-      showToast(errorMessage(err, "비밀번호 변경에 실패했어요."), "error");
+      if (err instanceof ApiError && err.status === 401) {
+        setErrors({ current: "현재 비밀번호가 올바르지 않아요." });
+      } else {
+        showToast(errorMessage(err, "비밀번호 변경에 실패했어요."), "error");
+      }
       setSubmitting(false);
     }
   };
