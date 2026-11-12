@@ -1,14 +1,18 @@
 import { useId, type ComponentProps, type InputHTMLAttributes } from "react";
 import AuthField from "./AuthField";
 import {
-  getPasswordCharacterError,
   getPasswordError,
   PASSWORD_POLICY_HINT,
 } from "../../lib/passwordPolicy";
 
+/**
+ * 입력 중 바로 보여줄 오류.
+ * 확인란은 입력 중 길이를 지적하지 않는다 — 불일치 검사는 각 화면에서
+ * 제출 시점에 getPasswordConfirmationError로 처리한다.
+ */
 function getDraftError(password: string, confirmation: boolean, minimumLength?: number) {
-  if (!password) return undefined;
-  return confirmation ? getPasswordCharacterError(password) : getPasswordError(password, minimumLength);
+  if (!password || confirmation) return undefined;
+  return getPasswordError(password, minimumLength);
 }
 
 type NewPasswordAuthFieldProps = Omit<ComponentProps<typeof AuthField>, "type" | "autoComplete" | "value"> & {
