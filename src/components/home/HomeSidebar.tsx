@@ -2,9 +2,10 @@ import { useEffect, useState, type ComponentType } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
 import sidebarWave from "../../assets/images/sidebar-wave.png";
-import { DashboardIcon, SiteManageIcon, ContactIcon, DefaultProfileAvatar } from "../icons/Icons";
+import { DashboardIcon, SiteManageIcon, ContactIcon } from "../icons/Icons";
+import ProfileAvatar from "../account/ProfileAvatar";
 import { useToast } from "../../shared/ui/toastContext";
-import { useSiteMe } from "../../hooks/useSiteMe";
+import { useSiteMe, refreshSiteMePhoto } from "../../hooks/useSiteMe";
 import { authApi, type ManagedSite } from "../../api";
 import { getSelectedSiteId, setSelectedSiteId, SITE_SELECTION_EVENT } from "../../lib/siteSelection";
 
@@ -130,7 +131,12 @@ export default function HomeSidebar() {
           title="계정 설정"
           className="group flex w-full min-w-0 items-center gap-2 rounded px-1.5 py-1.5 text-left transition-colors hover:bg-[var(--home-nav-active-bg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
         >
-          <DefaultProfileAvatar className="size-8 shrink-0" />
+          <ProfileAvatar
+            photoUrl={me.user.photoUrl ?? null}
+            name={me.user.name}
+            className="size-8 shrink-0"
+            onExpired={refreshSiteMePhoto}
+          />
           <div className="flex min-w-0 flex-1 flex-col">
             <p className="text-xs leading-4 text-[var(--color-text-body)]">{me.user.name} 님</p>
             <p className="truncate pt-px text-[11px] leading-[16.5px] text-[var(--color-text-faint)]">{me.site.name}</p>
