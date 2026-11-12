@@ -1,4 +1,3 @@
-// ⚠️ 자동 생성 파일 — heatguard-shared/src 에서 수정한 뒤 `node sync.mjs`로 반영하세요.
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from "react";
 
 interface ToastItem {

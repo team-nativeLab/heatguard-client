@@ -1,4 +1,3 @@
-// ⚠️ 자동 생성 파일 — heatguard-shared/src 에서 수정한 뒤 `node sync.mjs`로 반영하세요.
 /** 데이터를 불러오는 동안 자리를 잡아두는 회색 블록 */
 export function Skeleton({ className = "" }: { className?: string }) {
   return <span aria-hidden="true" className={`block animate-pulse rounded-md bg-[var(--color-bg-tile)] ${className}`} />;

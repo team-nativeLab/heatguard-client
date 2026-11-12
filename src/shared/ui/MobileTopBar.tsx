@@ -1,4 +1,3 @@
-// ⚠️ 자동 생성 파일 — heatguard-shared/src 에서 수정한 뒤 `node sync.mjs`로 반영하세요.
 
 /** 좁은 화면(768px 미만)에서 사이드바 대신 보이는 상단 바 */
 export default function MobileTopBar({
