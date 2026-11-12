@@ -3,7 +3,7 @@ import HQLayout, { HQContent } from "../../components/hq/HQLayout";
 import ModalShell, { btnPrimary, btnSecondary, inputCls } from "../../components/hq/ModalShell";
 import { errorMessage, inquiriesApi, type Inquiry, type InquiryStatus } from "../../api";
 import { SkeletonList } from "../../shared/ui/Skeleton";
-import { useToast } from "../../shared/ui/Toast";
+import { useToast } from "../../shared/ui/toastContext";
 
 const TYPE_RE = /^\[(계정|기록|현장|기타)\]\s*/;
 function splitTitle(raw: string) {

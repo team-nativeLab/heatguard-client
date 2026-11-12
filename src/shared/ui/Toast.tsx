@@ -1,22 +1,5 @@
-import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from "react";
-
-interface ToastItem {
-  id: number;
-  message: string;
-  variant: "default" | "success" | "error";
-}
-
-interface ToastContextValue {
-  showToast: (message: string, variant?: ToastItem["variant"]) => void;
-}
-
-const ToastContext = createContext<ToastContextValue | null>(null);
-
-export function useToast() {
-  const ctx = useContext(ToastContext);
-  if (!ctx) throw new Error("useToast는 ToastProvider 내부에서만 사용할 수 있습니다.");
-  return ctx;
-}
+import { useCallback, useRef, useState, type ReactNode } from "react";
+import { ToastContext, type ToastItem } from "./toastContext";
 
 const VARIANT_STYLES: Record<ToastItem["variant"], string> = {
   default: "border-[var(--color-border)]",

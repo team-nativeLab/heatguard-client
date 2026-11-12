@@ -10,8 +10,8 @@ import { ApiError, authApi, errorMessage } from "../../api";
 import { getPasswordConfirmationError, getPasswordError, SIGNUP_PASSWORD_MIN_LENGTH, SIGNUP_PASSWORD_POLICY_HINT } from "../../lib/passwordPolicy";
 import { clearSelectedSiteId } from "../../lib/siteSelection";
 import { clearSiteMeCache } from "../../hooks/useSiteMe";
-import { markSignedIn } from "../../shared/auth/RequireAuth";
-import { useToast } from "../../shared/ui/Toast";
+import { markSignedIn } from "../../shared/auth/authScope";
+import { useToast } from "../../shared/ui/toastContext";
 
 const EMAIL_RE = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
 

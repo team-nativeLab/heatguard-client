@@ -5,7 +5,7 @@ import SiteManagementHeader from "../../components/manager/SiteManagementHeader"
 import TeamDetailModal from "../../components/manager/TeamDetailModal";
 import SiteTeamInvitationModal from "../../components/manager/SiteTeamInvitationModal";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
-import { useToast } from "../../shared/ui/Toast";
+import { useToast } from "../../shared/ui/toastContext";
 import { TeamMemberIcon } from "../../components/icons/Icons";
 import { teamsApi, isDemoFallback, errorMessage, type TeamSummary } from "../../api";
 import { validateTeamForm, type TeamFormValues } from "../../lib/teamForm";

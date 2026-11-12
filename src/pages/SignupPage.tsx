@@ -6,7 +6,7 @@ import AuthCardLayout from "../components/auth/AuthCardLayout";
 import AuthField from "../components/auth/AuthField";
 import AuthSubmitButton from "../components/auth/AuthSubmitButton";
 import { AnimatedLockIcon, UserIcon, UsersIcon, MapPinIcon } from "../components/auth/AuthIcons";
-import { useToast } from "../shared/ui/Toast";
+import { useToast } from "../shared/ui/toastContext";
 import { authApi, ApiError, errorMessage } from "../api";
 import { getPasswordConfirmationError, getPasswordError } from "../lib/passwordPolicy";
 import { NewPasswordAuthField } from "../components/auth/NewPasswordField";

@@ -3,7 +3,7 @@ import HomeLayout from "../../components/home/HomeLayout";
 import SiteManagementHeader from "../../components/manager/SiteManagementHeader";
 import { CheckboxCheckIcon } from "../../components/icons/Icons";
 import { settingsApi, isDemoFallback, errorMessage } from "../../api";
-import { useToast } from "../../shared/ui/Toast";
+import { useToast } from "../../shared/ui/toastContext";
 
 const TIME_SLOTS = Array.from({ length: 24 }, (_, index) => `${String(index + 1).padStart(2, "0")}:00`);
 const ALL_CHECKED_TIMES = Object.fromEntries(TIME_SLOTS.map((time) => [time, true]));

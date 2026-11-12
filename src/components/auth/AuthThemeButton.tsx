@@ -1,4 +1,4 @@
-import { useTheme } from "../../shared/theme/ThemeContext";
+import { useTheme } from "../../shared/theme/useTheme";
 import { MoonIcon, SunIcon } from "./AuthIcons";
 
 /** 인증 화면 우상단 테마 전환 버튼 (36×36 정사각 버튼) */

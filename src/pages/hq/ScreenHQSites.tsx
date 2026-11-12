@@ -5,7 +5,7 @@ import HQLayout, { HQContent } from "../../components/hq/HQLayout";
 import { SiteHeatBadge } from "../../components/hq/RecordTable";
 import { EmptyBlock, ErrorBlock, LoadingBlock } from "../../components/hq/LoadState";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
-import { useToast } from "../../shared/ui/Toast";
+import { useToast } from "../../shared/ui/toastContext";
 import { hqApi, ApiError, errorMessage, type HqSite } from "../../api";
 import { heatLabel, heatTone, sortByRisk } from "../../lib/hqFormat";
 

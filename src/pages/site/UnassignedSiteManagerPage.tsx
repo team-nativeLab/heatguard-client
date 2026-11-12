@@ -5,7 +5,7 @@ import AuthField from "../../components/auth/AuthField";
 import AuthSubmitButton from "../../components/auth/AuthSubmitButton";
 import { MapPinIcon, PhoneIcon } from "../../components/auth/AuthIcons";
 import { authApi, errorMessage } from "../../api";
-import { useToast } from "../../shared/ui/Toast";
+import { useToast } from "../../shared/ui/toastContext";
 import { clearSiteMeCache } from "../../hooks/useSiteMe";
 import { setSelectedSiteId } from "../../lib/siteSelection";
 

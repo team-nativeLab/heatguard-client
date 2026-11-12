@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import HomeLayout from "../../components/home/HomeLayout";
 import SiteManagementHeader from "../../components/manager/SiteManagementHeader";
-import RecordsTable, { DEFAULT_RECORDS, type RecordRow } from "../../components/manager/RecordsTable";
+import RecordsTable, { type RecordRow } from "../../components/manager/RecordsTable";
+import { DEFAULT_RECORDS } from "../../components/manager/defaultRecords";
 import RecordDetailDialog from "../../components/manager/RecordDetailDialog";
 import { useSiteMe } from "../../hooks/useSiteMe";
 import { teamsApi, recordsApi, settingsApi, checklistsApi, isDemoFallback, type RecordItem, type TeamSummary } from "../../api";

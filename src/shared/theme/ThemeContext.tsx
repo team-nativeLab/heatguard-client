@@ -1,16 +1,6 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { flushSync } from "react-dom";
-
-export type Theme = "dark" | "light";
-
-interface ThemeContextValue {
-  theme: Theme;
-  toggleTheme: () => void;
-}
-
-const ThemeContext = createContext<ThemeContextValue | null>(null);
-
-const STORAGE_KEY = "heatguard-theme";
+import { ThemeContext, THEME_STORAGE_KEY as STORAGE_KEY, type Theme } from "./useTheme";
 
 function getInitialTheme(): Theme {
   if (typeof window === "undefined") return "light";
@@ -20,12 +10,6 @@ function getInitialTheme(): Theme {
   } catch {
     return "light";
   }
-}
-
-export function useTheme() {
-  const ctx = useContext(ThemeContext);
-  if (!ctx) throw new Error("useTheme은 ThemeProvider 내부에서만 사용할 수 있습니다.");
-  return ctx;
 }
 
 type ViewTransitionDocument = Document & {
