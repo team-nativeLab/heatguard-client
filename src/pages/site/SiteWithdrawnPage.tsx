@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import HomeLayout from "../../components/home/HomeLayout";
 import SiteManagementHeader from "../../components/manager/SiteManagementHeader";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
-import { useToast } from "../../shared/ui/Toast";
+import { useToast } from "../../shared/ui/toastContext";
 import { SkeletonTable } from "../../shared/ui/Skeleton";
 import { teamMembersApi, ApiError, isDemoFallback, errorMessage, type TeamMember, type RetentionInfo } from "../../api";
 

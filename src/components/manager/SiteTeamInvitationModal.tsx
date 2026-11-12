@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { errorMessage, teamsApi } from "../../api";
 import type { TeamSummary } from "../../api";
-import { useToast } from "../../shared/ui/Toast";
+import { useToast } from "../../shared/ui/toastContext";
 import ModalShell, { btnPrimary, btnSecondary, inputCls } from "../home/ModalShell";
 import { useSiteMe } from "../../hooks/useSiteMe";
 

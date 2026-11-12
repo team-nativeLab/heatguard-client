@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useToast } from "../../shared/ui/Toast";
+import { useToast } from "../../shared/ui/toastContext";
 import { useEscapeKey } from "../../shared/ui/useEscapeKey";
 import { CloseIcon } from "../icons/Icons";
 import { teamsApi, isDemoFallback, errorMessage, type TeamSummary, type UpdateTeamPayload } from "../../api";

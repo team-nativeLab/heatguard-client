@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 import HQLayout, { HQContent } from "../../components/hq/HQLayout";
 import ModalShell, { btnPrimary, btnSecondary, inputCls } from "../../components/hq/ModalShell";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
-import { useToast } from "../../shared/ui/Toast";
+import { useToast } from "../../shared/ui/toastContext";
 import { hqApi, ApiError, errorMessage } from "../../api";
 import { clearHqMeCache, patchHqCompany, patchHqUser, useHqMe } from "../../hooks/useHqMe";
-import { markSignedOut } from "../../shared/auth/RequireAuth";
+import { markSignedOut } from "../../shared/auth/authScope";
 import { getPasswordConfirmationError, getPasswordError } from "../../lib/passwordPolicy";
 import { NewPasswordInput } from "../../components/auth/NewPasswordField";
 import { usePasswordComposition } from "../../components/auth/usePasswordComposition";
-import { useTheme } from "../../shared/theme/ThemeContext";
+import { useTheme } from "../../shared/theme/useTheme";
 import EmailChangeModal from "../../components/account/EmailChangeModal";
 
 const PHONE_RE = /^0\d{1,2}-?\d{3,4}-?\d{4}$/;

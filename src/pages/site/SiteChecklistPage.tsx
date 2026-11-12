@@ -3,7 +3,7 @@ import HomeLayout from "../../components/home/HomeLayout";
 import SiteManagementHeader from "../../components/manager/SiteManagementHeader";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 import { ChecklistDeleteIcon } from "../../components/icons/Icons";
-import { useToast } from "../../shared/ui/Toast";
+import { useToast } from "../../shared/ui/toastContext";
 import { LoadError, SkeletonList } from "../../shared/ui/Skeleton";
 import { checklistsApi, isDemoFallback, errorMessage, type ChecklistItem, type ChecklistQuickAddKey } from "../../api";
 

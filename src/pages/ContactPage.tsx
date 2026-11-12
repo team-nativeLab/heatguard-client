@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import HomeLayout from "../components/home/HomeLayout";
 import ModalShell, { btnPrimary, btnSecondary, inputCls } from "../components/home/ModalShell";
-import { useToast } from "../shared/ui/Toast";
+import { useToast } from "../shared/ui/toastContext";
 import { SkeletonList } from "../shared/ui/Skeleton";
 import { inquiriesApi, isDemoFallback, errorMessage, type Inquiry, type InquiryStatus } from "../api";
 

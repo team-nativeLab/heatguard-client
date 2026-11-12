@@ -6,8 +6,8 @@ import AuthSubmitButton from "../../components/auth/AuthSubmitButton";
 import { BarChartIcon, FileTextIcon, AnimatedLockIcon, MailIcon, UsersIcon } from "../../components/auth/AuthIcons";
 import { hqApi, ApiError, errorMessage } from "../../api";
 import { clearHqMeCache } from "../../hooks/useHqMe";
-import { markSignedIn } from "../../shared/auth/RequireAuth";
-import { useToast } from "../../shared/ui/Toast";
+import { markSignedIn } from "../../shared/auth/authScope";
+import { useToast } from "../../shared/ui/toastContext";
 
 const FEATURES = [
   {

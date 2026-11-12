@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useToast } from "../../shared/ui/Toast";
+import { useToast } from "../../shared/ui/toastContext";
 import { clearSiteMeCache } from "../../hooks/useSiteMe";
 import { clearHqMeCache } from "../../hooks/useHqMe";
-import { markSignedOut } from "../../shared/auth/RequireAuth";
+import { markSignedOut } from "../../shared/auth/authScope";
 import { UNAUTHORIZED_EVENT } from "../../api";
 
 /** API가 401을 돌려주면 로그인 화면으로 보낸다. */

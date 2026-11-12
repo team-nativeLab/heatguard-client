@@ -1,6 +1,7 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { EmergencyContext } from "./emergencyContext";
 import EmergencyModal, { type EmergencyStatus } from "../manager/EmergencyModal";
-import { useToast } from "../../shared/ui/Toast";
+import { useToast } from "../../shared/ui/toastContext";
 import { usePolling } from "../../shared/hooks/usePolling";
 import { notifyEmergency, primeEmergencyAlerts } from "../../shared/hooks/emergencyAlert";
 import { useSiteMe } from "../../hooks/useSiteMe";
@@ -8,17 +9,6 @@ import { alertsApi, isNetworkError, errorMessage, type EmergencyCall } from "../
 
 const ALERT_POLL_INTERVAL_MS = 5000;
 const ALERT_HIDDEN_POLL_INTERVAL_MS = 15000;
-
-interface EmergencyContextValue {
-  /** 실제 호출 없이 긴급 호출 팝업을 띄워 본다. */
-  openTest: () => void;
-}
-
-const EmergencyContext = createContext<EmergencyContextValue>({ openTest: () => {} });
-
-export function useEmergency() {
-  return useContext(EmergencyContext);
-}
 
 /** 관리자 화면 어디에 있든 활성 긴급 호출을 감시하고 팝업을 띄운다. */
 export function EmergencyWatcher({ children }: { children: ReactNode }) {

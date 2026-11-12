@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
 import sidebarWave from "../../assets/images/sidebar-wave.png";
 import { DashboardIcon, SiteManageIcon, ContactIcon, DefaultProfileAvatar } from "../icons/Icons";
-import { useToast } from "../../shared/ui/Toast";
+import { useToast } from "../../shared/ui/toastContext";
 import { useSiteMe } from "../../hooks/useSiteMe";
 import { authApi, type ManagedSite } from "../../api";
 import { getSelectedSiteId, setSelectedSiteId, SITE_SELECTION_EVENT } from "../../lib/siteSelection";
