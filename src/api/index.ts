@@ -3,6 +3,8 @@ export * from "./types";
 export * as authApi from "./auth";
 export type { ManagedSite } from "./auth";
 export * as siteApi from "./site";
+export * as profilePhotoApi from "./profilePhoto";
+export type { ProfilePhoto } from "./profilePhoto";
 export * as dashboardApi from "./dashboard";
 export * as recordsApi from "./records";
 export * as printApi from "./print";
