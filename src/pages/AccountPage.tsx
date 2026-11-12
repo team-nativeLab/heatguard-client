@@ -1,11 +1,11 @@
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import HomeLayout from "../components/home/HomeLayout";
 import ModalShell, { btnPrimary, btnSecondary, inputCls } from "../components/home/ModalShell";
 import ConfirmDialog from "../shared/ui/ConfirmDialog";
 import { useToast } from "../shared/ui/toastContext";
-import { useSiteMe, patchSiteMeUser } from "../hooks/useSiteMe";
-import { ApiError, authApi, siteApi, isDemoFallback, errorMessage } from "../api";
+import { useSiteMe, patchSiteMeUser, refreshSiteMePhoto } from "../hooks/useSiteMe";
+import { ApiError, authApi, siteApi, profilePhotoApi, isDemoFallback, errorMessage } from "../api";
 import { markSignedOut } from "../shared/auth/authScope";
 import { clearSiteMeCache } from "../hooks/useSiteMe";
 import { clearSelectedSiteId } from "../lib/siteSelection";
@@ -14,6 +14,7 @@ import { NewPasswordInput } from "../components/auth/NewPasswordField";
 import { usePasswordComposition } from "../components/auth/usePasswordComposition";
 import { useTheme } from "../shared/theme/useTheme";
 import EmailChangeModal from "../components/account/EmailChangeModal";
+import ProfileAvatar from "../components/account/ProfileAvatar";
 
 const PHONE_RE = /^0\d{1,2}-?\d{3,4}-?\d{4}$/;
 
@@ -59,6 +60,87 @@ function Row({ label, value, sub, action }: { label: string; value: ReactNode; s
 }
 
 const fixedNote = <span className="shrink-0 text-xs leading-[1.45] text-[var(--color-text-faint)]">변경 불가</span>;
+
+/** 프로필 사진 업로드·삭제 */
+function ProfilePhotoRow({ photoUrl, name }: { photoUrl: string | null; name: string }) {
+  const { showToast } = useToast();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState<"upload" | "delete" | null>(null);
+
+  const pick = (file: File | undefined) => {
+    if (!file || busy) return;
+    const invalid = profilePhotoApi.getProfilePhotoFileError(file);
+    if (invalid) return showToast(invalid, "error");
+    void upload(file);
+  };
+
+  const upload = async (file: File) => {
+    setBusy("upload");
+    try {
+      const saved = await profilePhotoApi.uploadSiteProfilePhoto(file);
+      patchSiteMeUser({ photoUrl: saved.photoUrl });
+      showToast("프로필 사진을 변경했어요.", "success");
+    } catch (err) {
+      showToast(
+        err instanceof ApiError && err.code === "INVALID_IMAGE_UPLOAD"
+          ? "이미지를 읽을 수 없어요. 다른 파일로 시도해주세요."
+          : err instanceof ApiError && (err.code === "UPLOAD_EXPIRED" || err.code === "UPLOAD_NOT_READY")
+            ? "업로드 시간이 초과됐어요. 다시 시도해주세요."
+            : errorMessage(err, "프로필 사진을 변경하지 못했어요."),
+        "error",
+      );
+    } finally {
+      setBusy(null);
+      // 같은 파일을 다시 고를 수 있도록 비운다.
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
+
+  const remove = async () => {
+    if (busy) return;
+    setBusy("delete");
+    try {
+      await profilePhotoApi.deleteSiteProfilePhoto();
+      patchSiteMeUser({ photoUrl: null });
+      showToast("기본 이미지로 되돌렸어요.");
+    } catch (err) {
+      showToast(errorMessage(err, "프로필 사진을 삭제하지 못했어요."), "error");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <Row
+      label="프로필 사진"
+      value={
+        <span className="flex items-center gap-3">
+          <ProfileAvatar photoUrl={photoUrl} name={name} className="size-12 shrink-0" onExpired={refreshSiteMePhoto} />
+          <span className="text-xs text-[var(--color-text-faint)]">JPG · PNG · WEBP / 5MB 이하</span>
+        </span>
+      }
+      action={
+        <span className="flex shrink-0 items-center gap-2">
+          <input
+            ref={inputRef}
+            type="file"
+            accept={profilePhotoApi.PROFILE_PHOTO_CONTENT_TYPES.join(",")}
+            className="hidden"
+            onChange={(event) => pick(event.target.files?.[0])}
+          />
+          <button type="button" disabled={busy !== null} onClick={() => inputRef.current?.click()} className={smallBtn}>
+            {busy === "upload" ? "올리는 중..." : photoUrl ? "변경" : "등록"}
+          </button>
+          {photoUrl && (
+            <button type="button" disabled={busy !== null} onClick={() => void remove()} className={smallBtn}>
+              {busy === "delete" ? "삭제 중..." : "삭제"}
+            </button>
+          )}
+        </span>
+      }
+    />
+  );
+}
 
 export default function AccountPage() {
   const { theme, toggleTheme } = useTheme();
@@ -133,6 +215,7 @@ export default function AccountPage() {
           </div>
 
           <Card title="기본 정보" description="현장 관리자 계정 정보예요.">
+            <ProfilePhotoRow photoUrl={me.user.photoUrl ?? null} name={me.user.name} />
             <Row label="이름" value={me.user.name} action={fixedNote} />
             <Row label="이메일" value={me.user.email || "-"} action={<button type="button" onClick={() => setEditingEmail(true)} className={smallBtn}>변경</button>} />
             <Row
