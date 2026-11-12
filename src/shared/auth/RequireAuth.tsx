@@ -1,4 +1,3 @@
-// ⚠️ 자동 생성 파일 — heatguard-shared/src 에서 수정한 뒤 `node sync.mjs`로 반영하세요.
 import { useEffect, useState, type ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { ApiError, DEMO_MODE, isNetworkError } from "../api/client";
