@@ -36,7 +36,7 @@ export function NewPasswordAuthField({
   const draftError = getDraftError(value, confirmation, minimumLength) ?? error;
   const describedBy = [
     draftError ? `${inputId}-error` : "",
-    !confirmation ? `${inputId}-policy` : "",
+    !confirmation && !draftError ? `${inputId}-policy` : "",
   ].filter(Boolean).join(" ") || undefined;
   return (
     <div>
@@ -52,7 +52,7 @@ export function NewPasswordAuthField({
         error={draftError}
         aria-describedby={describedBy}
       />
-      {!confirmation && (
+      {!confirmation && !draftError && (
         <p id={`${inputId}-policy`} className="mb-4 -mt-2 text-xs leading-5 text-[var(--auth-text-muted)]">
           {policyHint}
         </p>
@@ -83,7 +83,7 @@ export function NewPasswordInput({
   const draftError = getDraftError(value, confirmation, minimumLength) ?? error;
   const describedBy = [
     draftError ? `${inputId}-error` : "",
-    !confirmation ? `${inputId}-policy` : "",
+    !confirmation && !draftError ? `${inputId}-policy` : "",
   ].filter(Boolean).join(" ") || undefined;
   return (
     <>
@@ -104,7 +104,7 @@ export function NewPasswordInput({
           {draftError}
         </span>
       )}
-      {!confirmation && (
+      {!confirmation && !draftError && (
         <span id={`${inputId}-policy`} className="text-xs leading-5 text-[var(--color-text-body)]">
           {policyHint}
         </span>
