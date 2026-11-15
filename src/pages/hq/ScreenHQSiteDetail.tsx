@@ -6,8 +6,7 @@ import { ErrorBlock, LoadingBlock } from "../../components/hq/LoadState";
 import { hqApi, ApiError, errorMessage, type HqSiteDetail } from "../../api";
 import { HEAT_LABEL, HEAT_TONE } from "../../api/hq";
 import { doneText } from "../../lib/hqFormat";
-import SiteAppLinkStatusPanel from "../../components/hq/SiteAppLinkStatusPanel";
-import SiteWeatherPanel from "../../components/hq/SiteWeatherPanel";
+import SiteAppLinkStatusBadge from "../../components/hq/SiteAppLinkStatusBadge";
 import { ChevronLeftIcon } from "../../components/home/HomeIcons";
 
 export default function ScreenHQSiteDetail() {
@@ -52,17 +51,19 @@ export default function ScreenHQSiteDetail() {
           <LoadingBlock />
         ) : (
           <>
-            <div className="flex flex-wrap items-center gap-3 pt-6">
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-6">
               <h1 className="text-xl font-semibold text-[var(--color-text-heading)]">{site.name}</h1>
-              <SiteHeatBadge temperature={site.temperature} label={site.heatLevel == null ? "미측정" : HEAT_LABEL[site.heatLevel]} tone={site.heatLevel == null ? "none" : HEAT_TONE[site.heatLevel]} />
-              {!site.active && <span className="rounded bg-[var(--color-heat-none-bg)] px-2 py-0.5 text-[10px] text-[var(--color-heat-none-fg)]">비활성</span>}
+              {/* 상태 배지는 제목 반대쪽에 모아 둔다. */}
+              <div className="flex shrink-0 flex-wrap items-center gap-2">
+                <SiteHeatBadge temperature={site.temperature} label={site.heatLevel == null ? "미측정" : HEAT_LABEL[site.heatLevel]} tone={site.heatLevel == null ? "none" : HEAT_TONE[site.heatLevel]} />
+                <SiteAppLinkStatusBadge siteId={site.id} />
+                {!site.active && <span className="rounded bg-[var(--color-heat-none-bg)] px-2 py-0.5 text-[10px] text-[var(--color-heat-none-fg)]">비활성</span>}
+              </div>
             </div>
             {(site.managerName || site.managerEmail) && (
               <p className="pt-1 text-sm text-[var(--color-text-body)]">{[site.managerName, site.managerPhone, site.managerEmail].filter(Boolean).join(" · ")}</p>
             )}
 
-            <SiteAppLinkStatusPanel key={site.id} siteId={site.id} />
-            <SiteWeatherPanel siteId={site.id} version={site.version} active={site.active} />
 
             <div className="flex flex-wrap gap-2 pt-6">
               {detail.teams.length === 0 && <span className="text-xs text-[var(--color-text-faint)]">등록된 팀이 없어요.</span>}
