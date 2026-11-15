@@ -66,7 +66,7 @@ export default function SiteSettingsPage() {
                   <span className={`flex items-center justify-center size-4 rounded border transition ${checked[slot] ? "bg-[var(--color-accent)] border-[var(--color-accent)]" : "border-[var(--color-checkbox-border)]"}`}>
                     {checked[slot] && <CheckboxCheckIcon className="size-2.5 text-white" />}
                   </span>
-                  <span className="font-['JetBrains_Mono',monospace] text-[var(--color-text-value)] text-sm">{slot}</span>
+                  <span className="font-mono-num text-[var(--color-text-value)] text-sm">{slot}</span>
                 </button>
               ))}
             </div>

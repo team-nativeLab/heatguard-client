@@ -285,7 +285,7 @@ export default function ScreenHQDashboard() {
               ].map(([label, value]) => (
                 <div key={label} className="rounded-lg border border-[var(--home-weather-tile-border)] bg-[var(--home-weather-tile-bg)] px-3 py-2 backdrop-blur-[2px]">
                   <p className="text-xs leading-4 text-[var(--color-text-body)]">{label}</p>
-                  <p className="pt-0.5 font-['JetBrains_Mono',monospace] text-sm font-medium leading-5 text-[var(--color-text-value)]">{value}</p>
+                  <p className="pt-0.5 font-mono-num text-sm font-medium leading-5 text-[var(--color-text-value)]">{value}</p>
                 </div>
               ))}
             </div>
@@ -345,7 +345,7 @@ export default function ScreenHQDashboard() {
                 </div>
                 <SiteHeatBadge temperature={site.temperature} label={heatLabel(site)} tone={heatTone(site)} />
                 <div className="w-16 text-right">
-                  <p className={`font-['JetBrains_Mono',monospace] text-xs ${doneClass(heatTone(site))}`}>{doneText(site.checklistDone, site.checklistTotal)}</p>
+                  <p className={`font-mono-num text-xs ${doneClass(heatTone(site))}`}>{doneText(site.checklistDone, site.checklistTotal)}</p>
                   <p className="pt-0.5 text-[11px] text-[var(--color-text-faint)]">오늘 {site.todayRecordCount}건</p>
                 </div>
               </Link>

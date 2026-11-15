@@ -218,7 +218,7 @@ export default function SiteTodayPage() {
                     </p>
                   </div>
                   <span
-                    className={`${badge.bg} ${badge.text} flex gap-1.5 items-center px-2 py-0.5 rounded text-[10px] font-['JetBrains_Mono',monospace] font-medium whitespace-nowrap`}
+                    className={`${badge.bg} ${badge.text} flex gap-1.5 items-center px-2 py-0.5 rounded text-[10px] font-mono-num font-medium whitespace-nowrap`}
                   >
                     {team.feelsLike != null ? (
                       <>
@@ -239,7 +239,7 @@ export default function SiteTodayPage() {
                   {team.checkTimes.map((log) => (
                     <span
                       key={log.time}
-                      className={`text-[10px] px-2 py-0.5 rounded font-['JetBrains_Mono',monospace] border ${
+                      className={`text-[10px] px-2 py-0.5 rounded font-mono-num border ${
                         log.done
                           ? "bg-[var(--color-checktime-done-bg)] border-[var(--color-checktime-done-border)] text-[var(--color-checktime-done-text)]"
                           : "border-[var(--color-border)] text-[var(--color-text-faint)]"
@@ -251,7 +251,7 @@ export default function SiteTodayPage() {
                   ))}
                 </div>
 
-                <p className="font-['JetBrains_Mono',monospace] leading-[16.5px] text-[var(--color-text-body)] text-[11px] pt-3">
+                <p className="font-mono-num leading-[16.5px] text-[var(--color-text-body)] text-[11px] pt-3">
                   체크리스트 {team.checklistDone ?? "-"}/{team.checklistTotal ?? "-"}
                 </p>
               </button>
