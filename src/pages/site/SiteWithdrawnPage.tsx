@@ -145,7 +145,7 @@ export default function SiteWithdrawnPage() {
                 <tr key={m.id} className="border-b border-[var(--color-border)] last:border-b-0">
                   <td className="px-4 py-3 text-sm text-[var(--color-text-value)]">{m.name}</td>
                   <td className="px-4 py-3 text-sm text-[var(--color-text-body)]">{m.teamName}</td>
-                  <td className="px-4 py-3 text-xs font-['JetBrains_Mono',monospace] text-[var(--color-text-body)]">{formatDate(m.withdrawnAt)}</td>
+                  <td className="px-4 py-3 text-xs font-mono-num text-[var(--color-text-body)]">{formatDate(m.withdrawnAt)}</td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
                     <button
                       type="button"

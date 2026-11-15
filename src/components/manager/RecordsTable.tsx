@@ -57,7 +57,7 @@ export default function RecordsTable({
     <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg overflow-x-auto w-full">
       <table className="w-full text-left border-collapse min-w-[700px]">
         <thead>
-          <tr className="border-[var(--color-border)] border-b font-['JetBrains_Mono',monospace] text-[var(--color-text-faint)] text-[10px] tracking-[0.5px]">
+          <tr className="border-[var(--color-border)] border-b font-mono-num text-[var(--color-text-faint)] text-[10px] tracking-[0.5px]">
             <th className="px-4 py-2.5 font-bold">사진</th>
             <th className="px-4 py-2.5 font-bold">유형</th>
             <th className="px-4 py-2.5 font-bold">장소</th>
@@ -93,10 +93,10 @@ export default function RecordsTable({
                 {row.place}
                 {row.teamName && <span className="text-[var(--color-text-faint)] ml-1.5">· {row.teamName}</span>}
               </td>
-              <td className="px-4 py-3 font-['JetBrains_Mono',monospace] text-[var(--color-text-value)] text-xs">{row.temp}</td>
-              <td className="px-4 py-3 font-['JetBrains_Mono',monospace] text-[var(--color-text-value)] text-xs">{row.humidity}</td>
-              <td className={`px-4 py-3 font-['JetBrains_Mono',monospace] font-medium text-xs ${row.feelsColor}`}>{row.feels}</td>
-              <td className="px-4 py-3 font-['JetBrains_Mono',monospace] text-[var(--color-text-body)] text-xs">{row.time}</td>
+              <td className="px-4 py-3 font-mono-num text-[var(--color-text-value)] text-xs">{row.temp}</td>
+              <td className="px-4 py-3 font-mono-num text-[var(--color-text-value)] text-xs">{row.humidity}</td>
+              <td className={`px-4 py-3 font-mono-num font-medium text-xs ${row.feelsColor}`}>{row.feels}</td>
+              <td className="px-4 py-3 font-mono-num text-[var(--color-text-body)] text-xs">{row.time}</td>
             </tr>
           ))}
           {rows.length === 0 && (

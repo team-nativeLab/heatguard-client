@@ -474,7 +474,7 @@ export default function HomeDashboard() {
               <div className="flex items-center gap-2 pb-1.5">
                 <span className="font-medium text-[24px] leading-8 text-[var(--color-text-heading)]">°C</span>
                 {w && w.deltaFromYesterday != null && (
-                  <span className="font-['JetBrains_Mono',monospace] text-sm font-medium leading-5 px-2 py-[2px] rounded bg-[var(--color-delta-bg)] text-[var(--color-delta-fg)]">
+                  <span className="font-mono-num text-sm font-medium leading-5 px-2 py-[2px] rounded bg-[var(--color-delta-bg)] text-[var(--color-delta-fg)]">
                     {w.deltaFromYesterday > 0 ? "+" : ""}
                     {w.deltaFromYesterday.toFixed(1)}°C
                   </span>
@@ -498,7 +498,7 @@ export default function HomeDashboard() {
                 className="bg-[var(--home-weather-tile-bg)] border border-[var(--home-weather-tile-border)] backdrop-blur-[2px] rounded-lg px-3 py-2"
               >
                 <p className="text-xs leading-4 text-[var(--color-text-body)]">{label}</p>
-                <p className="font-['JetBrains_Mono',monospace] text-sm font-medium leading-5 pt-0.5 text-[var(--color-text-value)]">{value}</p>
+                <p className="font-mono-num text-sm font-medium leading-5 pt-0.5 text-[var(--color-text-value)]">{value}</p>
               </div>
             ))}
           </div>
@@ -605,7 +605,7 @@ export default function HomeDashboard() {
             <col style={{ width: "4.7%" }} />
           </colgroup>
           <thead>
-            <tr className="border-[var(--home-table-border)] border-b font-['JetBrains_Mono',monospace] text-[10px] font-bold tracking-[0.5px] text-[var(--home-table-head)] h-[35.5px]">
+            <tr className="border-[var(--home-table-border)] border-b font-mono-num text-[10px] font-bold tracking-[0.5px] text-[var(--home-table-head)] h-[35.5px]">
               <th className="pl-4 font-bold">사진</th>
               <th className="pl-[19px] font-bold">유형</th>
               <th className="font-bold">장소</th>
@@ -655,15 +655,15 @@ export default function HomeDashboard() {
                   </span>
                 </td>
                 <td className="text-xs text-[var(--home-table-text)]">{r.place}</td>
-                <td className="font-['JetBrains_Mono',monospace] text-xs text-[var(--home-table-value)]">{r.temperature}°</td>
-                <td className="font-['JetBrains_Mono',monospace] text-xs text-[var(--home-table-value)]">{r.humidity}%</td>
+                <td className="font-mono-num text-xs text-[var(--home-table-value)]">{r.temperature}°</td>
+                <td className="font-mono-num text-xs text-[var(--home-table-value)]">{r.humidity}%</td>
                 <td
-                  className="font-['JetBrains_Mono',monospace] text-xs font-medium"
+                  className="font-mono-num text-xs font-medium"
                   style={{ color: feelsLikeColor(r.apparentTemperature ?? 0) }}
                 >
                   {(r.apparentTemperature ?? 0).toFixed(1)}°C
                 </td>
-                <td className="font-['JetBrains_Mono',monospace] text-xs text-[var(--home-table-time)] whitespace-nowrap">
+                <td className="font-mono-num text-xs text-[var(--home-table-time)] whitespace-nowrap">
                   {isRange && <span className="text-[var(--color-text-faint)] mr-1">{r.date.slice(5).replace("-", "/")}</span>}
                   {r.time}
                 </td>

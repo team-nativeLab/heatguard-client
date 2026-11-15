@@ -72,7 +72,7 @@ export default function RecordTable({ records }: { records: HqRecordRow[] }) {
   return (
     <div className="w-full overflow-x-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)]">
       <div className="min-w-[860px]">
-        <div className={`grid h-[35px] ${COLS} items-center border-b border-[var(--color-border)] px-4 font-['JetBrains_Mono',monospace] text-[10px] font-bold tracking-[0.5px] text-[var(--color-text-faint)]`}>
+        <div className={`grid h-[35px] ${COLS} items-center border-b border-[var(--color-border)] px-4 font-mono-num text-[10px] font-bold tracking-[0.5px] text-[var(--color-text-faint)]`}>
           <span>사진</span>
           <span>유형</span>
           <span>장소</span>
@@ -87,12 +87,12 @@ export default function RecordTable({ records }: { records: HqRecordRow[] }) {
             <Photos row={r} />
             <span className="text-[var(--color-text-label)]">{r.type}</span>
             <span className="truncate pr-2 text-[var(--color-text-label)]">{r.place || r.teamName || "-"}</span>
-            <span className="font-['JetBrains_Mono',monospace] text-[var(--color-text-value)]">{r.temperature != null ? `${r.temperature}°` : "-"}</span>
-            <span className="font-['JetBrains_Mono',monospace] text-[var(--color-text-value)]">{r.humidity != null ? `${r.humidity}%` : "-"}</span>
-            <span className={`font-['JetBrains_Mono',monospace] font-medium ${valueTone(feelsTone(r.apparentTemperature))}`}>
+            <span className="font-mono-num text-[var(--color-text-value)]">{r.temperature != null ? `${r.temperature}°` : "-"}</span>
+            <span className="font-mono-num text-[var(--color-text-value)]">{r.humidity != null ? `${r.humidity}%` : "-"}</span>
+            <span className={`font-mono-num font-medium ${valueTone(feelsTone(r.apparentTemperature))}`}>
               {r.apparentTemperature != null ? `${r.apparentTemperature.toFixed(1)}°C` : "-"}
             </span>
-            <span className="font-['JetBrains_Mono',monospace] text-[var(--color-text-body)]">{r.time}</span>
+            <span className="font-mono-num text-[var(--color-text-body)]">{r.time}</span>
           </div>
         ))}
       </div>
@@ -102,7 +102,7 @@ export default function RecordTable({ records }: { records: HqRecordRow[] }) {
 
 export function HeatBadge({ temp, status, tone = "orange" }: { temp: string; status: string; tone?: string }) {
   return (
-    <span className={`${toneClass(tone)} inline-flex items-center gap-1.5 rounded px-2 py-0.5 font-['JetBrains_Mono',monospace] text-[10px] font-medium whitespace-nowrap`}>
+    <span className={`${toneClass(tone)} inline-flex items-center gap-1.5 rounded px-2 py-0.5 font-mono-num text-[10px] font-medium whitespace-nowrap`}>
       {temp && (
         <>
           {temp}

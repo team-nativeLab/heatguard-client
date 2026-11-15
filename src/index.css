@@ -212,6 +212,15 @@ body {
   min-height: 100svh;
 }
 
+/*
+ * 숫자를 자릿수에 맞춰 세로로 정렬하기 위한 고정폭 글꼴.
+ * JetBrains Mono에는 한글 글리프가 없어서, 한글이 섞인 텍스트(테이블 머리글,
+ * 현장명 등)는 본문 글꼴로 넘긴다. monospace만 두면 한글이 □□□로 깨진다.
+ */
+.font-mono-num {
+  font-family: "JetBrains Mono", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+}
+
 .figma-emoji {
   font-family: "Noto Emoji", "Noto Sans KR", sans-serif;
   font-variant-emoji: text;

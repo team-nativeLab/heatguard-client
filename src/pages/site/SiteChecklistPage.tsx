@@ -169,7 +169,7 @@ export default function SiteChecklistPage() {
               key={item.id}
               className="group flex gap-3 items-center pl-4 pr-2 py-2 min-h-[48px] border-b border-[var(--color-border)] last:border-b-0"
             >
-              <span className="font-['JetBrains_Mono',monospace] text-[var(--color-accent)] text-[11px] w-5 shrink-0">
+              <span className="font-mono-num text-[var(--color-accent)] text-[11px] w-5 shrink-0">
                 {String(i + 1).padStart(2, "0")}
               </span>
               {editingId === item.id ? (

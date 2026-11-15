@@ -141,7 +141,7 @@ export default function ScreenHQRecords() {
                     <h2 className="text-sm font-medium text-[var(--color-text-heading)]">{g.name}</h2>
                     {(g.siteStatus === "INACTIVE" || (site && !site.active)) && <span className="rounded bg-[var(--color-heat-none-bg)] px-1.5 py-0.5 text-[10px] text-[var(--color-heat-none-fg)]">비활성 · 기록 보존</span>}
                     {site && <SiteHeatBadge temperature={site.temperature} label={heatLabel(site)} tone={heatTone(site)} />}
-                    <span className="font-['JetBrains_Mono',monospace] text-xs text-[var(--color-text-faint)]">{g.rows.length}건 표시</span>
+                    <span className="font-mono-num text-xs text-[var(--color-text-faint)]">{g.rows.length}건 표시</span>
                   </div>
                   <div className="pt-3">
                     <RecordTable records={g.rows} />

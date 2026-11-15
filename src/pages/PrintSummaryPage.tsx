@@ -131,7 +131,7 @@ export default function PrintSummaryPage() {
             <p className="text-sm text-[var(--color-text-label)] pt-1">{data.site.siteName}</p>
             {data.site.address && <p className="text-xs text-[var(--color-text-body)]">{data.site.address}</p>}
           </div>
-          <p className="font-['JetBrains_Mono',monospace] text-sm text-[var(--color-text-label)]">{data.date}</p>
+          <p className="font-mono-num text-sm text-[var(--color-text-label)]">{data.date}</p>
         </div>
 
         <div className="grid grid-cols-4 gap-4 py-5 border-b border-[var(--color-border)]">
