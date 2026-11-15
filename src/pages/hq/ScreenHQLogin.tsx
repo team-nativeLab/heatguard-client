@@ -90,7 +90,7 @@ export default function ScreenHQLogin() {
       step={2}
       hideBackButton
       cardTitle="폭염가드"
-      cardSubtitle="본사 계정으로 로그인해주세요."
+      cardSubtitle="관리자 계정으로 로그인해주세요."
     >
       <form className="mt-14 flex flex-col gap-1" onSubmit={handleSubmit} noValidate>
         <AuthField
