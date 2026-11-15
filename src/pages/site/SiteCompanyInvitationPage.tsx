@@ -7,6 +7,7 @@ import { AnimatedLockIcon, MapPinIcon } from "../../components/auth/AuthIcons";
 import { ApiError, authApi, errorMessage } from "../../api";
 import { clearSiteMeCache } from "../../hooks/useSiteMe";
 import { setSelectedSiteId } from "../../lib/siteSelection";
+import { setMembership } from "../../lib/membership";
 
 export default function SiteCompanyInvitationPage() {
   const [searchParams] = useSearchParams();
@@ -51,6 +52,8 @@ export default function SiteCompanyInvitationPage() {
       if (!selectedSiteId) {
         throw new Error("연결은 완료됐지만 현장 목록을 확인하지 못했어요. 새로고침 후 다시 확인해주세요.");
       }
+      // 서버 세션 갱신 전 재조회로 이전 상태를 받지 않도록 응답 기준으로 기록한다.
+      setMembership("joined");
       setSelectedSiteId(selectedSiteId);
       navigate("/manager", { replace: true });
     } catch (err) {

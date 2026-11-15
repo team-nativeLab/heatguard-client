@@ -8,6 +8,7 @@ import { useSiteMe, patchSiteMeUser, refreshSiteMePhoto } from "../hooks/useSite
 import { ApiError, authApi, siteApi, profilePhotoApi, isDemoFallback, errorMessage } from "../api";
 import { markSignedOut } from "../shared/auth/authScope";
 import { clearSiteMeCache } from "../hooks/useSiteMe";
+import { clearMembership } from "../lib/membership";
 import { clearSelectedSiteId } from "../lib/siteSelection";
 import { getPasswordConfirmationError, getPasswordError } from "../lib/passwordPolicy";
 import { NewPasswordInput } from "../components/auth/NewPasswordField";
@@ -165,6 +166,7 @@ export default function AccountPage() {
       // 네트워크가 끊겨도 로컬 세션은 종료한다.
     } finally {
       clearSiteMeCache();
+      clearMembership();
       authApi.clearManagedSitesCache();
       clearSelectedSiteId();
       markSignedOut();
@@ -182,12 +184,14 @@ export default function AccountPage() {
     try {
       await siteApi.withdraw({ currentPassword: withdrawalPassword });
       clearSiteMeCache();
+      clearMembership();
       markSignedOut();
       showToast("회원탈퇴가 처리됐어요.");
       navigate("/auth/login", { replace: true });
     } catch (err) {
       if (isDemoFallback(err)) {
         clearSiteMeCache();
+      clearMembership();
         markSignedOut();
         showToast("회원탈퇴가 처리됐어요. (데모)");
         navigate("/auth/login", { replace: true });

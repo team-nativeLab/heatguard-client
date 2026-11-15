@@ -7,6 +7,7 @@ import { AnimatedLockIcon, BarChartIcon, FileTextIcon, MailIcon } from "../compo
 import { useToast } from "../shared/ui/toastContext";
 import { markSignedIn } from "../shared/auth/authScope";
 import { clearSiteMeCache } from "../hooks/useSiteMe";
+import { clearMembership } from "../lib/membership";
 import { authApi, ApiError, errorMessage } from "../api";
 import { clearSelectedSiteId } from "../lib/siteSelection";
 
@@ -68,6 +69,7 @@ export default function LoginPage() {
       const role = session.user?.role;
       if (role !== "HQ_MANAGER" && role !== "SITE_MANAGER") throw new Error("관리자 계정이 아닙니다.");
       clearSiteMeCache();
+      clearMembership();
       authApi.clearManagedSitesCache();
       clearSelectedSiteId();
       // 본사·현장 세션은 따로 기억하므로 로그인한 역할의 스코프를 표시한다.

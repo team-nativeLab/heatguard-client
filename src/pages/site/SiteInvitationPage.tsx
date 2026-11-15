@@ -10,6 +10,7 @@ import { ApiError, authApi, errorMessage } from "../../api";
 import { getPasswordConfirmationError, getPasswordError, SIGNUP_PASSWORD_MIN_LENGTH, SIGNUP_PASSWORD_POLICY_HINT } from "../../lib/passwordPolicy";
 import { clearSelectedSiteId } from "../../lib/siteSelection";
 import { clearSiteMeCache } from "../../hooks/useSiteMe";
+import { clearMembership } from "../../lib/membership";
 import { markSignedIn } from "../../shared/auth/authScope";
 import { useToast } from "../../shared/ui/toastContext";
 
@@ -46,6 +47,7 @@ export default function SiteInvitationPage() {
       await authApi.acceptSiteInvitation({ invitationId, email: email.trim(), managerPhone: phone.replace(/\D/g, ""), password, confirmPassword });
       setAccepted(true);
       clearSiteMeCache();
+      clearMembership();
       authApi.clearManagedSitesCache();
       clearSelectedSiteId();
       markSignedIn();
