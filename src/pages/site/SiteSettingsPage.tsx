@@ -7,6 +7,7 @@ import { useToast } from "../../shared/ui/toastContext";
 
 const TIME_SLOTS = Array.from({ length: 24 }, (_, index) => `${String(index + 1).padStart(2, "0")}:00`);
 const ALL_CHECKED_TIMES = Object.fromEntries(TIME_SLOTS.map((time) => [time, true]));
+const NO_CHECKED_TIMES: Record<string, boolean> = {};
 
 export default function SiteSettingsPage() {
   const { showToast } = useToast();
@@ -17,16 +18,22 @@ export default function SiteSettingsPage() {
   useEffect(() => {
     let alive = true;
     settingsApi.getCheckTimes().then((times) => {
-      if (alive) setChecked(times.times.length > 0 ? Object.fromEntries(times.times.map((time) => [time, true])) : ALL_CHECKED_TIMES);
+      // 저장된 값이 없으면 전부 해제 상태로 시작한다.
+      if (alive) setChecked(Object.fromEntries(times.times.map((time) => [time, true])));
     }).catch((err) => {
       if (!alive) return;
-      if (isDemoFallback(err)) setChecked(ALL_CHECKED_TIMES);
+      if (isDemoFallback(err)) setChecked(NO_CHECKED_TIMES);
       else showToast(errorMessage(err, "체크 시간을 불러오지 못했어요."), "error");
     }).finally(() => {
       if (alive) setLoading(false);
     });
     return () => { alive = false; };
   }, [showToast]);
+
+  const selectedCount = TIME_SLOTS.filter((time) => checked[time]).length;
+  const allSelected = selectedCount === TIME_SLOTS.length;
+
+  const toggleAll = () => setChecked(allSelected ? NO_CHECKED_TIMES : ALL_CHECKED_TIMES);
 
   const saveCheckTimes = async () => {
     if (saving) return;
@@ -48,8 +55,21 @@ export default function SiteSettingsPage() {
     <HomeLayout>
       <SiteManagementHeader active="schedule" />
       <section aria-busy={loading} className={`w-full max-w-[720px] pt-8 self-start ${loading ? "animate-pulse pointer-events-none" : ""}`}>
-        <h2 className="font-medium text-[var(--color-text-heading)] text-sm">온도 체크 시간</h2>
-        <p className="text-[var(--color-text-body)] text-xs pt-1">선택한 시간마다 팀에 온도 측정 알림이 가요.</p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="font-medium text-[var(--color-text-heading)] text-sm">온도 체크 시간</h2>
+            <p className="text-[var(--color-text-body)] text-xs pt-1">선택한 시간마다 팀에 온도 측정 알림이 가요.</p>
+          </div>
+          <button
+            type="button"
+            onClick={toggleAll}
+            disabled={loading}
+            className="shrink-0 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-text-label)] transition hover:bg-[var(--color-bg-tile)] disabled:opacity-60"
+          >
+            {allSelected ? "전체 해제" : "전체 체크"}
+          </button>
+        </div>
+        <p className="pt-2 text-xs text-[var(--color-text-faint)]">{selectedCount}개 시간 선택됨</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 pt-3 max-w-[560px]">
           {[TIME_SLOTS.slice(0, 12), TIME_SLOTS.slice(12, 24)].map((column, columnIndex) => (
             <div key={columnIndex} className="flex flex-col gap-1">
