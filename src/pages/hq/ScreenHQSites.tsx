@@ -90,8 +90,8 @@ export default function ScreenHQSites() {
     const v = { ...form, siteName: form.siteName.trim(), managerName: form.managerName.trim(), managerPhone: form.managerPhone.trim() };
     if (!v.siteName) return showToast("현장 이름을 입력해 주세요.", "error");
     if (!v.managerName) return showToast("현장관리자 이름을 입력해 주세요.", "error");
-    if (!v.managerPhone) return showToast("현장관리자 전화번호를 입력해 주세요.", "error");
-    if (!PHONE_RE.test(v.managerPhone)) return showToast("현장관리자 전화번호 형식을 확인해 주세요.", "error");
+    if (!v.managerPhone) return showToast("인증 전화번호를 입력해 주세요.", "error");
+    if (!PHONE_RE.test(v.managerPhone)) return showToast("인증 전화번호 형식을 확인해 주세요.", "error");
 
     setCreating(true);
     try {
@@ -251,7 +251,7 @@ export default function ScreenHQSites() {
             </>}
           >
             <form id="add-site" onSubmit={handleCreate} noValidate>
-              <p className="mb-4 text-xs leading-5 text-[var(--color-text-body)]">현장관리자 전화번호는 앱에서 초대를 수락할 때 본인 확인에 사용합니다.</p>
+              <p className="mb-4 text-xs leading-5 text-[var(--color-text-body)]">인증 전화번호는 앱에서 초대를 수락할 때 본인 확인에 사용합니다.</p>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <label className="flex flex-col gap-1.5">
                   <span className="text-xs text-[var(--color-text-body)]">현장 이름 *</span>
@@ -262,7 +262,7 @@ export default function ScreenHQSites() {
                   <input disabled={creating} className={inputCls} value={form.managerName} onChange={setField("managerName")} autoComplete="off" />
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-xs text-[var(--color-text-body)]">현장관리자 전화번호 *</span>
+                  <span className="text-xs text-[var(--color-text-body)]">인증 전화번호 *</span>
                   <input
                     disabled={creating}
                     type="tel"
