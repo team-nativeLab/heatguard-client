@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "../../shared/ui/toastContext";
 import { clearSiteMeCache } from "../../hooks/useSiteMe";
+import { clearMembership } from "../../lib/membership";
 import { clearHqMeCache } from "../../hooks/useHqMe";
 import { markSignedOut } from "../../shared/auth/authScope";
 import { UNAUTHORIZED_EVENT } from "../../api";
@@ -28,6 +29,7 @@ export default function SessionGuard() {
         markSignedOut("hq");
       } else {
         clearSiteMeCache();
+        clearMembership();
         markSignedOut();
       }
       showToast("로그인이 만료됐어요. 다시 로그인해주세요.", "error");

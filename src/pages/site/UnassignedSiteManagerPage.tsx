@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthCardLayout from "../../components/auth/AuthCardLayout";
 import AuthField from "../../components/auth/AuthField";
@@ -8,6 +8,7 @@ import { authApi, errorMessage } from "../../api";
 import { useToast } from "../../shared/ui/toastContext";
 import { clearSiteMeCache } from "../../hooks/useSiteMe";
 import { setSelectedSiteId } from "../../lib/siteSelection";
+import { setMembership } from "../../lib/membership";
 
 function formatPhone(value: string) {
   const digits = value.replace(/\D/g, "").slice(0, 11);
@@ -22,27 +23,10 @@ export default function UnassignedSiteManagerPage() {
   const [siteName, setSiteName] = useState("");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    let active = true;
-    authApi.me()
-      .then((me) => {
-        if (!active) return;
-        if (me.membershipStatus !== "UNASSIGNED") {
-          navigate("/manager", { replace: true });
-          return;
-        }
-        setLoading(false);
-      })
-      .catch((err: unknown) => {
-        if (!active) return;
-        setError(errorMessage(err, "계정 정보를 불러오지 못했어요."));
-        setLoading(false);
-      });
-    return () => { active = false; };
-  }, [navigate]);
+  // 연결 상태 확인과 리다이렉트는 SiteMembershipGate가 담당한다.
+  // 이 화면이 같은 판단을 중복으로 하면 둘이 서로에게 보내며 깜빡인다.
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -66,6 +50,7 @@ export default function UnassignedSiteManagerPage() {
       });
       const siteId = result.selectedSiteId || result.site?.siteId;
       if (!siteId) throw new Error("현장 생성 응답에서 현장 정보를 확인하지 못했어요.");
+      setMembership("joined");
       setSelectedSiteId(siteId);
       authApi.clearManagedSitesCache();
       clearSiteMeCache();
@@ -91,10 +76,7 @@ export default function UnassignedSiteManagerPage() {
       cardSubtitle="현장 이름과 관리자 연락처를 입력해주세요."
       hideBackButton
     >
-      {loading ? (
-        <div role="status" className="mt-8 text-sm text-[var(--auth-text-muted)]">계정 정보를 확인하는 중...</div>
-      ) : (
-        <form className="mt-6 flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
+      <form className="mt-6 flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
           <AuthField
             label="현장 이름"
             icon={<MapPinIcon size={18} />}
@@ -117,8 +99,7 @@ export default function UnassignedSiteManagerPage() {
           <AuthSubmitButton disabled={submitting}>
             {submitting ? "현장 만드는 중..." : "현장 만들기"}
           </AuthSubmitButton>
-        </form>
-      )}
+      </form>
     </AuthCardLayout>
   );
 }
