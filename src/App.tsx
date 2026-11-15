@@ -28,16 +28,27 @@ import SiteCompanyInvitationPage from "./pages/site/SiteCompanyInvitationPage";
 import UnassignedSiteManagerPage from "./pages/site/UnassignedSiteManagerPage";
 import RequireAuth from "./shared/auth/RequireAuth";
 import { authApi, hqApi } from "./api";
+import { getCachedMembership, loadMembership } from "./lib/membership";
 
 // 로그인해야 볼 수 있는 화면
 function SiteMembershipGate({ children }: { children: ReactNode }) {
   const location = useLocation();
-  const [membership, setMembership] = useState<"loading" | "joined" | "unassigned" | "error">("loading");
+  // 한 번 확인한 연결 상태는 화면 이동마다 다시 묻지 않는다.
+  // 현장 생성·초대 수락은 응답으로 캐시를 갱신하므로, 서버 세션이 갱신되기
+  // 전에 조회해 이전 값을 받고 되돌아가는 깜빡임이 생기지 않는다.
+  const [membership, setMembership] = useState<"loading" | "joined" | "unassigned" | "error">(
+    () => getCachedMembership() ?? "loading",
+  );
 
   useEffect(() => {
+    const cached = getCachedMembership();
+    if (cached) {
+      setMembership(cached);
+      return;
+    }
     let active = true;
-    authApi.me().then((user) => {
-      if (active) setMembership(user.membershipStatus === "UNASSIGNED" ? "unassigned" : "joined");
+    loadMembership().then((status) => {
+      if (active) setMembership(status);
     }).catch(() => {
       if (active) setMembership("error");
     });
