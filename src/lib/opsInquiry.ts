@@ -99,3 +99,19 @@ export function clearDraft(inquiryId: string) {
 export function isOpen(inquiry: OpsInquiry) {
   return inquiry.status === "OPEN";
 }
+
+/**
+ * 답변 전송 실패가 "실제로는 저장됐을 수도 있는" 종류인지.
+ * - 응답을 못 받은 네트워크 오류: 요청이 서버에 도달해 저장됐을 수 있다.
+ * - 5xx (예: 503 SERVICE_DEGRADED): 서버 계약상 이벤트 전송만 실패하고 저장은 됐을 수 있다.
+ * - 4xx (400·404·409): 서버가 거부했으므로 저장되지 않았다.
+ */
+export function mayHaveBeenSaved(failure: { network?: boolean; status?: number }): boolean {
+  if (failure.network) return true;
+  return typeof failure.status === "number" && failure.status >= 500;
+}
+
+/** 다시 조회한 답변 수가 늘었으면 이전 요청이 저장된 것이다. */
+export function replyLanded(beforeCount: number, afterCount: number): boolean {
+  return afterCount > beforeCount;
+}
