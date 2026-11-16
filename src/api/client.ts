@@ -17,4 +17,5 @@ configureApiClient({ authPaths: [
     "/api/v1/auth/admin/login",
     "/api/v1/auth/hq/login",
     "/api/v1/auth/hq/register",
+    "/api/v1/ops/auth/login",
   ] });

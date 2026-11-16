@@ -22,7 +22,14 @@ export default function SessionGuard() {
   useEffect(() => {
     const handler = () => {
       const path = pathRef.current;
-      if (path.startsWith("/auth") || path === "/" || path === "/hq/login" || path.startsWith("/hq/signup")) return;
+      if (path.startsWith("/auth") || path === "/" || path === "/hq/login" || path.startsWith("/hq/signup") || path === "/ops/login") return;
+      // 운영자 세션은 본사·현장과 따로 관리한다.
+      if (path.startsWith("/ops")) {
+        markSignedOut("ops");
+        showToast("로그인이 만료됐어요. 다시 로그인해주세요.", "error");
+        navigate("/ops/login", { replace: true });
+        return;
+      }
       const isHq = path.startsWith("/hq");
       if (isHq) {
         clearHqMeCache();

@@ -20,6 +20,8 @@ import ScreenHQSiteDetail from "./pages/hq/ScreenHQSiteDetail";
 import ScreenHQRecords from "./pages/hq/ScreenHQRecords";
 import ScreenHQAccount from "./pages/hq/ScreenHQAccount";
 import ScreenHQContact from "./pages/hq/ScreenHQContact";
+import OpsLoginPage from "./pages/ops/OpsLoginPage";
+import OpsInquiriesPage from "./pages/ops/OpsInquiriesPage";
 import SessionGuard from "./components/auth/SessionGuard";
 import SiteScopeGuard from "./components/auth/SiteScopeGuard";
 import SiteSelectionPage from "./pages/site/SiteSelectionPage";
@@ -27,7 +29,7 @@ import SiteInvitationPage from "./pages/site/SiteInvitationPage";
 import SiteCompanyInvitationPage from "./pages/site/SiteCompanyInvitationPage";
 import UnassignedSiteManagerPage from "./pages/site/UnassignedSiteManagerPage";
 import RequireAuth from "./shared/auth/RequireAuth";
-import { authApi, hqApi } from "./api";
+import { authApi, hqApi, opsApi } from "./api";
 import { getCachedMembership, loadMembership } from "./lib/membership";
 
 // 로그인해야 볼 수 있는 화면
@@ -80,6 +82,15 @@ function Protected({ children, siteSelection = false }: { children: ReactNode; s
   );
 }
 
+// 운영자 전용 화면 (본사·현장 세션과 별도로 확인한다)
+function ProtectedOps({ children }: { children: ReactNode }) {
+  return (
+    <RequireAuth check={opsApi.me} loginPath="/ops/login" scope="ops">
+      {children}
+    </RequireAuth>
+  );
+}
+
 // 본사 관리자 전용 화면 (현장 세션과 별도로 확인한다)
 function ProtectedHq({ children }: { children: ReactNode }) {
   return (
@@ -127,6 +138,11 @@ export default function App() {
         <Route path="/hq/records" element={<ProtectedHq><ScreenHQRecords /></ProtectedHq>} />
         <Route path="/hq/account" element={<ProtectedHq><ScreenHQAccount /></ProtectedHq>} />
         <Route path="/hq/contact" element={<ProtectedHq><ScreenHQContact /></ProtectedHq>} />
+
+        {/* 운영자 콘솔 */}
+        <Route path="/ops" element={<Navigate to="/ops/inquiries" replace />} />
+        <Route path="/ops/login" element={<OpsLoginPage />} />
+        <Route path="/ops/inquiries" element={<ProtectedOps><OpsInquiriesPage /></ProtectedOps>} />
 
         <Route path="*" element={<Navigate to="/auth/login" replace />} />
       </Routes>
