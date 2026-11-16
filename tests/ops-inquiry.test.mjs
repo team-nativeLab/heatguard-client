@@ -5,7 +5,9 @@ import {
   formatDateTime,
   inquiryType,
   matchesTab,
+  mayHaveBeenSaved,
   relativeTime,
+  replyLanded,
 } from "../src/lib/opsInquiry.ts";
 
 test("inquiryType reads the bracket prefix", () => {
@@ -54,4 +56,38 @@ test("relativeTime and formatDateTime tolerate missing or bad input", () => {
 
 test("reply limit matches the design", () => {
   assert.equal(REPLY_MAX_LENGTH, 1000);
+});
+
+test("network errors and 5xx may have saved the reply", () => {
+  assert.equal(mayHaveBeenSaved({ network: true }), true);
+  assert.equal(mayHaveBeenSaved({ status: 503 }), true);
+  assert.equal(mayHaveBeenSaved({ status: 500 }), true);
+});
+
+test("4xx rejections did not save the reply", () => {
+  for (const status of [400, 401, 403, 404, 409, 429]) {
+    assert.equal(mayHaveBeenSaved({ status }), false, `status ${status}`);
+  }
+  assert.equal(mayHaveBeenSaved({}), false);
+});
+
+const r = (content) => ({ content });
+
+test("replyLanded detects my reply saved despite the error", () => {
+  assert.equal(replyLanded([], [r("안녕하세요")], "안녕하세요"), true);
+  assert.equal(replyLanded([r("이전 답변")], [r("이전 답변"), r("안녕하세요")], "안녕하세요"), true);
+  assert.equal(replyLanded([], [r("  안녕하세요\n")], "안녕하세요"), true);
+});
+
+test("replyLanded is false when nothing new was saved", () => {
+  assert.equal(replyLanded([r("이전 답변")], [r("이전 답변")], "안녕하세요"), false);
+  assert.equal(replyLanded([], [], "안녕하세요"), false);
+});
+
+test("replyLanded ignores another operator's reply arriving meanwhile", () => {
+  assert.equal(replyLanded([], [r("다른 운영자 답변")], "내 답변"), false);
+});
+
+test("replyLanded counts a second identical reply as new", () => {
+  assert.equal(replyLanded([r("같은 문구")], [r("같은 문구"), r("같은 문구")], "같은 문구"), true);
 });

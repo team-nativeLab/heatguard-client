@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import OpsLayout from "../../components/ops/OpsLayout";
-import { ApiError, errorMessage, opsApi, type OpsInquiry } from "../../api";
+import { ApiError, NetworkError, errorMessage, opsApi, type OpsInquiry } from "../../api";
 import { useToast } from "../../shared/ui/toastContext";
 import {
   REPLY_MAX_LENGTH,
@@ -11,7 +11,9 @@ import {
   inquiryType,
   loadDraft,
   matchesTab,
+  mayHaveBeenSaved,
   relativeTime,
+  replyLanded,
   saveDraft,
   type InquiryTab,
 } from "../../lib/opsInquiry";
@@ -134,20 +136,50 @@ export default function OpsInquiriesPage() {
     if (!detail || sending) return;
     const content = reply.trim();
     if (!content) return showToast("답변 내용을 입력해주세요.", "error");
+    // 전송 중 다른 문의를 고를 수 있으므로 대상과 기준 답변 수를 먼저 고정한다.
+    const inquiryId = detail.inquiryId;
+    const before = detail.replies;
     setSending(true);
     try {
-      await opsApi.replyToInquiry(detail.inquiryId, content, closeAfterReply);
-      clearDraft(detail.inquiryId);
+      let delayed = false;
+      try {
+        await opsApi.replyToInquiry(inquiryId, content, closeAfterReply);
+      } catch (err) {
+        if (err instanceof ApiError && err.code === "INQUIRY_CLOSED") {
+          showToast("종료된 문의에는 답변할 수 없어요. 다시 열고 답변해주세요.", "error");
+          void loadList();
+          return;
+        }
+        const failure = { network: err instanceof NetworkError, status: err instanceof ApiError ? err.status : undefined };
+        if (!mayHaveBeenSaved(failure)) {
+          showToast(errorMessage(err, "답변을 보내지 못했어요."), "error");
+          return;
+        }
+        // 503·네트워크 오류는 저장됐을 수 있다. 다시 보내게 하면 중복 등록되므로 먼저 확인한다.
+        const fresh = await opsApi.getInquiry(inquiryId).catch(() => null);
+        if (!fresh) {
+          showToast("답변이 저장됐는지 확인하지 못했어요. 새로고침해 답변을 확인한 뒤 다시 보내주세요.", "error");
+          return;
+        }
+        if (!replyLanded(before, fresh.replies, content)) {
+          showToast("답변을 보내지 못했어요. 잠시 후 다시 시도해주세요.", "error");
+          return;
+        }
+        delayed = true;
+      }
+
+      // 여기부터는 답변이 저장된 것이 확실하다. 이후 새로고침이 실패해도 "보내지 못함"으로 안내하지 않는다.
+      clearDraft(inquiryId);
       setReply("");
-      showToast("답변을 보냈어요.", "success");
-      const [fresh] = await Promise.all([opsApi.getInquiry(detail.inquiryId), loadList()]);
-      setDetail(fresh);
-    } catch (err) {
-      if (err instanceof ApiError && err.code === "INQUIRY_CLOSED") {
-        showToast("종료된 문의에는 답변할 수 없어요. 다시 열고 답변해주세요.", "error");
+      showToast(
+        delayed ? "답변은 저장됐어요. 회사로 전달되는 데 시간이 걸릴 수 있어요." : "답변을 보냈어요.",
+        "success",
+      );
+      try {
+        const [fresh] = await Promise.all([opsApi.getInquiry(inquiryId), loadList()]);
+        setDetail((current) => (current?.inquiryId === inquiryId ? fresh : current));
+      } catch {
         void loadList();
-      } else {
-        showToast(errorMessage(err, "답변을 보내지 못했어요."), "error");
       }
     } finally {
       setSending(false);
