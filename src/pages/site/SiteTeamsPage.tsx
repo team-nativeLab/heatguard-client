@@ -8,6 +8,7 @@ import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 import { useToast } from "../../shared/ui/toastContext";
 import { TeamMemberIcon } from "../../components/icons/Icons";
 import { teamsApi, isDemoFallback, errorMessage, type TeamSummary } from "../../api";
+import type { TeamAppLinks } from "../../api/teams";
 import { validateTeamForm, type TeamFormValues } from "../../lib/teamForm";
 import { LoadError, SkeletonList } from "../../shared/ui/Skeleton";
 import { getPasswordError, PASSWORD_MIN_LENGTH, PASSWORD_POLICY_HINT } from "../../lib/passwordPolicy";
@@ -34,6 +35,23 @@ const inputCls =
 const ghostBtn =
   "border border-[var(--color-border)] text-[var(--color-text-label)] text-xs px-3 py-1.5 rounded-md hover:bg-[var(--color-bg-tile)] transition";
 
+/** 앱 연동 배지. 조회 전·실패 시에는 아무것도 보여주지 않는다. */
+function TeamLinkBadge({ link }: { link?: TeamAppLinks }) {
+  if (!link) return null;
+  if (link.status === "LINKED") {
+    return (
+      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+        연동됨 {link.linkedMemberCount}명
+      </span>
+    );
+  }
+  return (
+    <span className="rounded-full bg-[var(--color-bg-tile)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text-label)]">
+      미연동
+    </span>
+  );
+}
+
 export default function SiteTeamsPage() {
   const { showToast } = useToast();
   const me = useSiteMe();
@@ -45,6 +63,9 @@ export default function SiteTeamsPage() {
   const [openTeamId, setOpenTeamId] = useState<string | null>(null);
   const [inviteTeam, setInviteTeam] = useState<TeamSummary | null>(null);
   const [pendingDelete, setPendingDelete] = useState<TeamSummary | null>(null);
+  // 팀별 앱 연동 상태. 조회에 실패한 팀은 색을 칠하지 않는다.
+  const [links, setLinks] = useState<Record<string, TeamAppLinks>>({});
+  const [linksVersion, setLinksVersion] = useState(0);
   const [deleting, setDeleting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const passwordComposition = usePasswordComposition();
@@ -86,6 +107,20 @@ export default function SiteTeamsPage() {
       alive = false;
     };
   }, [attempt]);
+
+  useEffect(() => {
+    if (!loaded || teams.length === 0) return;
+    let alive = true;
+    Promise.allSettled(teams.map((team) => teamsApi.getTeamAppLinks(team.id))).then((results) => {
+      if (!alive) return;
+      const next: Record<string, TeamAppLinks> = {};
+      results.forEach((result, index) => {
+        if (result.status === "fulfilled") next[teams[index].id] = result.value;
+      });
+      setLinks(next);
+    });
+    return () => { alive = false; };
+  }, [loaded, teams, linksVersion]);
 
   const openTeam = teams.find((t) => t.id === openTeamId) ?? null;
 
@@ -177,12 +212,21 @@ export default function SiteTeamsPage() {
               key={team.id}
               className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg flex flex-col md:flex-row gap-4 items-start md:items-center px-5 py-4 w-full"
             >
-              <div className="bg-[var(--color-bg-tile)] rounded-md flex items-center justify-center size-8 shrink-0 text-[var(--color-text-body)] overflow-hidden">
+              <div
+                className={`rounded-md flex items-center justify-center size-8 shrink-0 overflow-hidden transition-colors ${
+                  links[team.id]?.status === "LINKED"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-[var(--color-bg-tile)] text-[var(--color-text-body)]"
+                }`}
+              >
                 <TeamMemberIcon className="size-4" />
               </div>
 
               <div className="flex min-w-0 flex-1 flex-col gap-1 w-full">
-                <p className="font-medium leading-5 text-sm text-[var(--color-text-heading)]">{me.site.name || team.name || "현장"}</p>
+                <p className="flex flex-wrap items-center gap-2 font-medium leading-5 text-sm text-[var(--color-text-heading)]">
+                  {me.site.name || team.name || "현장"}
+                  <TeamLinkBadge link={links[team.id]} />
+                </p>
                 <p className="leading-4 text-[var(--color-text-body)] text-xs">팀장 {team.leaderName} · {team.workLocation || "작업 장소 미입력"}</p>
               </div>
 
@@ -268,7 +312,11 @@ export default function SiteTeamsPage() {
         <SiteTeamInvitationModal
           team={inviteTeam}
           autoGenerate
-          onClose={() => setInviteTeam(null)}
+          onClose={() => {
+            setInviteTeam(null);
+            // 모달을 연 사이 작업자가 초대를 수락했을 수 있으니 상태를 다시 확인한다.
+            setLinksVersion((n) => n + 1);
+          }}
         />
       )}
 
