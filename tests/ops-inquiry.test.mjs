@@ -5,7 +5,9 @@ import {
   formatDateTime,
   inquiryType,
   matchesTab,
+  mayHaveBeenSaved,
   relativeTime,
+  replyLanded,
 } from "../src/lib/opsInquiry.ts";
 
 test("inquiryType reads the bracket prefix", () => {
@@ -54,4 +56,24 @@ test("relativeTime and formatDateTime tolerate missing or bad input", () => {
 
 test("reply limit matches the design", () => {
   assert.equal(REPLY_MAX_LENGTH, 1000);
+});
+
+test("network errors and 5xx may have saved the reply", () => {
+  assert.equal(mayHaveBeenSaved({ network: true }), true);
+  assert.equal(mayHaveBeenSaved({ status: 503 }), true);
+  assert.equal(mayHaveBeenSaved({ status: 500 }), true);
+});
+
+test("4xx rejections did not save the reply", () => {
+  for (const status of [400, 401, 403, 404, 409, 429]) {
+    assert.equal(mayHaveBeenSaved({ status }), false, `status ${status}`);
+  }
+  assert.equal(mayHaveBeenSaved({}), false);
+});
+
+test("replyLanded detects a reply saved despite the error", () => {
+  assert.equal(replyLanded(0, 1), true);
+  assert.equal(replyLanded(2, 3), true);
+  assert.equal(replyLanded(1, 1), false);
+  assert.equal(replyLanded(1, 0), false);
 });
