@@ -71,9 +71,23 @@ test("4xx rejections did not save the reply", () => {
   assert.equal(mayHaveBeenSaved({}), false);
 });
 
-test("replyLanded detects a reply saved despite the error", () => {
-  assert.equal(replyLanded(0, 1), true);
-  assert.equal(replyLanded(2, 3), true);
-  assert.equal(replyLanded(1, 1), false);
-  assert.equal(replyLanded(1, 0), false);
+const r = (content) => ({ content });
+
+test("replyLanded detects my reply saved despite the error", () => {
+  assert.equal(replyLanded([], [r("안녕하세요")], "안녕하세요"), true);
+  assert.equal(replyLanded([r("이전 답변")], [r("이전 답변"), r("안녕하세요")], "안녕하세요"), true);
+  assert.equal(replyLanded([], [r("  안녕하세요\n")], "안녕하세요"), true);
+});
+
+test("replyLanded is false when nothing new was saved", () => {
+  assert.equal(replyLanded([r("이전 답변")], [r("이전 답변")], "안녕하세요"), false);
+  assert.equal(replyLanded([], [], "안녕하세요"), false);
+});
+
+test("replyLanded ignores another operator's reply arriving meanwhile", () => {
+  assert.equal(replyLanded([], [r("다른 운영자 답변")], "내 답변"), false);
+});
+
+test("replyLanded counts a second identical reply as new", () => {
+  assert.equal(replyLanded([r("같은 문구")], [r("같은 문구"), r("같은 문구")], "같은 문구"), true);
 });

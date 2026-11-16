@@ -138,7 +138,7 @@ export default function OpsInquiriesPage() {
     if (!content) return showToast("답변 내용을 입력해주세요.", "error");
     // 전송 중 다른 문의를 고를 수 있으므로 대상과 기준 답변 수를 먼저 고정한다.
     const inquiryId = detail.inquiryId;
-    const before = detail.replies.length;
+    const before = detail.replies;
     setSending(true);
     try {
       let delayed = false;
@@ -161,7 +161,7 @@ export default function OpsInquiriesPage() {
           showToast("답변이 저장됐는지 확인하지 못했어요. 새로고침해 답변을 확인한 뒤 다시 보내주세요.", "error");
           return;
         }
-        if (!replyLanded(before, fresh.replies.length)) {
+        if (!replyLanded(before, fresh.replies, content)) {
           showToast("답변을 보내지 못했어요. 잠시 후 다시 시도해주세요.", "error");
           return;
         }
