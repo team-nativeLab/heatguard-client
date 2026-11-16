@@ -199,11 +199,14 @@
 
 html {
   color-scheme: var(--native-color-scheme);
+  /* 본문 글자가 작다는 피드백에 따라 기준 크기를 16px -> 17px로 올린다.
+     Tailwind의 글자·여백 값이 rem 기반이라 전체가 같은 비율로 커진다. */
+  font-size: 17px;
 }
 
 body {
   margin: 0;
-  font-family: "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: var(--color-text-body);
   background: var(--color-bg-app);
 }
@@ -218,11 +221,11 @@ body {
  * 현장명 등)는 본문 글꼴로 넘긴다. monospace만 두면 한글이 □□□로 깨진다.
  */
 .font-mono-num {
-  font-family: "JetBrains Mono", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+  font-family: "JetBrains Mono", "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
 }
 
 .figma-emoji {
-  font-family: "Noto Emoji", "Noto Sans KR", sans-serif;
+  font-family: "Noto Emoji", "Pretendard Variable", Pretendard, sans-serif;
   font-variant-emoji: text;
 }
 
