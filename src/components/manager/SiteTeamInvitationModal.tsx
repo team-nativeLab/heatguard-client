@@ -1,9 +1,59 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { errorMessage, teamsApi } from "../../api";
+import type { TeamAppLinks } from "../../api/teams";
 import type { TeamSummary } from "../../api";
 import { useToast } from "../../shared/ui/toastContext";
 import ModalShell, { btnPrimary, btnSecondary, inputCls } from "../home/ModalShell";
 import { useSiteMe } from "../../hooks/useSiteMe";
+
+/** 팀 앱 연동 상태. 실제로 초대를 수락한 활성 작업자가 있을 때만 초록색으로 표시한다. */
+function LinkStatusPanel({ link, state, onRefresh }: {
+  link: TeamAppLinks | null;
+  state: "loading" | "ready" | "error";
+  onRefresh: () => void;
+}) {
+  const linked = state === "ready" && link?.status === "LINKED";
+  const refreshButton = (
+    <button
+      type="button"
+      onClick={onRefresh}
+      disabled={state === "loading"}
+      className="shrink-0 text-xs text-[var(--color-accent)] hover:underline disabled:opacity-60"
+    >
+      {state === "loading" ? "확인 중..." : "새로고침"}
+    </button>
+  );
+  return (
+    <div
+      role="status"
+      className={`flex flex-col gap-2 rounded-lg border p-3 transition-colors ${
+        linked ? "border-emerald-200 bg-emerald-50" : "border-[var(--color-border)] bg-[var(--color-bg-tile)]"
+      }`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <span className={`text-sm font-medium ${linked ? "text-emerald-700" : "text-[var(--color-text-label)]"}`}>
+          {state === "loading" && !link
+            ? "앱 연동 상태 확인 중"
+            : state === "error"
+              ? "앱 연동 상태를 확인하지 못했어요"
+              : linked
+                ? `앱 연동됨 · ${link?.linkedMemberCount ?? 0}명`
+                : "아직 앱에 연동된 작업자가 없어요"}
+        </span>
+        {refreshButton}
+      </div>
+      {linked && link && link.items.length > 0 && (
+        <ul className="flex flex-col gap-1">
+          {link.items.map((member) => (
+            <li key={member.userId} className="truncate text-xs text-emerald-800">
+              {member.name || "이름 없음"}{member.email ? ` · ${member.email}` : ""}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 export default function SiteTeamInvitationModal({ team, onClose, autoGenerate = false }: {
   team: TeamSummary;
@@ -17,6 +67,22 @@ export default function SiteTeamInvitationModal({ team, onClose, autoGenerate = 
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const generating = useRef(false);
+  const [link, setLink] = useState<TeamAppLinks | null>(null);
+  const [linkState, setLinkState] = useState<"loading" | "ready" | "error">("loading");
+
+  const loadLink = useCallback(async () => {
+    setLinkState("loading");
+    try {
+      setLink(await teamsApi.getTeamAppLinks(team.id));
+      setLinkState("ready");
+    } catch {
+      setLinkState("error");
+    }
+  }, [team.id]);
+
+  useEffect(() => {
+    void loadLink();
+  }, [loadLink]);
   const autoStarted = useRef(false);
 
   const generate = useCallback(async () => {
@@ -78,6 +144,7 @@ export default function SiteTeamInvitationModal({ team, onClose, autoGenerate = 
       <p className="text-sm leading-6 text-[var(--color-text-body)]">
         앱에서 초대를 수락하면 이 현장에 참여합니다.
       </p>
+      <LinkStatusPanel link={link} state={linkState} onRefresh={() => void loadLink()} />
       {!inviteUrl && (
         <button type="button" className={btnPrimary} disabled={busy} onClick={() => void generate()}>
           {busy ? "발급 중..." : "초대 링크 발급"}
