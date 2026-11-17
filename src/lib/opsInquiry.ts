@@ -112,6 +112,33 @@ export function mayHaveBeenSaved(failure: { network?: boolean; status?: number }
 }
 
 /**
+ * 같은 문의에 같은 내용을 다시 보낼 때는 이전 키를 재사용하고, 내용이 바뀌었거나
+ * 다른 문의면 새 키를 만든다. 서버는 같은 키의 재요청을 중복 저장하지 않는다.
+ */
+export interface PendingReplyKey {
+  inquiryId: string;
+  content: string;
+  key: string;
+}
+
+export function replyKeyFor(
+  pending: PendingReplyKey | null,
+  inquiryId: string,
+  content: string,
+  createKey: () => string,
+): PendingReplyKey {
+  const text = content.trim();
+  if (pending && pending.inquiryId === inquiryId && pending.content === text) return pending;
+  return { inquiryId, content: text, key: createKey() };
+}
+
+export function newIdempotencyKey(): string {
+  const c = globalThis.crypto;
+  if (c && typeof c.randomUUID === "function") return c.randomUUID();
+  return `reply-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+}
+
+/**
  * 다시 조회했을 때 내가 보낸 내용과 같은 답변이 늘었으면 이전 요청이 저장된 것이다.
  * 개수만 비교하면 그 사이 다른 운영자가 단 답변을 내 답변으로 오인한다.
  */

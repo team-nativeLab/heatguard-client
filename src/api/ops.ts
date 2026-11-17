@@ -110,11 +110,19 @@ export async function getInquiry(inquiryId: string) {
   return toInquiry(await apiFetch<unknown>(`/api/v1/ops/inquiries/${encodeURIComponent(inquiryId)}`));
 }
 
-/** closeAfterReply가 true면 서버가 상태를 CLOSED로, 아니면 ANSWERED로 바꾼다. */
-export function replyToInquiry(inquiryId: string, content: string, closeAfterReply: boolean) {
+/**
+ * closeAfterReply가 true면 서버가 상태를 CLOSED로, 아니면 ANSWERED로 바꾼다.
+ * 같은 답변을 재시도할 때는 같은 idempotencyKey를 보내야 서버가 중복 저장하지 않는다.
+ * (키를 모르는 이전 서버는 헤더를 무시하므로 함께 보내도 안전하다.)
+ */
+export function replyToInquiry(inquiryId: string, content: string, closeAfterReply: boolean, idempotencyKey?: string) {
   return apiFetch<{ replyId: string; inquiryId: string; deliveryStatus: string; createdAt: string }>(
     `/api/v1/ops/inquiries/${encodeURIComponent(inquiryId)}/replies`,
-    { method: "POST", body: { content, closeAfterReply } },
+    {
+      method: "POST",
+      body: { content, closeAfterReply },
+      headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
+    },
   );
 }
 
