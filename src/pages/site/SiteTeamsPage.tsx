@@ -111,13 +111,11 @@ export default function SiteTeamsPage() {
   useEffect(() => {
     if (!loaded || teams.length === 0) return;
     let alive = true;
-    Promise.allSettled(teams.map((team) => teamsApi.getTeamAppLinks(team.id))).then((results) => {
-      if (!alive) return;
-      const next: Record<string, TeamAppLinks> = {};
-      results.forEach((result, index) => {
-        if (result.status === "fulfilled") next[teams[index].id] = result.value;
-      });
-      setLinks(next);
+    // 한 번에 조회하고, 서버에 일괄 조회가 없으면 팀별 조회로 되돌아간다.
+    teamsApi.getTeamAppLinksForTeams(teams.map((team) => team.id)).then((next) => {
+      if (alive) setLinks(next);
+    }).catch(() => {
+      // 조회 실패 시 색을 칠하지 않고 둔다.
     });
     return () => { alive = false; };
   }, [loaded, teams, linksVersion]);
