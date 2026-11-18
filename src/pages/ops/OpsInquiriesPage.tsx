@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import OpsLayout from "../../components/ops/OpsLayout";
 import { ApiError, NetworkError, errorMessage, opsApi, type OpsInquiry } from "../../api";
 import { useToast } from "../../shared/ui/toastContext";
@@ -12,8 +12,11 @@ import {
   loadDraft,
   matchesTab,
   mayHaveBeenSaved,
+  newIdempotencyKey,
   relativeTime,
+  replyKeyFor,
   replyLanded,
+  type PendingReplyKey,
   saveDraft,
   type InquiryTab,
 } from "../../lib/opsInquiry";
@@ -56,6 +59,8 @@ export default function OpsInquiriesPage() {
   const [closeAfterReply, setCloseAfterReply] = useState(true);
   const [sending, setSending] = useState(false);
   const [reopening, setReopening] = useState(false);
+  // 결과가 불확실한 전송(503·네트워크 오류)을 다시 보낼 때 같은 키를 쓰기 위해 기억한다.
+  const pendingKey = useRef<PendingReplyKey | null>(null);
 
   const loadList = useCallback(async () => {
     try {
@@ -139,19 +144,24 @@ export default function OpsInquiriesPage() {
     // 전송 중 다른 문의를 고를 수 있으므로 대상과 기준 답변 수를 먼저 고정한다.
     const inquiryId = detail.inquiryId;
     const before = detail.replies;
+    const attempt = replyKeyFor(pendingKey.current, inquiryId, content, newIdempotencyKey);
+    pendingKey.current = attempt;
     setSending(true);
     try {
       let delayed = false;
       try {
-        await opsApi.replyToInquiry(inquiryId, content, closeAfterReply);
+        await opsApi.replyToInquiry(inquiryId, content, closeAfterReply, attempt.key);
       } catch (err) {
         if (err instanceof ApiError && err.code === "INQUIRY_CLOSED") {
+          pendingKey.current = null;
           showToast("종료된 문의에는 답변할 수 없어요. 다시 열고 답변해주세요.", "error");
           void loadList();
           return;
         }
         const failure = { network: err instanceof NetworkError, status: err instanceof ApiError ? err.status : undefined };
         if (!mayHaveBeenSaved(failure)) {
+          // 서버가 거부해 저장되지 않은 것이 확실하므로 다음 전송은 새 키로 한다.
+          pendingKey.current = null;
           showToast(errorMessage(err, "답변을 보내지 못했어요."), "error");
           return;
         }
@@ -169,6 +179,7 @@ export default function OpsInquiriesPage() {
       }
 
       // 여기부터는 답변이 저장된 것이 확실하다. 이후 새로고침이 실패해도 "보내지 못함"으로 안내하지 않는다.
+      pendingKey.current = null;
       clearDraft(inquiryId);
       setReply("");
       showToast(

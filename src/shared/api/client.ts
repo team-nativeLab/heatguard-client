@@ -49,6 +49,8 @@ interface RequestOptions {
   method?: Method;
   body?: unknown;
   params?: Record<string, string | number | boolean | undefined>;
+  /** 요청별 추가 헤더 (예: Idempotency-Key) */
+  headers?: Record<string, string>;
 }
 
 const SITE_SCOPED_PATH = /^\/api\/v1\/(?:site|team)\//;
@@ -134,9 +136,9 @@ function extractCode(data: unknown): string | undefined {
 }
 
 export async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = "GET", body, params } = options;
+  const { method = "GET", body, params, headers: extraHeaders } = options;
 
-  const headers: Record<string, string> = {};
+  const headers: Record<string, string> = { ...extraHeaders };
   if (body !== undefined) headers["Content-Type"] = "application/json";
   if (SITE_SCOPED_PATH.test(path) && typeof window !== "undefined") {
     const siteId = window.localStorage.getItem(SITE_SELECTION_KEY);
