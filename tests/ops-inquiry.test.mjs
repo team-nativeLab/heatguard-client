@@ -6,7 +6,9 @@ import {
   inquiryType,
   matchesTab,
   mayHaveBeenSaved,
+  newIdempotencyKey,
   relativeTime,
+  replyKeyFor,
   replyLanded,
 } from "../src/lib/opsInquiry.ts";
 
@@ -90,4 +92,24 @@ test("replyLanded ignores another operator's reply arriving meanwhile", () => {
 
 test("replyLanded counts a second identical reply as new", () => {
   assert.equal(replyLanded([r("같은 문구")], [r("같은 문구"), r("같은 문구")], "같은 문구"), true);
+});
+
+let counter = 0;
+const nextKey = () => `k${++counter}`;
+
+test("replyKeyFor reuses the key when retrying the same reply", () => {
+  const first = replyKeyFor(null, "inq-1", "안녕하세요", nextKey);
+  const retry = replyKeyFor(first, "inq-1", "  안녕하세요 ", nextKey);
+  assert.equal(retry.key, first.key);
+});
+
+test("replyKeyFor issues a new key when content or inquiry changes", () => {
+  const first = replyKeyFor(null, "inq-1", "안녕하세요", nextKey);
+  assert.notEqual(replyKeyFor(first, "inq-1", "수정한 답변", nextKey).key, first.key);
+  assert.notEqual(replyKeyFor(first, "inq-2", "안녕하세요", nextKey).key, first.key);
+});
+
+test("newIdempotencyKey is unique per call", () => {
+  const keys = new Set(Array.from({ length: 50 }, () => newIdempotencyKey()));
+  assert.equal(keys.size, 50);
 });
