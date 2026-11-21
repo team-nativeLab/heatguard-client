@@ -151,3 +151,23 @@ export function replyLanded(
   const count = (list: { content: string }[]) => list.filter((r) => r.content.trim() === target).length;
   return count(after) > count(before);
 }
+
+/* ───────────── 대시보드 집계 ───────────── */
+
+export interface InquirySummary {
+  total: number;
+  open: number;
+  answered: number;
+  closed: number;
+  /** 최근 접수 순 (createdAt 내림차순) */
+  recent: OpsInquiry[];
+}
+
+/** 대시보드 지표. 서버에 통계 API가 없어 문의 목록에서 직접 센다. */
+export function summarizeInquiries(items: OpsInquiry[], recentLimit = 5): InquirySummary {
+  const count = (status: OpsInquiry["status"]) => items.filter((i) => i.status === status).length;
+  const recent = [...items]
+    .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""))
+    .slice(0, recentLimit);
+  return { total: items.length, open: count("OPEN"), answered: count("ANSWERED"), closed: count("CLOSED"), recent };
+}
