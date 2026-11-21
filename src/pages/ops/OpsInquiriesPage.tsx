@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import OpsLayout from "../../components/ops/OpsLayout";
 import { ChevronDownIcon } from "../../components/home/HomeIcons";
 import { ApiError, NetworkError, errorMessage, opsApi, type OpsInquiry } from "../../api";
@@ -51,10 +52,13 @@ export default function OpsInquiriesPage() {
   const [items, setItems] = useState<OpsInquiry[] | null>(null);
   const [truncated, setTruncated] = useState(false);
   const [loadError, setLoadError] = useState("");
-  const [tab, setTab] = useState<InquiryTab>("open");
+  // 대시보드의 "최근 문의"에서 ?tab=all&id=… 로 들어오면 그 문의를 바로 연다.
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab");
+  const [tab, setTab] = useState<InquiryTab>(initialTab === "all" || initialTab === "done" ? initialTab : "open");
   const [type, setType] = useState(TYPE_ALL);
   const [keyword, setKeyword] = useState("");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(() => searchParams.get("id"));
   const [detail, setDetail] = useState<OpsInquiry | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [reply, setReply] = useState("");

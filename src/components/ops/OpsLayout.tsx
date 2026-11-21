@@ -1,17 +1,20 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
-import { ContactIcon, DefaultProfileAvatar } from "../icons/Icons";
+import { ContactIcon, DashboardIcon, DefaultProfileAvatar } from "../icons/Icons";
 import { opsApi, type OpsUser } from "../../api";
 import { markSignedOut } from "../../shared/auth/authScope";
 import { useToast } from "../../shared/ui/toastContext";
 
 /*
  * 운영자 콘솔 사이드바.
- * Figma에는 대시보드·집계·회원 관리·가입 승인·활동 로그·시스템 설정도 있지만
+ * Figma에는 집계·회원 관리·가입 승인·활동 로그·시스템 설정도 있지만
  * 서버 API가 아직 없어 동작하지 않는 메뉴는 노출하지 않는다.
  */
-const NAV_ITEMS = [{ label: "민원 처리", Icon: ContactIcon, to: "/ops/inquiries" }];
+const NAV_ITEMS = [
+  { label: "대시보드", Icon: DashboardIcon, to: "/ops/dashboard" },
+  { label: "민원 처리", Icon: ContactIcon, to: "/ops/inquiries" },
+];
 
 function OpsSidebar() {
   const location = useLocation();

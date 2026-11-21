@@ -11,6 +11,7 @@ import {
   relativeTime,
   replyKeyFor,
   replyLanded,
+  summarizeInquiries,
 } from "../src/lib/opsInquiry.ts";
 
 test("inquiryType reads the bracket prefix", () => {
@@ -126,4 +127,28 @@ test("lockedCloseAfterReply pins the flag only for the same pending reply", () =
 test("newIdempotencyKey is unique per call", () => {
   const keys = new Set(Array.from({ length: 50 }, () => newIdempotencyKey()));
   assert.equal(keys.size, 50);
+});
+
+const inq = (id, status, createdAt) => ({ inquiryId: id, title: id, content: "", status, version: 1, createdAt, replies: [] });
+
+test("summarizeInquiries counts each status", () => {
+  const s = summarizeInquiries([
+    inq("a", "OPEN", "2026-11-01T00:00:00Z"),
+    inq("b", "OPEN", "2026-11-02T00:00:00Z"),
+    inq("c", "ANSWERED", "2026-11-03T00:00:00Z"),
+    inq("d", "CLOSED", "2026-11-04T00:00:00Z"),
+  ]);
+  assert.deepEqual([s.total, s.open, s.answered, s.closed], [4, 2, 1, 1]);
+});
+
+test("summarizeInquiries lists the most recent first and respects the limit", () => {
+  const items = ["01", "05", "03", "04", "02", "06"].map((d) => inq(d, "OPEN", `2026-11-${d}T00:00:00Z`));
+  const s = summarizeInquiries(items, 3);
+  assert.deepEqual(s.recent.map((i) => i.inquiryId), ["06", "05", "04"]);
+  assert.equal(items[0].inquiryId, "01", "input order is not mutated");
+});
+
+test("summarizeInquiries handles an empty list", () => {
+  const s = summarizeInquiries([]);
+  assert.deepEqual([s.total, s.open, s.answered, s.closed, s.recent.length], [0, 0, 0, 0, 0]);
 });
