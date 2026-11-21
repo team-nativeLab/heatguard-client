@@ -23,6 +23,7 @@ import ScreenHQContact from "./pages/hq/ScreenHQContact";
 import OpsLoginPage from "./pages/ops/OpsLoginPage";
 import OpsInquiriesPage from "./pages/ops/OpsInquiriesPage";
 import OpsDashboardPage from "./pages/ops/OpsDashboardPage";
+import OpsTenantsPage from "./pages/ops/OpsTenantsPage";
 import SessionGuard from "./components/auth/SessionGuard";
 import SiteScopeGuard from "./components/auth/SiteScopeGuard";
 import SiteSelectionPage from "./pages/site/SiteSelectionPage";
@@ -36,9 +37,6 @@ import { getCachedMembership, loadMembership } from "./lib/membership";
 // 로그인해야 볼 수 있는 화면
 function SiteMembershipGate({ children }: { children: ReactNode }) {
   const location = useLocation();
-  // 한 번 확인한 연결 상태는 화면 이동마다 다시 묻지 않는다.
-  // 현장 생성·초대 수락은 응답으로 캐시를 갱신하므로, 서버 세션이 갱신되기
-  // 전에 조회해 이전 값을 받고 되돌아가는 깜빡임이 생기지 않는다.
   const [membership, setMembership] = useState<"loading" | "joined" | "unassigned" | "error">(
     () => getCachedMembership() ?? "loading",
   );
@@ -72,7 +70,6 @@ function SiteMembershipGate({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-// 로그인해야 볼 수 있는 화면
 function Protected({ children, siteSelection = false }: { children: ReactNode; siteSelection?: boolean }) {
   return (
     <RequireAuth check={authApi.me} loginPath="/auth/login">
@@ -83,22 +80,12 @@ function Protected({ children, siteSelection = false }: { children: ReactNode; s
   );
 }
 
-// 운영자 전용 화면 (본사·현장 세션과 별도로 확인한다)
 function ProtectedOps({ children }: { children: ReactNode }) {
-  return (
-    <RequireAuth check={opsApi.me} loginPath="/ops/login" scope="ops">
-      {children}
-    </RequireAuth>
-  );
+  return <RequireAuth check={opsApi.me} loginPath="/ops/login" scope="ops">{children}</RequireAuth>;
 }
 
-// 본사 관리자 전용 화면 (현장 세션과 별도로 확인한다)
 function ProtectedHq({ children }: { children: ReactNode }) {
-  return (
-    <RequireAuth check={hqApi.me} loginPath="/hq/login" scope="hq">
-      {children}
-    </RequireAuth>
-  );
+  return <RequireAuth check={hqApi.me} loginPath="/hq/login" scope="hq">{children}</RequireAuth>;
 }
 
 export default function App() {
@@ -106,12 +93,10 @@ export default function App() {
     <>
       <SessionGuard />
       <Routes>
-        {/* 회원가입 유형을 선택하고 본사 또는 현장 관리자 가입으로 이동한다. */}
         <Route path="/" element={<Navigate to="/auth/login" replace />} />
         <Route path="/auth/select" element={<Navigate to="/auth/login" replace />} />
         <Route path="/auth/select/signup" element={<RoleSelectPage mode="signup" />} />
 
-        {/* 현장 관리자 */}
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/signup" element={<SignupPage />} />
         <Route path="/site-invitation" element={<SiteInvitationPage />} />
@@ -129,7 +114,6 @@ export default function App() {
         <Route path="/manager/contact" element={<Protected><ContactPage /></Protected>} />
         <Route path="/manager/print" element={<Protected><PrintSummaryPage /></Protected>} />
 
-        {/* 본사 관리자 */}
         <Route path="/hq/login" element={<ScreenHQLogin />} />
         <Route path="/hq/signup" element={<ScreenHQSignup />} />
         <Route path="/hq/signup/validation" element={<ScreenHQSignup validation />} />
@@ -140,10 +124,10 @@ export default function App() {
         <Route path="/hq/account" element={<ProtectedHq><ScreenHQAccount /></ProtectedHq>} />
         <Route path="/hq/contact" element={<ProtectedHq><ScreenHQContact /></ProtectedHq>} />
 
-        {/* 운영자 콘솔 */}
         <Route path="/ops" element={<Navigate to="/ops/dashboard" replace />} />
         <Route path="/ops/login" element={<OpsLoginPage />} />
         <Route path="/ops/dashboard" element={<ProtectedOps><OpsDashboardPage /></ProtectedOps>} />
+        <Route path="/ops/tenants" element={<ProtectedOps><OpsTenantsPage /></ProtectedOps>} />
         <Route path="/ops/inquiries" element={<ProtectedOps><OpsInquiriesPage /></ProtectedOps>} />
 
         <Route path="*" element={<Navigate to="/auth/login" replace />} />
