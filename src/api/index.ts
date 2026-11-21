@@ -16,5 +16,5 @@ export * as inquiriesApi from "./inquiries";
 export * as teamMembersApi from "./teamMembers";
 export * as hqApi from "./hq";
 export * as opsApi from "./ops";
-export type { OpsInquiry, OpsInquiryStatus, OpsReply, OpsUser } from "./ops";
+export type { OpsInquiry, OpsInquiryStatus, OpsReply, OpsTenant, OpsUser } from "./ops";
 export type { HqUser, HqProfile, HqSite, HqRecordRow, HqDashboard, HqSiteDetail, HqSiteAppLinks, HqEmergencyCall, HqWeatherAvailability, HqSiteWeather, HeatLevel, HeatTone } from "./hq";
