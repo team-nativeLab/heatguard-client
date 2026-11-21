@@ -112,12 +112,14 @@ export function mayHaveBeenSaved(failure: { network?: boolean; status?: number }
 }
 
 /**
- * 같은 문의에 같은 내용을 다시 보낼 때는 이전 키를 재사용하고, 내용이 바뀌었거나
- * 다른 문의면 새 키를 만든다. 서버는 같은 키의 재요청을 중복 저장하지 않는다.
+ * 같은 문의에 같은 내용·같은 완료 표시로 다시 보낼 때는 이전 키를 재사용하고,
+ * 하나라도 다르면 새 키를 만든다. 서버는 같은 키의 재요청을 중복 저장하지 않으며,
+ * 같은 키에 내용이나 closeAfterReply가 다르면 409 IDEMPOTENCY_KEY_REUSED로 거부한다.
  */
 export interface PendingReplyKey {
   inquiryId: string;
   content: string;
+  closeAfterReply: boolean;
   key: string;
 }
 
@@ -125,11 +127,27 @@ export function replyKeyFor(
   pending: PendingReplyKey | null,
   inquiryId: string,
   content: string,
+  closeAfterReply: boolean,
   createKey: () => string,
 ): PendingReplyKey {
   const text = content.trim();
-  if (pending && pending.inquiryId === inquiryId && pending.content === text) return pending;
-  return { inquiryId, content: text, key: createKey() };
+  if (pending && pending.inquiryId === inquiryId && pending.content === text && pending.closeAfterReply === closeAfterReply) {
+    return pending;
+  }
+  return { inquiryId, content: text, closeAfterReply, key: createKey() };
+}
+
+/**
+ * 저장 여부가 불확실한 전송이 남아 있으면, 같은 문의·같은 내용의 재시도는 그때의
+ * 완료 표시로 보내야 서버가 저장된 답변을 돌려준다. 이때 고정할 값을 반환한다.
+ */
+export function lockedCloseAfterReply(
+  pending: PendingReplyKey | null,
+  inquiryId: string | undefined,
+  content: string,
+): boolean | null {
+  if (!pending || pending.inquiryId !== inquiryId || pending.content !== content.trim()) return null;
+  return pending.closeAfterReply;
 }
 
 export function newIdempotencyKey(): string {
