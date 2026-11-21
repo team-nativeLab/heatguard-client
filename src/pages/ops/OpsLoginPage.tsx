@@ -25,7 +25,7 @@ export default function OpsLoginPage() {
   const location = useLocation();
   const { showToast } = useToast();
   const from = (location.state as { from?: string } | null)?.from;
-  const redirectTo = from?.startsWith("/ops/") && from !== "/ops/login" ? from : "/ops/inquiries";
+  const redirectTo = from?.startsWith("/ops/") && from !== "/ops/login" ? from : "/ops/dashboard";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

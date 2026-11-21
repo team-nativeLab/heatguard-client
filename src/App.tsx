@@ -22,6 +22,7 @@ import ScreenHQAccount from "./pages/hq/ScreenHQAccount";
 import ScreenHQContact from "./pages/hq/ScreenHQContact";
 import OpsLoginPage from "./pages/ops/OpsLoginPage";
 import OpsInquiriesPage from "./pages/ops/OpsInquiriesPage";
+import OpsDashboardPage from "./pages/ops/OpsDashboardPage";
 import SessionGuard from "./components/auth/SessionGuard";
 import SiteScopeGuard from "./components/auth/SiteScopeGuard";
 import SiteSelectionPage from "./pages/site/SiteSelectionPage";
@@ -140,8 +141,9 @@ export default function App() {
         <Route path="/hq/contact" element={<ProtectedHq><ScreenHQContact /></ProtectedHq>} />
 
         {/* 운영자 콘솔 */}
-        <Route path="/ops" element={<Navigate to="/ops/inquiries" replace />} />
+        <Route path="/ops" element={<Navigate to="/ops/dashboard" replace />} />
         <Route path="/ops/login" element={<OpsLoginPage />} />
+        <Route path="/ops/dashboard" element={<ProtectedOps><OpsDashboardPage /></ProtectedOps>} />
         <Route path="/ops/inquiries" element={<ProtectedOps><OpsInquiriesPage /></ProtectedOps>} />
 
         <Route path="*" element={<Navigate to="/auth/login" replace />} />
