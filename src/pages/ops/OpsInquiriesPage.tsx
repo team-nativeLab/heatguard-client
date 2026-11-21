@@ -12,6 +12,7 @@ import {
   loadDraft,
   matchesTab,
   mayHaveBeenSaved,
+  lockedCloseAfterReply,
   newIdempotencyKey,
   relativeTime,
   replyKeyFor,
@@ -61,6 +62,15 @@ export default function OpsInquiriesPage() {
   const [reopening, setReopening] = useState(false);
   // 결과가 불확실한 전송(503·네트워크 오류)을 다시 보낼 때 같은 키를 쓰기 위해 기억한다.
   const pendingKey = useRef<PendingReplyKey | null>(null);
+  // 화면(완료 표시 고정)에도 반영해야 해서 상태로도 들고 있는다.
+  const [pending, setPendingState] = useState<PendingReplyKey | null>(null);
+  const setPending = (next: PendingReplyKey | null) => {
+    pendingKey.current = next;
+    setPendingState(next);
+  };
+  // 저장 여부가 불확실한 전송이 남아 있으면 재시도는 그때의 완료 표시로 보내야 한다.
+  const lockedClose = lockedCloseAfterReply(pending, detail?.inquiryId, reply);
+  const effectiveClose = lockedClose ?? closeAfterReply;
 
   const loadList = useCallback(async () => {
     try {
@@ -144,16 +154,22 @@ export default function OpsInquiriesPage() {
     // 전송 중 다른 문의를 고를 수 있으므로 대상과 기준 답변 수를 먼저 고정한다.
     const inquiryId = detail.inquiryId;
     const before = detail.replies;
-    const attempt = replyKeyFor(pendingKey.current, inquiryId, content, newIdempotencyKey);
-    pendingKey.current = attempt;
+    const close = effectiveClose;
+    const attempt = replyKeyFor(pendingKey.current, inquiryId, content, close, newIdempotencyKey);
+    setPending(attempt);
     setSending(true);
     try {
       let delayed = false;
       try {
-        await opsApi.replyToInquiry(inquiryId, content, closeAfterReply, attempt.key);
+        await opsApi.replyToInquiry(inquiryId, content, close, attempt.key);
       } catch (err) {
+        if (err instanceof ApiError && err.code === "IDEMPOTENCY_KEY_REUSED") {
+          // 같은 키로 설정이 다른 요청을 보낸 경우다. 첫 요청이 저장됐을 수 있으므로 키를 유지한다.
+          showToast("이전 전송과 설정이 달라 보내지 않았어요. 새로고침해 답변이 등록됐는지 확인해주세요.", "error");
+          return;
+        }
         if (err instanceof ApiError && err.code === "INQUIRY_CLOSED") {
-          pendingKey.current = null;
+          setPending(null);
           showToast("종료된 문의에는 답변할 수 없어요. 다시 열고 답변해주세요.", "error");
           void loadList();
           return;
@@ -161,7 +177,7 @@ export default function OpsInquiriesPage() {
         const failure = { network: err instanceof NetworkError, status: err instanceof ApiError ? err.status : undefined };
         if (!mayHaveBeenSaved(failure)) {
           // 서버가 거부해 저장되지 않은 것이 확실하므로 다음 전송은 새 키로 한다.
-          pendingKey.current = null;
+          setPending(null);
           showToast(errorMessage(err, "답변을 보내지 못했어요."), "error");
           return;
         }
@@ -179,7 +195,7 @@ export default function OpsInquiriesPage() {
       }
 
       // 여기부터는 답변이 저장된 것이 확실하다. 이후 새로고침이 실패해도 "보내지 못함"으로 안내하지 않는다.
-      pendingKey.current = null;
+      setPending(null);
       clearDraft(inquiryId);
       setReply("");
       showToast(
@@ -387,10 +403,23 @@ export default function OpsInquiriesPage() {
                             {reply.length} / {REPLY_MAX_LENGTH}
                           </span>
                         </div>
-                        <label className="flex items-center gap-2 text-sm text-[var(--color-text-body)]">
-                          <input type="checkbox" checked={closeAfterReply} onChange={(e) => setCloseAfterReply(e.target.checked)} className="size-4 accent-[var(--color-accent)]" />
-                          답변을 보내면 완료로 표시
-                        </label>
+                        <div className="flex flex-col gap-1">
+                          <label className={`flex items-center gap-2 text-sm text-[var(--color-text-body)] ${lockedClose !== null ? "opacity-70" : ""}`}>
+                            <input
+                              type="checkbox"
+                              checked={effectiveClose}
+                              disabled={lockedClose !== null}
+                              onChange={(e) => setCloseAfterReply(e.target.checked)}
+                              className="size-4 accent-[var(--color-accent)] disabled:cursor-not-allowed"
+                            />
+                            답변을 보내면 완료로 표시
+                          </label>
+                          {lockedClose !== null && (
+                            <p className="text-xs text-[var(--color-text-faint)]">
+                              이전 전송의 저장 여부를 확인 중이라 같은 설정으로 다시 보내요. 내용을 바꾸면 새 답변으로 보내져요.
+                            </p>
+                          )}
+                        </div>
                         <div className="flex justify-end gap-2">
                           <button type="button" onClick={saveTemporarily} disabled={sending} className="rounded-lg border border-[var(--color-border)] px-5 py-2.5 text-sm disabled:opacity-60">
                             임시 저장

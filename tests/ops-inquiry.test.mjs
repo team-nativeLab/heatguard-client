@@ -5,6 +5,7 @@ import {
   formatDateTime,
   inquiryType,
   matchesTab,
+  lockedCloseAfterReply,
   mayHaveBeenSaved,
   newIdempotencyKey,
   relativeTime,
@@ -98,15 +99,28 @@ let counter = 0;
 const nextKey = () => `k${++counter}`;
 
 test("replyKeyFor reuses the key when retrying the same reply", () => {
-  const first = replyKeyFor(null, "inq-1", "안녕하세요", nextKey);
-  const retry = replyKeyFor(first, "inq-1", "  안녕하세요 ", nextKey);
+  const first = replyKeyFor(null, "inq-1", "안녕하세요", false, nextKey);
+  const retry = replyKeyFor(first, "inq-1", "  안녕하세요 ", false, nextKey);
   assert.equal(retry.key, first.key);
 });
 
 test("replyKeyFor issues a new key when content or inquiry changes", () => {
-  const first = replyKeyFor(null, "inq-1", "안녕하세요", nextKey);
-  assert.notEqual(replyKeyFor(first, "inq-1", "수정한 답변", nextKey).key, first.key);
-  assert.notEqual(replyKeyFor(first, "inq-2", "안녕하세요", nextKey).key, first.key);
+  const first = replyKeyFor(null, "inq-1", "안녕하세요", false, nextKey);
+  assert.notEqual(replyKeyFor(first, "inq-1", "수정한 답변", false, nextKey).key, first.key);
+  assert.notEqual(replyKeyFor(first, "inq-2", "안녕하세요", false, nextKey).key, first.key);
+});
+
+test("replyKeyFor issues a new key when closeAfterReply changes (server rejects reuse)", () => {
+  const first = replyKeyFor(null, "inq-1", "안녕하세요", false, nextKey);
+  assert.notEqual(replyKeyFor(first, "inq-1", "안녕하세요", true, nextKey).key, first.key);
+});
+
+test("lockedCloseAfterReply pins the flag only for the same pending reply", () => {
+  const pending = replyKeyFor(null, "inq-1", "안녕하세요", true, nextKey);
+  assert.equal(lockedCloseAfterReply(pending, "inq-1", " 안녕하세요 "), true);
+  assert.equal(lockedCloseAfterReply(pending, "inq-1", "다른 내용"), null);
+  assert.equal(lockedCloseAfterReply(pending, "inq-2", "안녕하세요"), null);
+  assert.equal(lockedCloseAfterReply(null, "inq-1", "안녕하세요"), null);
 });
 
 test("newIdempotencyKey is unique per call", () => {
