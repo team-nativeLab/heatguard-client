@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import OpsLayout from "../../components/ops/OpsLayout";
+import { ChevronDownIcon } from "../../components/home/HomeIcons";
 import { ApiError, NetworkError, errorMessage, opsApi, type OpsInquiry } from "../../api";
 import { useToast } from "../../shared/ui/toastContext";
 import {
@@ -249,17 +250,21 @@ export default function OpsInquiriesPage() {
             {tabButton("open", "답변 대기", counts.open)}
             {tabButton("done", "답변 완료", counts.done)}
           </div>
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-            aria-label="문의 유형"
-            className="h-10 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] px-3 text-sm text-[var(--color-text-label)]"
-          >
-            <option value={TYPE_ALL}>유형 전체</option>
-            {types.map((t) => (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </select>
+          {/* 기본 화살표는 브라우저마다 달라 끄고, 다른 화면과 같은 아이콘을 얹는다. */}
+          <label className="relative inline-flex items-center">
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              aria-label="문의 유형"
+              className="h-10 cursor-pointer appearance-none rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] pl-3 pr-9 text-sm text-[var(--color-text-label)] outline-none [color-scheme:var(--native-color-scheme)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+            >
+              <option value={TYPE_ALL}>유형 전체</option>
+              {types.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+            <ChevronDownIcon className="pointer-events-none absolute right-3 size-3.5 text-[var(--color-text-body)]" />
+          </label>
         </div>
 
         {truncated && (
