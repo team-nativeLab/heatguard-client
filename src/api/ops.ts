@@ -35,6 +35,13 @@ export interface OpsInquiry {
   replies: OpsReply[];
 }
 
+export interface OpsTenant {
+  tenantId: string;
+  name: string;
+  status?: string;
+  createdAt?: string;
+}
+
 type Raw = Record<string, unknown>;
 
 const str = (value: unknown, fallback = "") => (typeof value === "string" ? value : fallback);
@@ -67,6 +74,16 @@ function toInquiry(raw: unknown): OpsInquiry {
   };
 }
 
+function toTenant(raw: unknown): OpsTenant {
+  const r = (raw && typeof raw === "object" ? raw : {}) as Raw;
+  return {
+    tenantId: str(r.tenantId, str(r.id, str(r.companyId))),
+    name: str(r.name, str(r.tenantName, str(r.companyName, "(이름 없음)"))),
+    status: str(r.status) || undefined,
+    createdAt: str(r.createdAt) || undefined,
+  };
+}
+
 /* ───────────── 인증 ───────────── */
 
 export function login(payload: { email: string; password: string }) {
@@ -84,15 +101,28 @@ export function me() {
   return apiFetch<OpsUser>("/api/v1/ops/auth/me");
 }
 
-/* ───────────── 민원 ───────────── */
+/* ───────────── 본사 목록 ───────────── */
 
 interface PageResponse {
   items?: unknown[];
   page?: { nextCursor?: string | null; hasMore?: boolean };
 }
 
-/** 탭 개수를 정확히 보여주려면 전체가 필요하다. 운영 규모에서 과도한 요청을 막기 위해 상한을 둔다. */
 const MAX_PAGES = 10;
+
+export async function listTenants(): Promise<{ items: OpsTenant[]; truncated: boolean }> {
+  const items: OpsTenant[] = [];
+  let cursor: string | undefined;
+  for (let page = 0; page < MAX_PAGES; page += 1) {
+    const res = await apiFetch<PageResponse>("/api/v1/ops/tenants", { params: { limit: 100, cursor } });
+    items.push(...(res.items ?? []).map(toTenant));
+    cursor = res.page?.nextCursor ?? undefined;
+    if (!cursor) return { items, truncated: false };
+  }
+  return { items, truncated: true };
+}
+
+/* ───────────── 문의 ───────────── */
 
 export async function listInquiries(): Promise<{ items: OpsInquiry[]; truncated: boolean }> {
   const items: OpsInquiry[] = [];
@@ -113,7 +143,6 @@ export async function getInquiry(inquiryId: string) {
 /**
  * closeAfterReply가 true면 서버가 상태를 CLOSED로, 아니면 ANSWERED로 바꾼다.
  * 같은 답변을 재시도할 때는 같은 idempotencyKey를 보내야 서버가 중복 저장하지 않는다.
- * (키를 모르는 이전 서버는 헤더를 무시하므로 함께 보내도 안전하다.)
  */
 export function replyToInquiry(inquiryId: string, content: string, closeAfterReply: boolean, idempotencyKey?: string) {
   return apiFetch<{ replyId: string; inquiryId: string; deliveryStatus: string; createdAt: string }>(
