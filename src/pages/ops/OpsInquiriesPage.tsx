@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import OpsLayout from "../../components/ops/OpsLayout";
+import OpsLayout, { OpsPageHeader } from "../../components/ops/OpsLayout";
 import { ChevronDownIcon } from "../../components/home/HomeIcons";
 import { ApiError, NetworkError, errorMessage, opsApi, type OpsInquiry } from "../../api";
 import { useToast } from "../../shared/ui/toastContext";
@@ -29,8 +29,8 @@ const TYPE_ALL = "__all__";
 function StatusBadge({ status }: { status: OpsInquiry["status"] }) {
   const tone =
     status === "OPEN"
-      ? "bg-[var(--color-warning-soft-bg,#fff4e5)] text-[var(--color-warning-text,#c2410c)]"
-      : "bg-[var(--color-bg-tile)] text-[var(--color-text-label)]";
+      ? "bg-[var(--ops-warning-bg)] text-[var(--ops-warning-fg)]"
+      : "bg-[var(--ops-chip-bg)] text-[var(--ops-body)]";
   return (
     <span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${tone}`}>
       <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
@@ -41,7 +41,7 @@ function StatusBadge({ status }: { status: OpsInquiry["status"] }) {
 
 function TypeChip({ title }: { title: string }) {
   return (
-    <span className="inline-flex shrink-0 rounded bg-[var(--color-bg-tile)] px-1.5 py-0.5 text-[11px] text-[var(--color-text-label)]">
+    <span className="inline-flex shrink-0 rounded bg-[var(--ops-chip-bg)] px-1.5 py-0.5 text-[11px] text-[var(--ops-body)]">
       {inquiryType(title)}
     </span>
   );
@@ -246,7 +246,7 @@ export default function OpsInquiriesPage() {
       aria-selected={tab === key}
       onClick={() => setTab(key)}
       className={`rounded-full px-4 py-1.5 text-sm transition-colors ${
-        tab === key ? "bg-[var(--color-accent)] font-medium text-white" : "text-[var(--color-text-body)] hover:bg-[var(--color-bg-tile)]"
+        tab === key ? "bg-[var(--ops-accent)] font-medium text-white" : "text-[var(--ops-body)] hover:bg-[var(--ops-chip-bg)]"
       }`}
     >
       {label} {count}
@@ -256,16 +256,12 @@ export default function OpsInquiriesPage() {
   const closed = detail?.status === "CLOSED";
 
   return (
-    <OpsLayout>
-      <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-6 p-4 md:p-8">
-        <div className="flex flex-col gap-1">
-          <p className="text-xs text-[var(--color-text-faint)]">운영 › 민원 처리</p>
-          <h1 className="text-2xl font-semibold text-[var(--color-text-heading)]">민원 처리</h1>
-          <p className="text-sm text-[var(--color-text-body)]">회사에서 보낸 문의에 답변해요.</p>
-        </div>
+    <OpsLayout openInquiries={items ? counts.open : null}>
+      <div className="flex w-full flex-col gap-6 px-4 pb-8 md:px-8">
+        <OpsPageHeader crumb="운영 › 민원 처리" title="민원 처리" description="회사에서 보낸 문의에 답변해요." />
 
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div role="tablist" aria-label="문의 상태" className="inline-flex gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-bg-card)] p-1">
+          <div role="tablist" aria-label="문의 상태" className="inline-flex gap-1 rounded-full border border-[var(--ops-border)] bg-[var(--ops-surface)] p-1">
             {tabButton("all", "전체", counts.all)}
             {tabButton("open", "답변 대기", counts.open)}
             {tabButton("done", "답변 완료", counts.done)}
@@ -276,30 +272,30 @@ export default function OpsInquiriesPage() {
               value={type}
               onChange={(e) => setType(e.target.value)}
               aria-label="문의 유형"
-              className="h-10 cursor-pointer appearance-none rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] pl-3 pr-9 text-sm text-[var(--color-text-label)] outline-none [color-scheme:var(--native-color-scheme)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+              className="h-10 cursor-pointer appearance-none rounded-lg border border-[var(--ops-border)] bg-[var(--ops-surface)] pl-3 pr-9 text-sm text-[var(--ops-body)] outline-none [color-scheme:var(--native-color-scheme)] focus-visible:ring-2 focus-visible:ring-[var(--ops-accent)]"
             >
               <option value={TYPE_ALL}>유형 전체</option>
               {types.map((t) => (
                 <option key={t} value={t}>{t}</option>
               ))}
             </select>
-            <ChevronDownIcon className="pointer-events-none absolute right-3 size-3.5 text-[var(--color-text-body)]" />
+            <ChevronDownIcon className="pointer-events-none absolute right-3 size-3.5 text-[var(--ops-body)]" />
           </label>
         </div>
 
         {truncated && (
-          <p className="text-xs text-[var(--color-text-faint)]">문의가 많아 최근 1,000건만 불러왔어요.</p>
+          <p className="text-xs text-[var(--ops-faint)]">문의가 많아 최근 1,000건만 불러왔어요.</p>
         )}
 
         {loadError ? (
-          <div className="flex flex-col items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-10">
+          <div className="flex flex-col items-center gap-3 p-10 rounded-[14px] border border-[var(--ops-border)] bg-[var(--ops-surface)] shadow-[var(--ops-card-shadow)]">
             <p role="alert" className="text-sm text-[var(--color-danger-text)]">{loadError}</p>
-            <button type="button" onClick={() => void loadList()} className="rounded-lg border border-[var(--color-border)] px-4 py-2 text-sm">다시 시도</button>
+            <button type="button" onClick={() => void loadList()} className="rounded-lg border border-[var(--ops-border)] px-4 py-2 text-sm">다시 시도</button>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
             {/* 목록 */}
-            <section className="flex min-h-[480px] flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)]">
+            <section className="flex min-h-[480px] flex-col rounded-[14px] border border-[var(--ops-border)] bg-[var(--ops-surface)] shadow-[var(--ops-card-shadow)]">
               <div className="p-3">
                 <input
                   type="search"
@@ -307,13 +303,13 @@ export default function OpsInquiriesPage() {
                   onChange={(e) => setKeyword(e.target.value)}
                   placeholder="제목, 내용 검색"
                   aria-label="문의 검색"
-                  className="h-10 w-full rounded-lg bg-[var(--color-bg-tile)] px-3 text-sm text-[var(--color-text-heading)] outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                  className="h-10 w-full rounded-lg bg-[var(--ops-chip-bg)] px-3 text-sm text-[var(--ops-heading)] outline-none focus:ring-2 focus:ring-[var(--ops-accent)]"
                 />
               </div>
               {!items ? (
-                <p role="status" className="p-6 text-center text-sm text-[var(--color-text-faint)]">문의를 불러오는 중...</p>
+                <p role="status" className="p-6 text-center text-sm text-[var(--ops-faint)]">문의를 불러오는 중...</p>
               ) : visible.length === 0 ? (
-                <p className="p-6 text-center text-sm text-[var(--color-text-faint)]">조건에 맞는 문의가 없어요.</p>
+                <p className="p-6 text-center text-sm text-[var(--ops-faint)]">조건에 맞는 문의가 없어요.</p>
               ) : (
                 <ul className="flex flex-col px-2 pb-2">
                   {visible.map((item) => {
@@ -325,15 +321,15 @@ export default function OpsInquiriesPage() {
                           onClick={() => setSelectedId(item.inquiryId)}
                           aria-current={active ? "true" : undefined}
                           className={`flex w-full flex-col gap-1.5 rounded-md border-l-2 px-4 py-3 text-left transition-colors ${
-                            active ? "border-[var(--color-accent)] bg-[var(--home-nav-active-bg)]" : "border-transparent hover:bg-[var(--color-bg-tile)]"
+                            active ? "border-[var(--ops-accent)] bg-[var(--ops-accent-soft)]" : "border-transparent hover:bg-[var(--ops-chip-bg)]"
                           }`}
                         >
                           <span className="flex items-center justify-between gap-2">
                             <TypeChip title={item.title} />
                             <StatusBadge status={item.status} />
                           </span>
-                          <span className="truncate text-sm font-medium text-[var(--color-text-heading)]">{item.title}</span>
-                          <span className="text-xs text-[var(--color-text-faint)]">{relativeTime(item.createdAt)}</span>
+                          <span className="truncate text-sm font-medium text-[var(--ops-heading)]">{item.title}</span>
+                          <span className="text-xs text-[var(--ops-faint)]">{relativeTime(item.createdAt)}</span>
                         </button>
                       </li>
                     );
@@ -343,56 +339,56 @@ export default function OpsInquiriesPage() {
             </section>
 
             {/* 상세 */}
-            <section className="flex min-h-[480px] flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)]">
+            <section className="flex min-h-[480px] flex-col rounded-[14px] border border-[var(--ops-border)] bg-[var(--ops-surface)] shadow-[var(--ops-card-shadow)]">
               {!detail ? (
-                <p className="m-auto p-6 text-sm text-[var(--color-text-faint)]">
+                <p className="m-auto p-6 text-sm text-[var(--ops-faint)]">
                   {detailLoading ? "문의를 불러오는 중..." : "왼쪽에서 문의를 선택하세요."}
                 </p>
               ) : (
                 <>
-                  <header className="flex flex-col gap-2 border-b border-[var(--color-border)] p-6">
+                  <header className="flex flex-col gap-2 border-b border-[var(--ops-border)] p-6">
                     <div className="flex items-center justify-between gap-2">
                       <TypeChip title={detail.title} />
                       <StatusBadge status={detail.status} />
                     </div>
-                    <h2 className="text-lg font-semibold text-[var(--color-text-heading)]">{detail.title}</h2>
-                    <p className="text-xs text-[var(--color-text-faint)]">{formatDateTime(detail.createdAt)}</p>
+                    <h2 className="text-lg font-semibold text-[var(--ops-heading)]">{detail.title}</h2>
+                    <p className="text-xs text-[var(--ops-faint)]">{formatDateTime(detail.createdAt)}</p>
                   </header>
 
                   <div className="flex flex-1 flex-col gap-5 p-6">
-                    <p className="whitespace-pre-wrap rounded-lg bg-[var(--color-bg-tile)] p-4 text-sm leading-6 text-[var(--color-text-heading)]">{detail.content}</p>
+                    <p className="whitespace-pre-wrap rounded-lg bg-[var(--ops-chip-bg)] p-4 text-sm leading-6 text-[var(--ops-heading)]">{detail.content}</p>
 
                     {detail.replies.length > 0 && (
                       <div className="flex flex-col gap-2">
-                        <h3 className="text-sm font-medium text-[var(--color-text-heading)]">보낸 답변 {detail.replies.length}</h3>
+                        <h3 className="text-sm font-medium text-[var(--ops-heading)]">보낸 답변 {detail.replies.length}</h3>
                         {detail.replies.map((r, index) => (
-                          <div key={r.replyId || index} className="rounded-lg border border-[var(--color-border)] p-4">
-                            <p className="whitespace-pre-wrap text-sm leading-6 text-[var(--color-text-heading)]">{r.content}</p>
-                            {r.answeredAt && <p className="pt-2 text-xs text-[var(--color-text-faint)]">{formatDateTime(r.answeredAt)}</p>}
+                          <div key={r.replyId || index} className="rounded-lg border border-[var(--ops-border)] p-4">
+                            <p className="whitespace-pre-wrap text-sm leading-6 text-[var(--ops-heading)]">{r.content}</p>
+                            {r.answeredAt && <p className="pt-2 text-xs text-[var(--ops-faint)]">{formatDateTime(r.answeredAt)}</p>}
                           </div>
                         ))}
                       </div>
                     )}
 
                     {closed ? (
-                      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--color-border)] p-4">
-                        <p className="text-sm text-[var(--color-text-body)]">종료된 문의예요. 답변하려면 다시 열어주세요.</p>
-                        <button type="button" onClick={() => void reopen()} disabled={reopening} className="rounded-lg border border-[var(--color-border)] px-4 py-2 text-sm disabled:opacity-60">
+                      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--ops-border)] p-4">
+                        <p className="text-sm text-[var(--ops-body)]">종료된 문의예요. 답변하려면 다시 열어주세요.</p>
+                        <button type="button" onClick={() => void reopen()} disabled={reopening} className="rounded-lg border border-[var(--ops-border)] px-4 py-2 text-sm disabled:opacity-60">
                           {reopening ? "여는 중..." : "다시 열기"}
                         </button>
                       </div>
                     ) : (
                       <div className="flex flex-col gap-3">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <label htmlFor="ops-reply" className="text-sm font-medium text-[var(--color-text-heading)]">답변 작성</label>
+                          <label htmlFor="ops-reply" className="text-sm font-medium text-[var(--ops-heading)]">답변 작성</label>
                           <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="text-xs text-[var(--color-text-faint)]">템플릿</span>
+                            <span className="text-xs text-[var(--ops-faint)]">템플릿</span>
                             {REPLY_TEMPLATES.map((t) => (
                               <button
                                 key={t.label}
                                 type="button"
                                 onClick={() => insertTemplate(t.body)}
-                                className="rounded-full bg-[var(--home-nav-active-bg)] px-2.5 py-1 text-xs text-[var(--color-accent)] transition hover:brightness-95"
+                                className="rounded-full bg-[var(--ops-accent-soft)] px-2.5 py-1 text-xs text-[var(--ops-accent)] transition hover:brightness-95"
                               >
                                 + {t.label}
                               </button>
@@ -406,34 +402,34 @@ export default function OpsInquiriesPage() {
                             onChange={(e) => setReply(e.target.value.slice(0, REPLY_MAX_LENGTH))}
                             rows={7}
                             placeholder="답변 내용을 입력하세요."
-                            className="w-full resize-y rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] p-4 pb-8 text-sm leading-6 text-[var(--color-text-heading)] outline-none focus:border-[var(--color-accent)]"
+                            className="w-full resize-y rounded-lg border border-[var(--ops-border)] bg-[var(--ops-surface)] p-4 pb-8 text-sm leading-6 text-[var(--ops-heading)] outline-none focus:border-[var(--ops-accent)]"
                           />
-                          <span className="pointer-events-none absolute bottom-3 right-4 text-xs text-[var(--color-text-faint)]">
+                          <span className="pointer-events-none absolute bottom-3 right-4 text-xs text-[var(--ops-faint)]">
                             {reply.length} / {REPLY_MAX_LENGTH}
                           </span>
                         </div>
                         <div className="flex flex-col gap-1">
-                          <label className={`flex items-center gap-2 text-sm text-[var(--color-text-body)] ${lockedClose !== null ? "opacity-70" : ""}`}>
+                          <label className={`flex items-center gap-2 text-sm text-[var(--ops-body)] ${lockedClose !== null ? "opacity-70" : ""}`}>
                             <input
                               type="checkbox"
                               checked={effectiveClose}
                               disabled={lockedClose !== null}
                               onChange={(e) => setCloseAfterReply(e.target.checked)}
-                              className="size-4 accent-[var(--color-accent)] disabled:cursor-not-allowed"
+                              className="size-4 accent-[var(--ops-accent)] disabled:cursor-not-allowed"
                             />
                             답변을 보내면 완료로 표시
                           </label>
                           {lockedClose !== null && (
-                            <p className="text-xs text-[var(--color-text-faint)]">
+                            <p className="text-xs text-[var(--ops-faint)]">
                               이전 전송의 저장 여부를 확인 중이라 같은 설정으로 다시 보내요. 내용을 바꾸면 새 답변으로 보내져요.
                             </p>
                           )}
                         </div>
                         <div className="flex justify-end gap-2">
-                          <button type="button" onClick={saveTemporarily} disabled={sending} className="rounded-lg border border-[var(--color-border)] px-5 py-2.5 text-sm disabled:opacity-60">
+                          <button type="button" onClick={saveTemporarily} disabled={sending} className="rounded-lg border border-[var(--ops-border)] px-5 py-2.5 text-sm disabled:opacity-60">
                             임시 저장
                           </button>
-                          <button type="button" onClick={() => void send()} disabled={sending || !reply.trim()} className="rounded-lg bg-[var(--color-accent)] px-5 py-2.5 text-sm font-medium text-white disabled:opacity-60">
+                          <button type="button" onClick={() => void send()} disabled={sending || !reply.trim()} className="rounded-lg bg-[var(--ops-accent)] px-5 py-2.5 text-sm font-medium text-white disabled:opacity-60">
                             {sending ? "보내는 중..." : "답변 보내기"}
                           </button>
                         </div>

@@ -1,4 +1,5 @@
-import { apiFetch } from "./client";
+import { ApiError, apiFetch } from "./client";
+import { normalizeAccess, normalizeSummary, type DashboardAccess, type DashboardSummary } from "../lib/opsDashboard";
 
 /*
  * 운영자(SUPPORT_OPERATOR) 콘솔 API.
@@ -132,5 +133,32 @@ export async function updateInquiryStatus(inquiryId: string, status: OpsInquiryS
       method: "PATCH",
       body: { status, version },
     }),
+  );
+}
+
+/* ───────────── 대시보드 ───────────── */
+
+/**
+ * 대시보드 API가 없는 서버(배포 전)면 null을 돌려준다. 화면은 해당 카드를 숨긴다.
+ * days는 7·30·90만 받는다(그 외는 400).
+ */
+async function optional<T>(request: () => Promise<T>): Promise<T | null> {
+  try {
+    return await request();
+  } catch (err) {
+    if (err instanceof ApiError && (err.status === 404 || err.status === 405)) return null;
+    throw err;
+  }
+}
+
+export function getDashboardSummary(days: number): Promise<DashboardSummary | null> {
+  return optional(async () =>
+    normalizeSummary(await apiFetch<unknown>("/api/v1/ops/dashboard/summary", { params: { days } }), days),
+  );
+}
+
+export function getDashboardAccess(days: number): Promise<DashboardAccess | null> {
+  return optional(async () =>
+    normalizeAccess(await apiFetch<unknown>("/api/v1/ops/dashboard/access", { params: { days } }), days),
   );
 }

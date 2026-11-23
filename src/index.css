@@ -83,6 +83,23 @@
   --home-wave-1: rgba(59, 130, 246, 0.05);
   --home-wave-2: rgba(59, 130, 246, 0.18);
   --home-wave-3: rgba(59, 130, 246, 0.08);
+  /* ── 운영자 콘솔 전용 토큰 · 다크 (Figma 운영자 콘솔 2956:968) ── */
+  --ops-bg: #0f1115;
+  --ops-surface: #15181e;
+  --ops-border: #262a33;
+  --ops-divider: #1f232b;
+  --ops-heading: #f3f4f6;
+  --ops-body: #b4bac4;
+  --ops-faint: #7d8592;
+  --ops-accent: #3b82f6;
+  --ops-accent-soft: rgba(59, 130, 246, 0.16);
+  --ops-chip-bg: #22262e;
+  --ops-warning-bg: rgba(217, 119, 6, 0.18);
+  --ops-warning-fg: #f59e0b;
+  --ops-success-bg: rgba(22, 163, 74, 0.18);
+  --ops-success-fg: #22c55e;
+  --ops-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --ops-donut-site: rgba(59, 130, 246, 0.45);
   --home-wave-4: rgba(59, 130, 246, 0.28);
   --home-wave-img-opacity: 0.55;
   --home-wave-img-filter: invert(1) hue-rotate(180deg) saturate(1.4);
@@ -168,6 +185,23 @@
   --home-wave-1: #e8f0ff;
   --home-wave-2: #bcd3ff;
   --home-wave-3: #d7e4ff;
+  /* ── 운영자 콘솔 전용 토큰 · 라이트 (Figma 운영자 콘솔 2956:968) ── */
+  --ops-bg: #f5f7fb;
+  --ops-surface: #ffffff;
+  --ops-border: #e6eaf0;
+  --ops-divider: #f0f2f6;
+  --ops-heading: #111827;
+  --ops-body: #4b5563;
+  --ops-faint: #8b95a5;
+  --ops-accent: #2879ea;
+  --ops-accent-soft: #eef4fe;
+  --ops-chip-bg: #f3f5f8;
+  --ops-warning-bg: #fff3df;
+  --ops-warning-fg: #d97706;
+  --ops-success-bg: #e8f6ee;
+  --ops-success-fg: #16a34a;
+  --ops-card-shadow: 0 1px 3px rgba(18, 26, 41, 0.05);
+  --ops-donut-site: #a3c4f5;
   --home-wave-4: #98b9f8;
   --home-wave-img-opacity: 1;
   --home-wave-img-filter: none;
