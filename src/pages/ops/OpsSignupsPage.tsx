@@ -70,7 +70,12 @@ function StepBar({ counts, current }: { counts: SignupCounts | null; current: Si
   );
 }
 
-function RejectModal({ targets, onClose, onDone }: { targets: SignupRequest[]; onClose: () => void; onDone: () => void }) {
+/**
+ * 반려가 전부 성공하면 닫는다(onDone). 실패한 건이 있으면 모달을 열어 둔 채
+ * 실패한 건만 남겨 입력한 사유로 다시 시도할 수 있게 하고, 성공한 건은 목록에 반영한다(onChanged).
+ */
+function RejectModal({ targets: initialTargets, onClose, onDone, onChanged }: { targets: SignupRequest[]; onClose: () => void; onDone: () => void; onChanged: () => void }) {
+  const [targets, setTargets] = useState(initialTargets);
   const { showToast } = useToast();
   const [code, setCode] = useState<RejectReasonCode>("BUSINESS_MISMATCH");
   const [reason, setReason] = useState<string>(REJECT_REASONS[0].template);
@@ -87,11 +92,21 @@ function RejectModal({ targets, onClose, onDone }: { targets: SignupRequest[]; o
     if (busy || !reason.trim()) return;
     setBusy(true);
     const results = await Promise.allSettled(targets.map((t) => opsAdminApi.rejectSignup(t.requestId, { reasonCode: code, reason: reason.trim(), allowReapply })));
-    const failed = results.filter((r) => r.status === "rejected");
+    const failedTargets = targets.filter((_, i) => results[i].status === "rejected");
     setBusy(false);
-    if (failed.length === 0) showToast(one ? `${one.companyName} 가입 신청을 반려했어요.` : `${targets.length}건을 반려했어요.`, "success");
-    else showToast(errorMessage((failed[0] as PromiseRejectedResult).reason, `${failed.length}건을 반려하지 못했어요.`), "error");
-    onDone();
+    if (failedTargets.length === 0) {
+      showToast(one ? `${one.companyName} 가입 신청을 반려했어요.` : `${targets.length}건을 반려했어요.`, "success");
+      onDone();
+      return;
+    }
+    const firstError = (results.find((r) => r.status === "rejected") as PromiseRejectedResult).reason;
+    const done = targets.length - failedTargets.length;
+    showToast(
+      errorMessage(firstError, done > 0 ? `${done}건은 반려했고 ${failedTargets.length}건은 반려하지 못했어요.` : "반려하지 못했어요. 다시 시도해 주세요."),
+      "error",
+    );
+    if (done > 0) onChanged();
+    setTargets(failedTargets);
   };
 
   return (
@@ -301,7 +316,7 @@ export default function OpsSignupsPage() {
   const [status, setStatus] = useState<SignupStatus>("PENDING_APPROVAL");
   const [keyword, setKeyword] = useState("");
   const [requested, setRequested] = useState("all");
-  const [document, setDocument] = useState("all");
+  const [documentFilter, setDocumentFilter] = useState("all");
   const [sort, setSort] = useState("oldest");
   const [q, setQ] = useState("");
 
@@ -329,7 +344,7 @@ export default function OpsSignupsPage() {
         status,
         q: q || undefined,
         requested: requested === "all" ? undefined : requested,
-        document: document === "all" ? undefined : document,
+        document: documentFilter === "all" ? undefined : documentFilter,
         sort,
         cursor: more,
       });
@@ -345,7 +360,7 @@ export default function OpsSignupsPage() {
     } catch (err) {
       if (id === seq.current) setError(errorMessage(err, "가입 신청을 불러오지 못했어요."));
     }
-  }, [status, q, requested, document, sort]);
+  }, [status, q, requested, documentFilter, sort]);
 
   useEffect(() => {
     setItems(null);
@@ -478,7 +493,7 @@ export default function OpsSignupsPage() {
             <div className="flex flex-wrap items-center gap-2">
               <SearchBox value={keyword} onChange={setKeyword} placeholder="회사명, 담당자, 이메일, 사업자번호" label="신청 검색" />
               <OpsSelect label="신청일" icon="calendar" value={requested} onChange={setRequested} options={REQUESTED_OPTIONS} />
-              <OpsSelect label="서류" icon="file" value={document} onChange={setDocument} options={DOCUMENT_OPTIONS} />
+              <OpsSelect label="서류" icon="file" value={documentFilter} onChange={setDocumentFilter} options={DOCUMENT_OPTIONS} />
               <span className="flex-1" />
               <OpsSelect label="정렬" icon="sort" value={sort} onChange={setSort} options={sortOptions(status)} />
             </div>
@@ -554,11 +569,13 @@ export default function OpsSignupsPage() {
                               <td className="px-4 py-3">{due ? <Chip tone={overdue ? "danger" : "warning"}><OpsIcon name="clock" size={11} />{due.label}</Chip> : "–"}</td>
                               <td className="px-4 py-3">{overdue ? <Chip dot>미입금</Chip> : <Chip tone="accent" dot>입금 확인 필요</Chip>}</td>
                               <td className="px-4 py-3 text-right">
-                                {overdue ? (
-                                  <button type="button" onClick={() => void remind(r)} disabled={!!busyId} className={`${BTN_SECONDARY} h-8 px-3`}><OpsIcon name="send" size={13} />안내 재발송</button>
-                                ) : (
+                                {/* 기한이 지나도 늦게 입금될 수 있어 입금 확인은 항상 둔다 */}
+                                <span className="flex justify-end gap-1.5">
+                                  {overdue && (
+                                    <button type="button" onClick={() => void remind(r)} disabled={!!busyId} className={`${BTN_SECONDARY} h-8 px-3`}><OpsIcon name="send" size={13} />안내 재발송</button>
+                                  )}
                                   <button type="button" onClick={() => void confirmDeposit(r)} disabled={!!busyId} className={`${BTN_PRIMARY} h-8 px-3`}><OpsIcon name="card" size={13} />입금 확인</button>
-                                )}
+                                </span>
                               </td>
                             </tr>
                           );
@@ -641,6 +658,7 @@ export default function OpsSignupsPage() {
             setSelected(new Set());
             void load();
           }}
+          onChanged={() => void load()}
         />
       )}
     </OpsLayout>
