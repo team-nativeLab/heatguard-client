@@ -190,7 +190,19 @@ function InviteModal({ onClose, onDone }: { onClose: () => void; onDone: () => v
       showToast(`${email.trim()}로 초대 메일을 보냈어요.`, "success");
       onDone();
     } catch (err) {
-      showToast(errorMessage(err, "초대하지 못했어요."), "error");
+      const code = err instanceof ApiError ? err.code : undefined;
+      showToast(
+        code === "INVITATION_PENDING"
+          ? "이 이메일로 보낸 초대가 아직 유효해요. 24시간이 지나면 다시 보낼 수 있어요."
+          : code === "EMAIL_ALREADY_EXISTS"
+            ? "이미 가입된 이메일이에요."
+            : err instanceof ApiError && err.status === 403
+              ? "최고 관리자만 다른 관리자를 초대할 수 있어요."
+              : err instanceof ApiError && err.status === 503
+                ? "초대 메일을 보낼 수 없어요. 서버의 메일·초대 화면 설정을 확인해주세요."
+                : errorMessage(err, "초대하지 못했어요."),
+        "error",
+      );
       setBusy(false);
     }
   };
@@ -280,6 +292,8 @@ export default function OpsSettingsPage() {
   };
 
   const others = operators?.filter((o) => !o.isMe && o.userId !== me?.userId) ?? [];
+  // 초대는 최고 관리자만 할 수 있다 (서버도 403으로 막는다).
+  const canInvite = !!operators?.some((o) => o.isMe && o.role === "OWNER");
 
   return (
     <OpsLayout>
@@ -358,7 +372,7 @@ export default function OpsSettingsPage() {
             <SectionCard
               id="ops-settings-account"
               title="관리자 계정"
-              action={operators && (
+              action={canInvite && (
                 <button type="button" onClick={() => setInviting(true)} className={`${BTN_SECONDARY} h-8 border-transparent bg-[var(--ops-accent-soft)] text-[var(--ops-accent)]`}>
                   + 관리자 초대
                 </button>
