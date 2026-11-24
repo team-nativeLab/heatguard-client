@@ -107,8 +107,8 @@ export default function TeamDetailModal({
   };
 
   const rows = [
-    { key: "leaderName", label: "이름", value: team.leaderName },
-    { key: "contact", label: "전화번호", value: team.contact || "-" },
+    { key: "leaderName", label: "이름", value: team.leaderName || "미입력" },
+    { key: "contact", label: "전화번호", value: team.contact || "미입력 · 앱 연동 전에 입력해주세요" },
     { key: "memberCount", label: "인원", value: team.memberCount ? `${team.memberCount}명` : "-" },
     { key: "loginEmail", label: "이메일", value: team.loginEmail || "계정 미등록" },
     { key: "workLocation", label: "작업 장소", value: team.workLocation || "미지정" },

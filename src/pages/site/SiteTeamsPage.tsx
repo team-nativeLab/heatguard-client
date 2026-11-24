@@ -228,7 +228,12 @@ export default function SiteTeamsPage() {
                   {me.site.name || team.name || "현장"}
                   <TeamLinkBadge link={links[team.id]} />
                 </p>
-                <p className="leading-4 text-[var(--color-text-body)] text-xs">팀장 {team.leaderName}{team.contact ? ` · ${team.contact}` : ""} · {team.workLocation || "작업 장소 미입력"}</p>
+                <p className="leading-4 text-[var(--color-text-body)] text-xs">
+                  {/* 본사가 현장을 만들 때 생기는 기본팀은 팀장 이름·전화번호가 비어 있다. */}
+                  {team.leaderName ? `팀장 ${team.leaderName}` : "팀장 정보 미입력"}
+                  {team.contact ? ` · ${team.contact}` : team.leaderName ? " · 전화번호 미입력" : ""}
+                  {` · ${team.workLocation || "작업 장소 미입력"}`}
+                </p>
               </div>
 
               <div className="flex gap-2 shrink-0">
