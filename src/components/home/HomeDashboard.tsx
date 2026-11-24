@@ -236,7 +236,8 @@ export default function HomeDashboard() {
       try {
         const [dash, recordsRes] = await Promise.all([
           dashboardApi.getDashboard(),
-          recordsApi.listRecords({ date: todayStr }),
+          // 첫 페이지(서버 기본 20건)만 받으면 바쁜 현장의 오늘 기록이 잘린다.
+          recordsApi.listAllRecords({ date: todayStr }),
         ]);
         const records = recordsRes.items;
         setLoadFailed(false);
