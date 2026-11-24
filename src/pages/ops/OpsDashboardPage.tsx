@@ -4,7 +4,9 @@ import OpsLayout, { OpsPageHeader } from "../../components/ops/OpsLayout";
 import OpsIcon from "../../components/ops/OpsIcon";
 import { AccessDonut, KpiCard, Panel, type Delta } from "../../components/ops/OpsWidgets";
 import { CARD } from "../../components/ops/opsStyles";
-import { errorMessage, opsApi, type DashboardAccess, type DashboardDays, type DashboardSummary, type OpsInquiry } from "../../api";
+import { errorMessage, opsAdminApi, opsApi, type DashboardAccess, type DashboardDays, type DashboardSummary, type OpsInquiry } from "../../api";
+import { Chip, type ChipTone } from "../../components/ops/OpsUi";
+import { SIGNUP_STATUS_LABEL, type SignupCounts, type SignupRequest, type SignupStatus } from "../../lib/opsAdmin";
 import { usePolling } from "../../shared/hooks/usePolling";
 import { STATUS_LABEL, formatDateTime, summarizeInquiries } from "../../lib/opsInquiry";
 import {
@@ -20,9 +22,11 @@ import {
  * 운영 현황 대시보드 (Figma 01_대시보드 (운영 현황), node 2956:969).
  * - 운영 지표·접속 비중: GET /api/v1/ops/dashboard/summary, /access (현재 DB 기준)
  * - 문의 지표·최근 문의: 문의 목록
- * 대시보드 API가 없는 서버에서는 문의 지표만 보여준다.
- * 최근 가입 신청·가입 승인/입금 대기는 서버 기능이 없어 넣지 않았다.
+ * - 최근 가입 신청·승인/입금 대기: GET /api/v1/ops/signup-requests (서버 준비 중)
+ * 대시보드 API가 없는 서버에서는 문의 지표만, 가입 신청 API가 없으면 그 카드만 빠진다.
  */
+
+const SIGNUP_TONE: Record<SignupStatus, ChipTone> = { PENDING_APPROVAL: "warning", PENDING_DEPOSIT: "accent", ACTIVE: "success", REJECTED: "danger" };
 
 const REFRESH_MS = 60_000;
 
@@ -49,6 +53,7 @@ export default function OpsDashboardPage() {
   const [items, setItems] = useState<OpsInquiry[] | null>(null);
   const [summary, setSummary] = useState<Loaded<DashboardSummary>>(undefined);
   const [access, setAccess] = useState<Loaded<DashboardAccess>>(undefined);
+  const [signups, setSignups] = useState<Loaded<{ items: SignupRequest[]; counts: SignupCounts }>>(undefined);
   const [error, setError] = useState("");
   const [metricsError, setMetricsError] = useState("");
   // 기간을 바꾼 직후 이전 기간 응답이 늦게 도착해도 덮어쓰지 않는다.
@@ -56,10 +61,11 @@ export default function OpsDashboardPage() {
 
   const load = useCallback(async (period: DashboardDays) => {
     const seq = ++requestSeq.current;
-    const [inquiries, summaryRes, accessRes] = await Promise.allSettled([
+    const [inquiries, summaryRes, accessRes, signupRes] = await Promise.allSettled([
       opsApi.listInquiries(),
       opsApi.getDashboardSummary(period),
       opsApi.getDashboardAccess(period),
+      opsAdminApi.listSignupRequests({ sort: "newest", limit: 4 }),
     ]);
     if (seq !== requestSeq.current) return;
 
@@ -73,6 +79,7 @@ export default function OpsDashboardPage() {
     // 실패한 지표는 이전 값을 지우지 않고 안내만 띄운다.
     if (summaryRes.status === "fulfilled") setSummary(summaryRes.value);
     if (accessRes.status === "fulfilled") setAccess(accessRes.value);
+    if (signupRes.status === "fulfilled") setSignups(signupRes.value);
     const failed = [summaryRes, accessRes].find((r) => r.status === "rejected");
     setMetricsError(failed ? errorMessage(failed.reason, "운영 지표를 불러오지 못했어요.") : "");
   }, []);
@@ -113,8 +120,83 @@ export default function OpsDashboardPage() {
     </label>
   ) : undefined;
 
+  const inquiryPanel = (
+              <Panel icon="message" title="최근 문의" action={<ViewAll to="/ops/inquiries?tab=all" />} className={signups ? "" : "min-h-[280px]"}>
+                {!inquirySummary ? (
+                  <p role={error ? "alert" : "status"} className={`m-auto py-6 text-center text-sm ${error ? "text-[var(--color-danger-text)]" : "text-[var(--ops-faint)]"}`}>
+                    {error || "불러오는 중..."}
+                  </p>
+                ) : inquirySummary.recent.length === 0 ? (
+                  <p className="m-auto py-6 text-center text-sm text-[var(--ops-faint)]">아직 접수된 문의가 없어요.</p>
+                ) : (
+                  <ul className="mt-3 flex flex-col divide-y divide-[var(--ops-divider)]">
+                    {inquirySummary.recent.map((item) => (
+                      <li key={item.inquiryId}>
+                        <Link
+                          to={`/ops/inquiries?tab=all&id=${encodeURIComponent(item.inquiryId)}`}
+                          className="-mx-2 flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-[var(--ops-chip-bg)]"
+                        >
+                          <OpsIcon name="message" className="text-[var(--ops-faint)]" />
+                          <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--ops-heading)]">{item.title}</span>
+                          <span className="hidden shrink-0 text-xs text-[var(--ops-faint)] sm:inline">{formatDateTime(item.createdAt)}</span>
+                          <StatusChip status={item.status} />
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Panel>
+  );
+
+  const accessPanel = (
+    <Panel icon="pie" title="사이트 접속 비중" className="min-h-[280px]"
+                  action={<span className="text-xs text-[var(--ops-faint)]">최근 {days}일 · 관리자 로그인</span>}>
+                  {!access ? (
+                    <p role="status" className="m-auto py-6 text-center text-sm text-[var(--ops-faint)]">불러오는 중...</p>
+                  ) : (
+                    <>
+                      <AccessDonut access={access} />
+                      <p className="pt-3 text-xs text-[var(--ops-faint)]">
+                        {access.firstRecordedLoginAt
+                          ? `${formatDateTime(access.firstRecordedLoginAt, false)}부터 기록된 로그인만 집계돼요.`
+                          : "아직 기록된 로그인이 없어요. 로그인 기록은 서버 업데이트 이후부터 쌓여요."}
+                      </p>
+                    </>
+                  )}
+                </Panel>
+  );
+
+  const signupPanel = signups && (
+    <Panel icon="building" title="최근 가입 신청" action={<ViewAll to="/ops/signups" />} className="min-h-[280px]">
+      {signups.items.length === 0 ? (
+        <p className="m-auto py-6 text-center text-sm text-[var(--ops-faint)]">아직 가입 신청이 없어요.</p>
+      ) : (
+        <ul className="mt-3 flex flex-col divide-y divide-[var(--ops-divider)]">
+          {signups.items.map((r) => (
+            <li key={r.requestId}>
+              <Link to="/ops/signups" className="-mx-2 flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-[var(--ops-chip-bg)]">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-[var(--ops-chip-bg)] text-[var(--ops-body)]"><OpsIcon name="building" /></span>
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate text-sm font-medium text-[var(--ops-heading)]">{r.companyName}</span>
+                  <span className="truncate text-xs text-[var(--ops-faint)]">{[r.managerName, formatDateTime(r.requestedAt)].filter(Boolean).join(" · ")}</span>
+                </span>
+                <Chip tone={SIGNUP_TONE[r.status]} dot>{SIGNUP_STATUS_LABEL[r.status]}</Chip>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Panel>
+  );
+
+  const pendingParts = [
+    signups?.counts.PENDING_APPROVAL ? `가입 승인 대기 ${signups.counts.PENDING_APPROVAL}건` : "",
+    signups?.counts.PENDING_DEPOSIT ? `입금 확인 대기 ${signups.counts.PENDING_DEPOSIT}건` : "",
+    openCount ? `미답변 문의 ${openCount}건` : "",
+  ].filter(Boolean);
+
   return (
-    <OpsLayout openInquiries={openCount}>
+    <OpsLayout openInquiries={openCount} pendingSignups={signups ? signups.counts.PENDING_APPROVAL : undefined}>
       <div className="flex w-full flex-col gap-4 px-4 pb-8 md:px-8">
         <div className="mb-2">
           <OpsPageHeader
@@ -156,7 +238,7 @@ export default function OpsDashboardPage() {
               </section>
             )}
 
-            {openCount != null && openCount > 0 && (
+            {pendingParts.length > 0 && (
               <section className={`${CARD} flex min-h-16 flex-wrap items-center justify-between gap-3 px-[19px] py-3`}>
                 <div className="flex items-center gap-3.5">
                   <span className="flex size-8 items-center justify-center rounded-[9px] bg-[var(--ops-warning-bg)] text-[var(--ops-warning-fg)]">
@@ -164,60 +246,38 @@ export default function OpsDashboardPage() {
                   </span>
                   <div className="flex flex-col">
                     <p className="text-sm font-bold text-[var(--ops-heading)]">처리가 필요한 항목이 있어요</p>
-                    <p className="text-[13px] text-[var(--ops-body)]">미답변 문의 {openCount}건</p>
+                    <p className="text-[13px] text-[var(--ops-body)]">{pendingParts.join(" · ")}</p>
                   </div>
                 </div>
-                <Link to="/ops/inquiries" className="flex h-9 items-center rounded-lg border border-[var(--ops-border)] bg-[var(--ops-surface)] px-3.5 text-[13px] font-medium text-[var(--ops-body)] transition-colors hover:bg-[var(--ops-chip-bg)]">
-                  문의 확인
-                </Link>
+                <div className="flex gap-2">
+                  {!!signups?.counts.PENDING_APPROVAL && (
+                    <Link to="/ops/signups" className="flex h-9 items-center rounded-lg bg-[var(--ops-accent)] px-3.5 text-[13px] font-medium text-white transition hover:brightness-110">
+                      가입 승인 처리
+                    </Link>
+                  )}
+                  {!!openCount && (
+                    <Link to="/ops/inquiries" className="flex h-9 items-center rounded-lg border border-[var(--ops-border)] bg-[var(--ops-surface)] px-3.5 text-[13px] font-medium text-[var(--ops-body)] transition-colors hover:bg-[var(--ops-chip-bg)]">
+                      문의 확인
+                    </Link>
+                  )}
+                </div>
               </section>
             )}
 
-            <div className={`grid gap-4 ${access === null ? "" : "lg:grid-cols-2"}`}>
-              <Panel icon="message" title="최근 문의" action={<ViewAll to="/ops/inquiries?tab=all" />} className="min-h-[280px]">
-                {!inquirySummary ? (
-                  <p role={error ? "alert" : "status"} className={`m-auto py-6 text-center text-sm ${error ? "text-[var(--color-danger-text)]" : "text-[var(--ops-faint)]"}`}>
-                    {error || "불러오는 중..."}
-                  </p>
-                ) : inquirySummary.recent.length === 0 ? (
-                  <p className="m-auto py-6 text-center text-sm text-[var(--ops-faint)]">아직 접수된 문의가 없어요.</p>
-                ) : (
-                  <ul className="mt-3 flex flex-col divide-y divide-[var(--ops-divider)]">
-                    {inquirySummary.recent.map((item) => (
-                      <li key={item.inquiryId}>
-                        <Link
-                          to={`/ops/inquiries?tab=all&id=${encodeURIComponent(item.inquiryId)}`}
-                          className="-mx-2 flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-[var(--ops-chip-bg)]"
-                        >
-                          <OpsIcon name="message" className="text-[var(--ops-faint)]" />
-                          <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--ops-heading)]">{item.title}</span>
-                          <span className="hidden shrink-0 text-xs text-[var(--ops-faint)] sm:inline">{formatDateTime(item.createdAt)}</span>
-                          <StatusChip status={item.status} />
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </Panel>
-
-              {access !== null && (
-                <Panel icon="pie" title="사이트 접속 비중" className="min-h-[280px]"
-                  action={<span className="text-xs text-[var(--ops-faint)]">최근 {days}일 · 관리자 로그인</span>}>
-                  {!access ? (
-                    <p role="status" className="m-auto py-6 text-center text-sm text-[var(--ops-faint)]">불러오는 중...</p>
-                  ) : (
-                    <>
-                      <AccessDonut access={access} />
-                      <p className="pt-3 text-xs text-[var(--ops-faint)]">
-                        {access.firstRecordedLoginAt
-                          ? `${formatDateTime(access.firstRecordedLoginAt, false)}부터 기록된 로그인만 집계돼요.`
-                          : "아직 기록된 로그인이 없어요. 로그인 기록은 서버 업데이트 이후부터 쌓여요."}
-                      </p>
-                    </>
-                  )}
-                </Panel>
-              )}
-            </div>
+            {signups ? (
+              <>
+                <div className={`grid gap-4 ${access === null ? "" : "lg:grid-cols-2"}`}>
+                  {signupPanel}
+                  {access !== null && accessPanel}
+                </div>
+                {inquiryPanel}
+              </>
+            ) : (
+              <div className={`grid gap-4 ${access === null ? "" : "lg:grid-cols-2"}`}>
+                {inquiryPanel}
+                {access !== null && accessPanel}
+              </div>
+            )}
           </>
         )}
       </div>

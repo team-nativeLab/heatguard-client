@@ -25,6 +25,9 @@ import OpsInquiriesPage from "./pages/ops/OpsInquiriesPage";
 import OpsDashboardPage from "./pages/ops/OpsDashboardPage";
 import OpsStatsPage from "./pages/ops/OpsStatsPage";
 import OpsSettingsPage from "./pages/ops/OpsSettingsPage";
+import OpsMembersPage from "./pages/ops/OpsMembersPage";
+import OpsSignupsPage from "./pages/ops/OpsSignupsPage";
+import OpsActivityPage from "./pages/ops/OpsActivityPage";
 import SessionGuard from "./components/auth/SessionGuard";
 import SiteScopeGuard from "./components/auth/SiteScopeGuard";
 import SiteSelectionPage from "./pages/site/SiteSelectionPage";
@@ -149,6 +152,9 @@ export default function App() {
         <Route path="/ops/inquiries" element={<ProtectedOps><OpsInquiriesPage /></ProtectedOps>} />
         <Route path="/ops/stats" element={<ProtectedOps><OpsStatsPage /></ProtectedOps>} />
         <Route path="/ops/settings" element={<ProtectedOps><OpsSettingsPage /></ProtectedOps>} />
+        <Route path="/ops/members" element={<ProtectedOps><OpsMembersPage /></ProtectedOps>} />
+        <Route path="/ops/signups" element={<ProtectedOps><OpsSignupsPage /></ProtectedOps>} />
+        <Route path="/ops/activity" element={<ProtectedOps><OpsActivityPage /></ProtectedOps>} />
 
         <Route path="*" element={<Navigate to="/auth/login" replace />} />
       </Routes>
