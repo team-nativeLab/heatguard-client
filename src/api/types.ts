@@ -170,6 +170,8 @@ export interface TeamSummary {
   name: string;
   leaderName: string;
   workLocation: string;
+  /** 팀장 전화번호. 작업자가 앱 초대를 수락할 때 이 번호로 팀을 확인한다. */
+  contact: string;
   memberCount: number;
   active: boolean;
   version: number;
@@ -181,6 +183,8 @@ export interface CreateTeamPayload {
   name: string;
   workplace: string;
   leaderName: string;
+  /** 서버 필수 값. 작업자 앱 연동 시 본인 팀 확인에 쓰인다. */
+  leaderPhone: string;
   leaderEmail: string;
   initialPassword: string;
   workerCount: number;
@@ -190,6 +194,7 @@ export interface UpdateTeamPayload {
   name?: string;
   workplace?: string;
   leaderName?: string;
+  leaderPhone?: string;
   workerCount?: number;
   version?: number;
 }
