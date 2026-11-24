@@ -85,6 +85,11 @@ export function me() {
   return apiFetch<OpsUser>("/api/v1/ops/auth/me");
 }
 
+/** 현재 비밀번호가 틀리면 401 INVALID_CREDENTIALS (비밀번호가 담긴 요청이라 로그아웃시키지 않는다) */
+export function changePassword(payload: { currentPassword: string; newPassword: string }) {
+  return apiFetch<{ changedAt: string }>("/api/v1/ops/auth/password", { method: "PUT", body: payload });
+}
+
 /* ───────────── 민원 ───────────── */
 
 interface PageResponse {
