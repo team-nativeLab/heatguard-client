@@ -3,7 +3,7 @@ import { useToast } from "../../shared/ui/toastContext";
 import { useEscapeKey } from "../../shared/ui/useEscapeKey";
 import { CloseIcon } from "../icons/Icons";
 import { teamsApi, isDemoFallback, errorMessage, type TeamSummary, type UpdateTeamPayload } from "../../api";
-import { validateTeamForm } from "../../lib/teamForm";
+import { formatTeamPhone, validateTeamForm } from "../../lib/teamForm";
 import { getPasswordError } from "../../lib/passwordPolicy";
 import { NewPasswordInput } from "../auth/NewPasswordField";
 import { usePasswordComposition } from "../auth/usePasswordComposition";
@@ -29,6 +29,7 @@ export default function TeamDetailModal({
   const [form, setForm] = useState({
     leaderName: team.leaderName,
     workLocation: team.workLocation ?? "",
+    contact: team.contact ?? "",
     memberCount: team.memberCount ? String(team.memberCount) : "",
   });
   const [credentials, setCredentials] = useState({ leaderEmail: team.loginEmail ?? "", newPassword: "" });
@@ -36,12 +37,15 @@ export default function TeamDetailModal({
   useEscapeKey(saving || savingCredentials ? undefined : onClose);
 
   const save = async () => {
+    // Enter를 연달아 눌러도 같은 버전으로 두 번 보내지 않는다 (두 번째는 409 충돌).
+    if (saving) return;
     const error = validateTeamForm(form);
     if (error) return showToast(error, "error");
     const payload: UpdateTeamPayload = {
       name: team.name,
       workplace: form.workLocation.trim(),
       leaderName: form.leaderName.trim(),
+      leaderPhone: form.contact.trim(),
       workerCount: form.memberCount.trim() ? Number(form.memberCount) : team.memberCount,
       version: team.version,
     };
@@ -58,6 +62,7 @@ export default function TeamDetailModal({
           name: payload.name ?? team.name,
           workLocation: payload.workplace ?? team.workLocation,
           leaderName: payload.leaderName ?? team.leaderName,
+          contact: payload.leaderPhone ?? team.contact,
           memberCount: payload.workerCount ?? team.memberCount,
         });
         showToast("팀 정보를 저장했어요. (데모)", "success");
@@ -103,6 +108,7 @@ export default function TeamDetailModal({
 
   const rows = [
     { key: "leaderName", label: "이름", value: team.leaderName },
+    { key: "contact", label: "전화번호", value: team.contact || "-" },
     { key: "memberCount", label: "인원", value: team.memberCount ? `${team.memberCount}명` : "-" },
     { key: "loginEmail", label: "이메일", value: team.loginEmail || "계정 미등록" },
     { key: "workLocation", label: "작업 장소", value: team.workLocation || "미지정" },
@@ -161,6 +167,7 @@ export default function TeamDetailModal({
             {(
               [
                 ["leaderName", "이름 *", "text"],
+                ["contact", "전화번호 *", "tel"],
                 ["memberCount", "인원", "text"],
                 ["workLocation", "작업 장소", "text"],
               ] as const
@@ -169,9 +176,9 @@ export default function TeamDetailModal({
                 <span className="text-[var(--color-text-body)] text-xs">{label}</span>
                 <input
                   type={type}
-                  inputMode={key === "memberCount" ? "numeric" : undefined}
+                  inputMode={key === "memberCount" || key === "contact" ? "numeric" : undefined}
                   value={form[key]}
-                  onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
+                  onChange={(e) => setForm((f) => ({ ...f, [key]: key === "contact" ? formatTeamPhone(e.target.value) : e.target.value }))}
                   onKeyDown={(e) => e.key === "Enter" && save()}
                   className={inputCls}
                 />
