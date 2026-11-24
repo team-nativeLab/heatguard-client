@@ -144,15 +144,29 @@ export const BTN_PRIMARY = "inline-flex h-9 items-center justify-center gap-1.5 
 export const BTN_SECONDARY = "inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-[var(--ops-border)] bg-[var(--ops-surface)] px-3.5 text-[13px] font-medium text-[var(--ops-body)] transition-colors hover:bg-[var(--ops-chip-bg)] disabled:opacity-60";
 export const BTN_DANGER = "inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-[var(--color-danger-border)] bg-[var(--ops-surface)] px-3.5 text-[13px] font-medium text-[var(--color-danger-text)] transition-colors hover:bg-[var(--color-danger-soft-bg)] disabled:opacity-60";
 
+/**
+ * 열린 패널·모달 순서. Esc는 맨 위(가장 나중에 열린) 것만 닫는다.
+ * 패널 위에 확인 모달이 떠 있을 때 Esc 한 번에 둘 다 닫히지 않게 하기 위해서다.
+ */
+const escapeStack: symbol[] = [];
+
 function useEscape(onClose: () => void) {
   const ref = useRef(onClose);
   useEffect(() => {
     ref.current = onClose;
   });
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && ref.current();
+    const id = Symbol("dialog");
+    escapeStack.push(id);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && escapeStack[escapeStack.length - 1] === id) ref.current();
+    };
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      const i = escapeStack.indexOf(id);
+      if (i >= 0) escapeStack.splice(i, 1);
+    };
   }, []);
 }
 
