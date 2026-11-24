@@ -131,11 +131,13 @@ export function TrendChart({ points, unit, name }: { points: { label: string; va
   const H = 220;
   const pad = { l: 40, r: 16, t: 16, b: 28 };
   const max = Math.max(1, ...points.map((p) => p.value));
-  const step = Math.pow(10, Math.floor(Math.log10(max)));
-  const top = Math.ceil(max / step) * step;
-  const ticks = [0, 0.25, 0.5, 0.75, 1].map((r) => Math.round(top * r));
+  // 값이 작아도 눈금 4칸이 정수로 떨어지게 최소 4로 잡고, 4의 배수로 올린다.
+  const step = Math.pow(10, Math.floor(Math.log10(Math.max(4, max))));
+  const top = Math.max(4, Math.ceil(max / step) * step);
+  const unitTop = Math.ceil(top / 4) * 4;
+  const ticks = [0, 1, 2, 3, 4].map((i) => (unitTop / 4) * i);
   const x = (i: number) => pad.l + (points.length <= 1 ? (W - pad.l - pad.r) / 2 : (i * (W - pad.l - pad.r)) / (points.length - 1));
-  const y = (v: number) => pad.t + (1 - v / top) * (H - pad.t - pad.b);
+  const y = (v: number) => pad.t + (1 - v / unitTop) * (H - pad.t - pad.b);
   const line = points.map((p, i) => `${i ? "L" : "M"}${x(i)},${y(p.value)}`).join(" ");
   const area = points.length ? `${line} L${x(points.length - 1)},${y(0)} L${x(0)},${y(0)} Z` : "";
   const last = points[points.length - 1];
