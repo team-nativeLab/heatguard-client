@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import HomeLayout from "../../components/home/HomeLayout";
 import SiteManagementHeader from "../../components/manager/SiteManagementHeader";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
@@ -96,7 +96,11 @@ export default function SiteChecklistPage() {
     setEditText(item.text);
   };
 
+  // 같은 항목 저장이 겹치지 않게 한다 (Enter 뒤 blur 등으로 두 번 불릴 수 있다).
+  const savingIdRef = useRef<string | null>(null);
+
   const saveEdit = async (item: ChecklistItem) => {
+    if (savingIdRef.current === item.id) return;
     const text = editText.trim();
     if (!text) return showToast("항목 내용을 입력해주세요.", "error");
     if (text.length > MAX_TEXT) return showToast(`항목은 ${MAX_TEXT}자 이내로 입력해주세요.`, "error");
@@ -106,6 +110,7 @@ export default function SiteChecklistPage() {
     const prevItems = items;
     setItems((cur) => cur.map((i) => (i.id === item.id ? { ...i, text } : i)));
     setEditingId(null);
+    savingIdRef.current = item.id;
     try {
       await checklistsApi.updateChecklistItem(item.id, { text });
       showToast("항목을 수정했어요.", "success");
@@ -113,6 +118,8 @@ export default function SiteChecklistPage() {
       if (isDemoFallback(err)) return showToast("항목을 수정했어요. (데모)", "success");
       setItems(prevItems);
       showToast(errorMessage(err, "수정에 실패했어요."), "error");
+    } finally {
+      savingIdRef.current = null;
     }
   };
 
@@ -179,6 +186,8 @@ export default function SiteChecklistPage() {
                   maxLength={MAX_TEXT}
                   onChange={(e) => setEditText(e.target.value)}
                   onKeyDown={(e) => {
+                    // 한글 조합 중 Enter는 조합 확정용이라 저장하지 않는다 (확정 후 Enter가 한 번 더 온다).
+                    if (e.nativeEvent.isComposing || e.keyCode === 229) return;
                     if (e.key === "Enter") saveEdit(item);
                     if (e.key === "Escape") setEditingId(null);
                   }}
