@@ -15,7 +15,6 @@ import { markSignedIn } from "../../shared/auth/authScope";
 import { useToast } from "../../shared/ui/toastContext";
 import { isEmail } from "../../lib/email";
 
-
 export default function SiteInvitationPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
