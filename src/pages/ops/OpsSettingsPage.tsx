@@ -228,10 +228,12 @@ export default function OpsSettingsPage() {
   const [draft, setDraft] = useState<OpsSettings | null>(null);
   const [operators, setOperators] = useState<OpsOperator[] | null | undefined>(undefined);
   const [saving, setSaving] = useState(false);
+  const [settingsError, setSettingsError] = useState("");
   const [inviting, setInviting] = useState(false);
 
   const loadOperators = useCallback(() => {
-    opsAdminApi.listOperators().then(setOperators).catch(() => setOperators(null));
+    // 목록을 못 불러온 경우는 "서버 준비 중"과 구분해 내 계정만 보여준다.
+    opsAdminApi.listOperators().then(setOperators).catch(() => setOperators([]));
   }, []);
 
   useEffect(() => {
@@ -241,7 +243,7 @@ export default function OpsSettingsPage() {
       .catch((err) => alive && setMeError(errorMessage(err, "계정 정보를 불러오지 못했어요.")));
     opsAdminApi.getSettings()
       .then((s) => { if (alive) { setSaved(s); setDraft(s); } })
-      .catch(() => alive && setSaved(null));
+      .catch((err) => alive && setSettingsError(errorMessage(err, "설정을 불러오지 못했어요. 새로고침해 주세요.")));
     loadOperators();
     if (window.location.hash === "#policy") document.getElementById("ops-settings-policy")?.scrollIntoView({ block: "start" });
     return () => { alive = false; };
@@ -277,7 +279,7 @@ export default function OpsSettingsPage() {
     document.getElementById(`ops-settings-${key}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const others = operators?.filter((o) => !o.isMe) ?? [];
+  const others = operators?.filter((o) => !o.isMe && o.userId !== me?.userId) ?? [];
 
   return (
     <OpsLayout>
@@ -315,7 +317,9 @@ export default function OpsSettingsPage() {
 
           <div className="flex min-w-0 flex-col gap-4">
             <SectionCard id="ops-settings-policy" title="가입 승인 정책">
-              {saved === null ? SERVER_PENDING : !draft ? (
+              {saved === null ? SERVER_PENDING : settingsError ? (
+                <p role="alert" className="py-2 text-[13px] text-[var(--color-danger-text)]">{settingsError}</p>
+              ) : !draft ? (
                 <p role="status" className="py-4 text-center text-sm text-[var(--ops-faint)]">불러오는 중...</p>
               ) : (
                 <>
@@ -335,7 +339,9 @@ export default function OpsSettingsPage() {
             </SectionCard>
 
             <SectionCard id="ops-settings-notifications" title="운영자 알림">
-              {saved === null ? SERVER_PENDING : !draft ? (
+              {saved === null ? SERVER_PENDING : settingsError ? (
+                <p role="alert" className="py-2 text-[13px] text-[var(--color-danger-text)]">{settingsError}</p>
+              ) : !draft ? (
                 <p role="status" className="py-4 text-center text-sm text-[var(--ops-faint)]">불러오는 중...</p>
               ) : (
                 NOTIFICATION_KEYS.map((key) => (

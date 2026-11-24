@@ -26,6 +26,7 @@ export default function OpsStatsPage() {
   const [error, setError] = useState("");
   // undefined: 불러오는 중, null: 서버에 일별 집계 없음
   const [daily, setDaily] = useState<DailyAccess | null | undefined>(undefined);
+  const [dailyError, setDailyError] = useState("");
 
   // 사이트 현황 표가 기간별 열을 함께 보여주므로 세 기간을 한 번에 받는다.
   const load = useCallback(async () => {
@@ -43,9 +44,10 @@ export default function OpsStatsPage() {
   useEffect(() => {
     let alive = true;
     setDaily((prev) => (prev === null ? null : undefined));
+    setDailyError("");
     opsAdminApi.getDailyAccess(days)
       .then((d) => alive && setDaily(d))
-      .catch(() => alive && setDaily(null));
+      .catch((err) => alive && setDailyError(errorMessage(err, "일별 추이를 불러오지 못했어요.")));
     return () => { alive = false; };
   }, [days]);
 
@@ -119,6 +121,8 @@ export default function OpsStatsPage() {
                 action={daily && <span className="rounded-full bg-[var(--ops-accent-soft)] px-2.5 py-0.5 text-xs font-medium text-[var(--ops-accent)]">● 방문자</span>}>
                 {daily === null ? (
                   <p className="m-auto py-6 text-center text-sm text-[var(--ops-faint)]">일별 방문자 집계는 서버 준비 중이에요.</p>
+                ) : dailyError ? (
+                  <p role="alert" className="m-auto py-6 text-center text-sm text-[var(--color-danger-text)]">{dailyError}</p>
                 ) : !daily ? (
                   <p role="status" className="m-auto py-6 text-center text-sm text-[var(--ops-faint)]">불러오는 중...</p>
                 ) : trendPoints.length === 0 ? (
