@@ -8,7 +8,7 @@ import { useToast } from "../../shared/ui/toastContext";
 
 /*
  * 운영자 콘솔 공통 틀 (Figma 운영자 콘솔: Sidebar + 상단 바).
- * 메뉴는 Figma와 같은 7개를 보여주되, 서버 API가 없는 메뉴는 비활성으로 둔다.
+ * 메뉴는 Figma와 같은 7개를 보여주되, 서버 API가 없는 메뉴(회원 관리·가입 승인·활동 로그)는 비활성으로 둔다.
  */
 interface NavItem {
   label: string;
@@ -19,12 +19,12 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { label: "대시보드", icon: "home", to: "/ops/dashboard" },
-  { label: "집계 페이지", icon: "chart" },
+  { label: "집계 페이지", icon: "chart", to: "/ops/stats" },
   { label: "회원 관리", icon: "users" },
   { label: "가입 승인", icon: "userCheck" },
   { label: "활동 로그", icon: "activity" },
   { label: "민원 처리", icon: "message", to: "/ops/inquiries", badge: "openInquiries" },
-  { label: "시스템 설정", icon: "settings" },
+  { label: "시스템 설정", icon: "settings", to: "/ops/settings" },
 ];
 
 function useOpsLogout() {

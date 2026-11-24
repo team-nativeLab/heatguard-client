@@ -23,6 +23,8 @@ import ScreenHQContact from "./pages/hq/ScreenHQContact";
 import OpsLoginPage from "./pages/ops/OpsLoginPage";
 import OpsInquiriesPage from "./pages/ops/OpsInquiriesPage";
 import OpsDashboardPage from "./pages/ops/OpsDashboardPage";
+import OpsStatsPage from "./pages/ops/OpsStatsPage";
+import OpsSettingsPage from "./pages/ops/OpsSettingsPage";
 import SessionGuard from "./components/auth/SessionGuard";
 import SiteScopeGuard from "./components/auth/SiteScopeGuard";
 import SiteSelectionPage from "./pages/site/SiteSelectionPage";
@@ -145,6 +147,8 @@ export default function App() {
         <Route path="/ops/login" element={<OpsLoginPage />} />
         <Route path="/ops/dashboard" element={<ProtectedOps><OpsDashboardPage /></ProtectedOps>} />
         <Route path="/ops/inquiries" element={<ProtectedOps><OpsInquiriesPage /></ProtectedOps>} />
+        <Route path="/ops/stats" element={<ProtectedOps><OpsStatsPage /></ProtectedOps>} />
+        <Route path="/ops/settings" element={<ProtectedOps><OpsSettingsPage /></ProtectedOps>} />
 
         <Route path="*" element={<Navigate to="/auth/login" replace />} />
       </Routes>
