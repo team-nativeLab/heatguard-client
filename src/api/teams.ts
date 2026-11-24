@@ -6,6 +6,7 @@ interface BackendTeam {
   name?: string | null;
   leaderName?: string | null;
   workplace?: string | null;
+  leaderPhone?: string | null;
   workerCount?: number | null;
   active?: boolean;
   version?: number;
@@ -19,6 +20,7 @@ function normalizeTeam(team: BackendTeam): TeamSummary {
     name: team.name ?? `${team.leaderName || "미지정"} 팀`,
     leaderName: team.leaderName ?? "",
     workLocation: team.workplace ?? "",
+    contact: team.leaderPhone ?? "",
     memberCount: team.workerCount ?? 0,
     active: team.active ?? true,
     version: team.version ?? 1,
