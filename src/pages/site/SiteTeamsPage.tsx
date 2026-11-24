@@ -9,7 +9,7 @@ import { useToast } from "../../shared/ui/toastContext";
 import { TeamMemberIcon } from "../../components/icons/Icons";
 import { teamsApi, isDemoFallback, errorMessage, type TeamSummary } from "../../api";
 import type { TeamAppLinks } from "../../api/teams";
-import { validateTeamForm, type TeamFormValues } from "../../lib/teamForm";
+import { formatTeamPhone, validateTeamForm, type TeamFormValues } from "../../lib/teamForm";
 import { LoadError, SkeletonList } from "../../shared/ui/Skeleton";
 import { getPasswordError, PASSWORD_MIN_LENGTH, PASSWORD_POLICY_HINT } from "../../lib/passwordPolicy";
 import { NewPasswordInput } from "../../components/auth/NewPasswordField";
@@ -17,14 +17,15 @@ import { usePasswordComposition } from "../../components/auth/usePasswordComposi
 import { useSiteMe } from "../../hooks/useSiteMe";
 
 const FALLBACK_TEAMS: TeamSummary[] = [
-  { id: "t1", name: "A팀", leaderName: "홍길동", workLocation: "3층 외벽", memberCount: 8, active: true, version: 1, loginEmail: "team-a@example.com" },
-  { id: "t2", name: "B팀", leaderName: "김영희", workLocation: "지하 1층 배관", memberCount: 6, active: true, version: 1, loginEmail: "team-b@example.com" },
-  { id: "t3", name: "C팀", leaderName: "이철호", workLocation: "옥상 방수", memberCount: 4, active: true, version: 1, loginEmail: "team-c@example.com" },
+  { id: "t1", name: "A팀", leaderName: "홍길동", workLocation: "3층 외벽", contact: "010-1234-5678", memberCount: 8, active: true, version: 1, loginEmail: "team-a@example.com" },
+  { id: "t2", name: "B팀", leaderName: "김영희", workLocation: "지하 1층 배관", contact: "010-9876-5432", memberCount: 6, active: true, version: 1, loginEmail: "team-b@example.com" },
+  { id: "t3", name: "C팀", leaderName: "이철호", workLocation: "옥상 방수", contact: "010-5555-7777", memberCount: 4, active: true, version: 1, loginEmail: "team-c@example.com" },
 ];
 
 const EMPTY_FORM: TeamFormValues = {
   leaderName: "",
   workLocation: "",
+  contact: "",
   memberCount: "",
   leaderEmail: "",
   initialPassword: "",
@@ -130,13 +131,14 @@ export default function SiteTeamsPage() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.leaderEmail.trim())) {
       return showToast("이메일을 확인해주세요.", "error");
     }
-    const passwordError = getPasswordError(form.initialPassword, 10);
+    const passwordError = getPasswordError(form.initialPassword, PASSWORD_MIN_LENGTH);
     if (passwordError) return showToast(passwordError, "error");
     setSubmitting(true);
     const payload = {
       name: me.site.name?.trim() || form.workLocation.trim() || "현장",
       workplace: form.workLocation.trim(),
       leaderName: form.leaderName.trim(),
+      leaderPhone: form.contact.trim(),
       leaderEmail: form.leaderEmail.trim(),
       initialPassword: form.initialPassword,
       workerCount: form.memberCount.trim() ? Number(form.memberCount.trim()) : 0,
@@ -156,6 +158,7 @@ export default function SiteTeamsPage() {
             name: payload.name,
             leaderName: payload.leaderName,
             workLocation: payload.workplace,
+            contact: payload.leaderPhone,
             memberCount: payload.workerCount,
             active: true,
             version: 1,
@@ -225,7 +228,7 @@ export default function SiteTeamsPage() {
                   {me.site.name || team.name || "현장"}
                   <TeamLinkBadge link={links[team.id]} />
                 </p>
-                <p className="leading-4 text-[var(--color-text-body)] text-xs">팀장 {team.leaderName} · {team.workLocation || "작업 장소 미입력"}</p>
+                <p className="leading-4 text-[var(--color-text-body)] text-xs">팀장 {team.leaderName}{team.contact ? ` · ${team.contact}` : ""} · {team.workLocation || "작업 장소 미입력"}</p>
               </div>
 
               <div className="flex gap-2 shrink-0">
@@ -266,6 +269,20 @@ export default function SiteTeamsPage() {
                   <input disabled={submitting} type="text" value={form.leaderName} onChange={setField("leaderName")} maxLength={20} className={inputCls} />
                 </label>
 
+                <label className="flex flex-col gap-1.5">
+                  <span className="leading-4 text-[var(--color-text-body)] text-xs">팀장 전화번호 *</span>
+                  <input
+                    disabled={submitting}
+                    type="tel"
+                    inputMode="numeric"
+                    autoComplete="tel"
+                    value={form.contact}
+                    onChange={(event) => setForm((current) => ({ ...current, contact: formatTeamPhone(event.target.value) }))}
+                    placeholder="010-0000-0000"
+                    className={inputCls}
+                  />
+                  <span className="text-xs leading-5 text-[var(--color-text-body)]">작업자가 앱 초대를 수락할 때 이 번호로 팀을 확인해요.</span>
+                </label>
                 <label className="flex flex-col gap-1.5">
                   <span className="leading-4 text-[var(--color-text-body)] text-xs">인원</span>
                   <input disabled={submitting} type="text" inputMode="numeric" value={form.memberCount} onChange={setField("memberCount")} className={inputCls} />
