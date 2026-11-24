@@ -1,18 +1,19 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import OpsLayout, { OpsPageHeader } from "../../components/ops/OpsLayout";
 import OpsIcon from "../../components/ops/OpsIcon";
-import { AccessDonut, KpiCard, Panel } from "../../components/ops/OpsWidgets";
+import { AccessDonut, KpiCard, Panel, TrendChart } from "../../components/ops/OpsWidgets";
 import { CARD, DONUT_COLORS } from "../../components/ops/opsStyles";
-import { errorMessage, opsApi, type DashboardAccess, type DashboardDays } from "../../api";
+import { errorMessage, opsAdminApi, opsApi, type DashboardAccess, type DashboardDays } from "../../api";
+import type { DailyAccess } from "../../lib/opsAdmin";
 import { usePolling } from "../../shared/hooks/usePolling";
 import { formatDateTime } from "../../lib/opsInquiry";
 import { DASHBOARD_PERIODS, DEFAULT_DASHBOARD_DAYS, accessShares, formatCount } from "../../lib/opsDashboard";
 
 /*
  * 집계 페이지 (Figma 02_집계 페이지, node 2956:1202).
- * 서버 집계(GET /api/v1/ops/dashboard/access)는 본사·현장 관리자의 "성공 로그인 횟수"를
- * 최근 7·30·90일 단위로만 준다. 그래서 Figma의 방문자 수·방문자 추이(일별)·오늘/어제/누계 탭은
- * 데이터가 없어 넣지 않고, 기간은 서버가 주는 7·30·90일로 바꿨다.
+ * - 접속 수·비중: GET /api/v1/ops/dashboard/access (본사·현장 관리자 성공 로그인, 7·30·90일)
+ * - 방문자 수·일별 추이: GET /api/v1/ops/dashboard/access/daily (서버 준비 중이면 "준비 중" 표시)
+ * Figma의 오늘/어제/누계 탭은 서버 기간 단위(7·30·90일)에 맞춰 바꿨다.
  */
 
 const REFRESH_MS = 60_000;
@@ -23,6 +24,8 @@ export default function OpsStatsPage() {
   const [days, setDays] = useState<DashboardDays>(DEFAULT_DASHBOARD_DAYS);
   const [byDays, setByDays] = useState<AccessByDays | null>(null);
   const [error, setError] = useState("");
+  // undefined: 불러오는 중, null: 서버에 일별 집계 없음
+  const [daily, setDaily] = useState<DailyAccess | null | undefined>(undefined);
 
   // 사이트 현황 표가 기간별 열을 함께 보여주므로 세 기간을 한 번에 받는다.
   const load = useCallback(async () => {
@@ -36,6 +39,20 @@ export default function OpsStatsPage() {
   }, []);
 
   usePolling(load, REFRESH_MS, null);
+
+  useEffect(() => {
+    let alive = true;
+    setDaily((prev) => (prev === null ? null : undefined));
+    opsAdminApi.getDailyAccess(days)
+      .then((d) => alive && setDaily(d))
+      .catch(() => alive && setDaily(null));
+    return () => { alive = false; };
+  }, [days]);
+
+  const trendPoints = (daily?.items ?? []).map((d) => {
+    const [, m, day] = d.date.split("-").map(Number);
+    return { label: `${m}.${day}`, value: d.visitors };
+  });
 
   const current = byDays?.[days];
   const unsupported = byDays !== null && current === null;
@@ -82,20 +99,35 @@ export default function OpsStatsPage() {
             {periodTabs}
             {error && <p role="alert" className={`${CARD} px-4 py-3 text-sm text-[var(--color-danger-text)]`}>{error}</p>}
 
-            <section aria-label="접속 지표" className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <section aria-label="접속 지표" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+              <KpiCard label="전체 방문자 수" value={daily ? daily.uniqueVisitors : null} icon="users" />
               <KpiCard label="본사 관리자 접속" value={hq?.count} icon="building" />
               <KpiCard label="현장 관리자 접속" value={site?.count} icon="user" />
               <KpiCard label="전체 접속 수" value={current?.total} icon="chart" />
             </section>
 
-            <Panel icon="pie" title="사이트 접속 비중" className="min-h-[280px]"
-              action={<span className="text-xs text-[var(--ops-faint)]">최근 {days}일 · 관리자 로그인</span>}>
-              {current ? (
-                <AccessDonut access={current} />
-              ) : (
-                <p role="status" className="m-auto py-6 text-center text-sm text-[var(--ops-faint)]">불러오는 중...</p>
-              )}
-            </Panel>
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,460px)_minmax(0,1fr)]">
+              <Panel icon="pie" title="사이트 접속 비중" className="min-h-[280px]"
+                action={<span className="text-xs text-[var(--ops-faint)]">최근 {days}일 · 관리자 로그인</span>}>
+                {current ? (
+                  <AccessDonut access={current} />
+                ) : (
+                  <p role="status" className="m-auto py-6 text-center text-sm text-[var(--ops-faint)]">불러오는 중...</p>
+                )}
+              </Panel>
+              <Panel icon="chart" title="방문자 추이" className="min-h-[280px]"
+                action={daily && <span className="rounded-full bg-[var(--ops-accent-soft)] px-2.5 py-0.5 text-xs font-medium text-[var(--ops-accent)]">● 방문자</span>}>
+                {daily === null ? (
+                  <p className="m-auto py-6 text-center text-sm text-[var(--ops-faint)]">일별 방문자 집계는 서버 준비 중이에요.</p>
+                ) : !daily ? (
+                  <p role="status" className="m-auto py-6 text-center text-sm text-[var(--ops-faint)]">불러오는 중...</p>
+                ) : trendPoints.length === 0 ? (
+                  <p className="m-auto py-6 text-center text-sm text-[var(--ops-faint)]">이 기간에 접속 기록이 없어요.</p>
+                ) : (
+                  <div className="pt-3"><TrendChart points={trendPoints} unit="명" name="방문자" /></div>
+                )}
+              </Panel>
+            </div>
 
             <section aria-label="사이트 현황" className={`${CARD} flex min-w-0 flex-col overflow-hidden`}>
               <h2 className="flex items-center gap-2 p-[19px] text-[15px] font-bold text-[var(--ops-heading)]">
