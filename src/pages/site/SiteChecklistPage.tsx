@@ -100,7 +100,8 @@ export default function SiteChecklistPage() {
   const savingIdRef = useRef<string | null>(null);
 
   const saveEdit = async (item: ChecklistItem) => {
-    if (savingIdRef.current === item.id) return;
+    // 이전 수정이 아직 저장 중이면 입력칸을 그대로 두고 알려준다 (조용히 무시하지 않는다).
+    if (savingIdRef.current === item.id) return showToast("이전 수정을 저장하는 중이에요. 잠시 후 다시 시도해주세요.");
     const text = editText.trim();
     if (!text) return showToast("항목 내용을 입력해주세요.", "error");
     if (text.length > MAX_TEXT) return showToast(`항목은 ${MAX_TEXT}자 이내로 입력해주세요.`, "error");
