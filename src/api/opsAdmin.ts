@@ -127,6 +127,12 @@ export function listOperators() {
   return optional(async () => normalizeOperators(await apiFetch<unknown>("/api/v1/ops/operators")));
 }
 
+/** 공개 API. 초대 메일 링크의 email·token과 새 비밀번호로 운영자 계정을 만든다. */
+export function acceptOperatorInvitation(payload: { email: string; token: string; password: string; confirmPassword: string }) {
+  return apiFetch<{ userId: string; role: string }>("/api/v1/ops/operators/invitations/accept", { method: "POST", body: payload });
+}
+
+/** 최고 관리자(OWNER)만 가능. 403 다른 역할, 409 유효한 초대가 이미 있음, 503 메일·수락 화면 설정 누락 */
 export function inviteOperator(payload: { name: string; email: string }) {
   return apiFetch<unknown>("/api/v1/ops/operators/invitations", { method: "POST", body: payload });
 }
