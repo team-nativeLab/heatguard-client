@@ -13,8 +13,7 @@ import { clearSiteMeCache } from "../../hooks/useSiteMe";
 import { clearMembership } from "../../lib/membership";
 import { markSignedIn } from "../../shared/auth/authScope";
 import { useToast } from "../../shared/ui/toastContext";
-
-const EMAIL_RE = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+import { isEmail } from "../../lib/email";
 
 export default function SiteInvitationPage() {
   const [searchParams] = useSearchParams();
@@ -35,7 +34,7 @@ export default function SiteInvitationPage() {
     if (accepting || composition.isComposing()) return;
     if (!invitationId) return setError("초대 링크가 올바르지 않아요. 본사 관리자에게 새 링크를 요청해주세요.");
     if (!/^01[016789]\d{7,8}$/.test(phone.replace(/\D/g, ""))) { setError("휴대전화 번호를 확인해주세요."); return; }
-    if (!EMAIL_RE.test(email.trim())) { setError("이메일 주소를 확인해주세요."); return; }
+    if (!isEmail(email)) { setError("이메일 주소를 확인해주세요."); return; }
     const passwordError = getPasswordError(password, SIGNUP_PASSWORD_MIN_LENGTH) || getPasswordConfirmationError(password, confirmPassword);
     if (passwordError) return setError(passwordError);
     setAccepting(true);
