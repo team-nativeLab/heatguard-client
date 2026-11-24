@@ -4,8 +4,9 @@ import SiteManagementHeader from "../../components/manager/SiteManagementHeader"
 import { CheckboxCheckIcon } from "../../components/icons/Icons";
 import { settingsApi, isDemoFallback, errorMessage } from "../../api";
 import { useToast } from "../../shared/ui/toastContext";
+import { CHECK_TIME_SLOTS, otherCheckTimes, toCheckTimeSlots } from "../../lib/checkTimes";
 
-const TIME_SLOTS = Array.from({ length: 24 }, (_, index) => `${String(index + 1).padStart(2, "0")}:00`);
+const TIME_SLOTS = CHECK_TIME_SLOTS;
 const ALL_CHECKED_TIMES = Object.fromEntries(TIME_SLOTS.map((time) => [time, true]));
 const NO_CHECKED_TIMES: Record<string, boolean> = {};
 
@@ -13,13 +14,17 @@ export default function SiteSettingsPage() {
   const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
+  // 칸에 없는 시간(정각이 아닌 값). 저장할 때 함께 보내 지우지 않는다.
+  const [otherTimes, setOtherTimes] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     let alive = true;
     settingsApi.getCheckTimes().then((times) => {
       // 저장된 값이 없으면 전부 해제 상태로 시작한다.
-      if (alive) setChecked(Object.fromEntries(times.times.map((time) => [time, true])));
+      if (!alive) return;
+      setChecked(toCheckTimeSlots(times.times));
+      setOtherTimes(otherCheckTimes(times.times));
     }).catch((err) => {
       if (!alive) return;
       if (isDemoFallback(err)) setChecked(NO_CHECKED_TIMES);
@@ -37,7 +42,7 @@ export default function SiteSettingsPage() {
 
   const saveCheckTimes = async () => {
     if (saving) return;
-    const times = TIME_SLOTS.filter((time) => checked[time]);
+    const times = [...TIME_SLOTS.filter((time) => checked[time]), ...otherTimes];
     if (times.length === 0) return showToast("체크 시간을 한 개 이상 선택해주세요.", "error");
     setSaving(true);
     try {
@@ -69,7 +74,10 @@ export default function SiteSettingsPage() {
             {allSelected ? "전체 해제" : "전체 체크"}
           </button>
         </div>
-        <p className="pt-2 text-xs text-[var(--color-text-faint)]">{selectedCount}개 시간 선택됨</p>
+        <p className="pt-2 text-xs text-[var(--color-text-faint)]">
+          {selectedCount}개 시간 선택됨
+          {otherTimes.length > 0 && ` · 정각이 아닌 시간 ${otherTimes.join(", ")}은 그대로 유지돼요`}
+        </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 pt-3 max-w-[560px]">
           {[TIME_SLOTS.slice(0, 12), TIME_SLOTS.slice(12, 24)].map((column, columnIndex) => (
             <div key={columnIndex} className="flex flex-col gap-1">
