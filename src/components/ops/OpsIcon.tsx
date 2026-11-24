@@ -1,3 +1,19 @@
+import bell from "../../assets/ops/bell.svg";
+import ban from "../../assets/ops/ban.svg";
+import card from "../../assets/ops/card.svg";
+import check from "../../assets/ops/check.svg";
+import chevLeft from "../../assets/ops/chev-left.svg";
+import clock from "../../assets/ops/clock.svg";
+import close from "../../assets/ops/close.svg";
+import download from "../../assets/ops/download.svg";
+import eye from "../../assets/ops/eye.svg";
+import info from "../../assets/ops/info.svg";
+import mail from "../../assets/ops/mail.svg";
+import more from "../../assets/ops/more.svg";
+import search from "../../assets/ops/search.svg";
+import send from "../../assets/ops/send.svg";
+import shield from "../../assets/ops/shield.svg";
+import sort from "../../assets/ops/sort.svg";
 import activity from "../../assets/ops/activity.svg";
 import alert from "../../assets/ops/alert.svg";
 import building from "../../assets/ops/building.svg";
@@ -25,6 +41,7 @@ import users from "../../assets/ops/users.svg";
 const ICONS = {
   activity, alert, building, calendar, chart, chevDown, chevRight, file, home, logout,
   mapPin, message, pie, settings, upload, user, userCheck, users,
+  bell, ban, card, check, chevLeft, clock, close, download, eye, info, mail, more, search, send, shield, sort,
 } as const;
 
 export type OpsIconName = keyof typeof ICONS;

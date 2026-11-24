@@ -124,3 +124,52 @@ export function AccessDonut({ access }: { access: DashboardAccess }) {
     </div>
   );
 }
+
+/** 일별 추이 선 그래프 (Figma 02 방문자 추이). 값이 없는 날은 0으로 그린다. */
+export function TrendChart({ points, unit, name }: { points: { label: string; value: number }[]; unit: string; name: string }) {
+  const W = 640;
+  const H = 220;
+  const pad = { l: 40, r: 16, t: 16, b: 28 };
+  const max = Math.max(1, ...points.map((p) => p.value));
+  const step = Math.pow(10, Math.floor(Math.log10(max)));
+  const top = Math.ceil(max / step) * step;
+  const ticks = [0, 0.25, 0.5, 0.75, 1].map((r) => Math.round(top * r));
+  const x = (i: number) => pad.l + (points.length <= 1 ? (W - pad.l - pad.r) / 2 : (i * (W - pad.l - pad.r)) / (points.length - 1));
+  const y = (v: number) => pad.t + (1 - v / top) * (H - pad.t - pad.b);
+  const line = points.map((p, i) => `${i ? "L" : "M"}${x(i)},${y(p.value)}`).join(" ");
+  const area = points.length ? `${line} L${x(points.length - 1)},${y(0)} L${x(0)},${y(0)} Z` : "";
+  const last = points[points.length - 1];
+  const labelEvery = Math.max(1, Math.ceil(points.length / 7));
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label={`일별 ${name} 추이, 마지막 ${last ? `${last.label} ${last.value}${unit}` : "없음"}`}>
+      <defs>
+        <linearGradient id="ops-trend-fill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="var(--ops-accent)" stopOpacity="0.18" />
+          <stop offset="100%" stopColor="var(--ops-accent)" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      {ticks.map((t) => (
+        <g key={t}>
+          <line x1={pad.l} x2={W - pad.r} y1={y(t)} y2={y(t)} stroke="var(--ops-divider)" />
+          <text x={pad.l - 8} y={y(t) + 4} textAnchor="end" fontSize="11" fill="var(--ops-faint)">{t.toLocaleString("ko-KR")}</text>
+        </g>
+      ))}
+      {area && <path d={area} fill="url(#ops-trend-fill)" />}
+      {line && <path d={line} fill="none" stroke="var(--ops-accent)" strokeWidth="2" strokeLinejoin="round" />}
+      {points.map((p, i) => (
+        <g key={p.label}>
+          <circle cx={x(i)} cy={y(p.value)} r="3.5" fill="var(--ops-surface)" stroke="var(--ops-accent)" strokeWidth="2" />
+          {i % labelEvery === 0 || i === points.length - 1 ? (
+            <text x={x(i)} y={H - 8} textAnchor="middle" fontSize="11" fill="var(--ops-faint)">{p.label}</text>
+          ) : null}
+        </g>
+      ))}
+      {last && (
+        <g transform={`translate(${Math.min(x(points.length - 1), W - pad.r - 30)},${Math.max(y(last.value) - 22, 12)})`}>
+          <rect x="-30" y="-14" width="60" height="22" rx="6" fill="var(--ops-surface)" stroke="var(--ops-border)" />
+          <text x="0" y="1" textAnchor="middle" fontSize="11" fontWeight="700" fill="var(--ops-heading)">{last.value.toLocaleString("ko-KR")}{unit}</text>
+        </g>
+      )}
+    </svg>
+  );
+}
