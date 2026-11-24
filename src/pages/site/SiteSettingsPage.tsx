@@ -4,8 +4,9 @@ import SiteManagementHeader from "../../components/manager/SiteManagementHeader"
 import { CheckboxCheckIcon } from "../../components/icons/Icons";
 import { settingsApi, isDemoFallback, errorMessage } from "../../api";
 import { useToast } from "../../shared/ui/toastContext";
+import { CHECK_TIME_SLOTS, toCheckTimeSlots } from "../../lib/checkTimes";
 
-const TIME_SLOTS = Array.from({ length: 24 }, (_, index) => `${String(index + 1).padStart(2, "0")}:00`);
+const TIME_SLOTS = CHECK_TIME_SLOTS;
 const ALL_CHECKED_TIMES = Object.fromEntries(TIME_SLOTS.map((time) => [time, true]));
 const NO_CHECKED_TIMES: Record<string, boolean> = {};
 
@@ -19,7 +20,7 @@ export default function SiteSettingsPage() {
     let alive = true;
     settingsApi.getCheckTimes().then((times) => {
       // 저장된 값이 없으면 전부 해제 상태로 시작한다.
-      if (alive) setChecked(Object.fromEntries(times.times.map((time) => [time, true])));
+      if (alive) setChecked(toCheckTimeSlots(times.times));
     }).catch((err) => {
       if (!alive) return;
       if (isDemoFallback(err)) setChecked(NO_CHECKED_TIMES);
