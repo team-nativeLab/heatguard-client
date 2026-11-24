@@ -67,11 +67,28 @@ export default function OpsActivityPage() {
   // 회원 관리 상세에서 넘어올 때 회사 이름을 함께 받는다 (필터 표시용)
   const companyName = companyId ? params.get("companyName") ?? undefined : undefined;
 
-  const exportCsv = () => {
-    if (!items?.length) return;
+  const [exporting, setExporting] = useState(false);
+  // 불러온 쪽만이 아니라 현재 조건의 로그 전체를 내보낸다 (최대 50쪽).
+  const exportCsv = async () => {
+    if (!items?.length || exporting) return;
+    setExporting(true);
+    const all = [...items];
+    try {
+      let next = cursor;
+      for (let page = 0; next && page < 50; page += 1) {
+        const res = await opsAdminApi.listActivityLogs({ type: tab === "all" ? undefined : tab, days: Number(days), companyId, cursor: next });
+        if (!res) break;
+        all.push(...res.items);
+        next = res.page.nextCursor;
+      }
+    } catch {
+      // 실패하면 불러온 만큼만 내보낸다.
+    } finally {
+      setExporting(false);
+    }
     downloadCsv(
       `활동로그_${new Date().toISOString().slice(0, 10)}.csv`,
-      toCsv(["시간", "유형", "회사", "사용자", "내용", "IP"], items.map((i) => [formatDateTime(i.at), i.label, i.companyName, i.actorName, i.message, i.ip])),
+      toCsv(["시간", "유형", "회사", "사용자", "내용", "IP"], all.map((i) => [formatDateTime(i.at), i.label, i.companyName, i.actorName, i.message, i.ip])),
     );
   };
 
@@ -86,9 +103,9 @@ export default function OpsActivityPage() {
             title="활동 로그"
             description="회사와 관리자의 주요 활동을 시간순으로 확인해요."
             actions={!unavailable && (
-              <button type="button" onClick={exportCsv} disabled={!items?.length} className={BTN_SECONDARY}>
+              <button type="button" onClick={() => void exportCsv()} disabled={!items?.length || exporting} className={BTN_SECONDARY}>
                 <OpsIcon name="download" size={15} />
-                CSV 내보내기
+                {exporting ? "내보내는 중..." : "CSV 내보내기"}
               </button>
             )}
           />

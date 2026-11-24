@@ -191,7 +191,7 @@ function OpsBell() {
     const next = !open;
     setOpen(next);
     if (next && data?.unreadCount) {
-      opsAdminApi.markNotificationsRead().then(() => setData((d) => (d ? { ...d, unreadCount: 0 } : d))).catch(() => {});
+      opsAdminApi.markNotificationsRead().then(() => setData((d) => (d ? { items: d.items.map((n) => ({ ...n, read: true })), unreadCount: 0 } : d))).catch(() => {});
     }
   };
 

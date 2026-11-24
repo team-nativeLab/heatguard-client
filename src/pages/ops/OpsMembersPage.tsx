@@ -221,6 +221,7 @@ function CompanyDetailPanel({ companyId, onClose, onChanged }: { companyId: stri
 }
 
 export default function OpsMembersPage() {
+  const { showToast } = useToast();
   const [params] = useSearchParams();
   const [tab, setTab] = useState<Tab>("all");
   // 상단 검색창에서 넘어온 검색어(?q=)로 시작한다.
@@ -274,11 +275,28 @@ export default function OpsMembersPage() {
     void load();
   }, [load]);
 
-  const exportCsv = () => {
-    if (!items?.length) return;
+  const [exporting, setExporting] = useState(false);
+  // 화면에 불러온 쪽만이 아니라 현재 조건의 목록 전체를 내보낸다 (최대 50쪽).
+  const exportCsv = async () => {
+    if (!items?.length || exporting) return;
+    setExporting(true);
+    const all = [...items];
+    try {
+      let next = cursor;
+      for (let page = 0; next && page < 50; page += 1) {
+        const res = await opsAdminApi.listCompanies({ status: tab === "all" ? undefined : tab, q: q || undefined, joined: joined === "all" ? undefined : joined, sort, cursor: next });
+        if (!res) break;
+        all.push(...res.items);
+        next = res.page.nextCursor;
+      }
+    } catch (err) {
+      showToast(errorMessage(err, "전체 목록을 불러오지 못해 불러온 만큼만 내보냈어요."), "error");
+    } finally {
+      setExporting(false);
+    }
     const csv = toCsv(
       ["회사명", "사업자번호", "담당자", "이메일", "가입일", "현장 수", "기록 수", "최근 활동", "상태"],
-      items.map((c) => [c.name, c.businessNumber, c.managerName, c.email, formatDateTime(c.joinedAt, false), c.siteCount, c.recordCount, formatDateTime(c.lastActivityAt), COMPANY_STATUS_LABEL[c.status]]),
+      all.map((c) => [c.name, c.businessNumber, c.managerName, c.email, formatDateTime(c.joinedAt, false), c.siteCount, c.recordCount, formatDateTime(c.lastActivityAt), COMPANY_STATUS_LABEL[c.status]]),
     );
     downloadCsv(`회원목록_${new Date().toISOString().slice(0, 10)}.csv`, csv);
   };
@@ -299,9 +317,9 @@ export default function OpsMembersPage() {
             title="회원 관리"
             description="가입한 회사와 이용 상태를 관리해요."
             actions={!unavailable && (
-              <button type="button" onClick={exportCsv} disabled={!items?.length} className={BTN_SECONDARY}>
+              <button type="button" onClick={() => void exportCsv()} disabled={!items?.length || exporting} className={BTN_SECONDARY}>
                 <OpsIcon name="download" size={15} />
-                내보내기
+                {exporting ? "내보내는 중..." : "내보내기"}
               </button>
             )}
           />
@@ -370,7 +388,8 @@ export default function OpsMembersPage() {
 
             {items && items.length > 0 && (
               <div className="flex items-center justify-between text-xs text-[var(--ops-faint)]">
-                <span>{counts ? `총 ${formatCount(tab === "all" ? counts.all : counts[tab === "ACTIVE" ? "active" : tab === "SUSPENDED" ? "suspended" : "withdrawn"])}개 중 1–${items.length}` : `${items.length}개`}</span>
+                {/* counts는 검색·가입일 필터와 무관한 수라, 필터 중에는 불러온 수만 보여준다 */}
+                <span>{counts && !q && joined === "all" ? `총 ${formatCount(tab === "all" ? counts.all : counts[tab === "ACTIVE" ? "active" : tab === "SUSPENDED" ? "suspended" : "withdrawn"])}개 중 1–${items.length}` : `${items.length}개${cursor ? " 이상" : ""}`}</span>
                 {cursor && (
                   <button type="button" onClick={() => void load(cursor)} disabled={loadingMore} className={BTN_SECONDARY}>
                     {loadingMore ? "불러오는 중..." : "더 보기"}
