@@ -1,15 +1,15 @@
-import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import OpsLayout, { OpsPageHeader } from "../../components/ops/OpsLayout";
-import OpsIcon, { type OpsIconName } from "../../components/ops/OpsIcon";
+import OpsIcon from "../../components/ops/OpsIcon";
+import { AccessDonut, KpiCard, Panel, type Delta } from "../../components/ops/OpsWidgets";
+import { CARD } from "../../components/ops/opsStyles";
 import { errorMessage, opsApi, type DashboardAccess, type DashboardDays, type DashboardSummary, type OpsInquiry } from "../../api";
 import { usePolling } from "../../shared/hooks/usePolling";
 import { STATUS_LABEL, formatDateTime, summarizeInquiries } from "../../lib/opsInquiry";
 import {
   DASHBOARD_PERIODS,
   DEFAULT_DASHBOARD_DAYS,
-  accessShares,
-  formatCount,
   formatDiff,
   formatNew,
   formatRate,
@@ -29,52 +29,6 @@ const REFRESH_MS = 60_000;
 /** 아직 불러오는 중이면 undefined, 서버에 API가 없으면 null */
 type Loaded<T> = T | null | undefined;
 
-const CARD = "rounded-[14px] border border-[var(--ops-border)] bg-[var(--ops-surface)] shadow-[var(--ops-card-shadow)]";
-
-interface Delta {
-  value: string;
-  caption: string;
-  trend: "up" | "down" | "flat";
-}
-
-function KpiCard({ label, value, icon, delta, chip }: {
-  label: string;
-  value: number | null | undefined;
-  icon: OpsIconName;
-  delta?: Delta;
-  chip?: string;
-}) {
-  const tone = delta?.trend === "up"
-    ? "text-[var(--ops-success-fg)]"
-    : delta?.trend === "down"
-      ? "text-[var(--color-danger-text)]"
-      : "text-[var(--ops-faint)]";
-  const arrow = delta?.trend === "up" ? "▲ " : delta?.trend === "down" ? "▼ " : "";
-  return (
-    <div className={`${CARD} flex h-[120px] min-w-0 flex-col p-[15px]`}>
-      <div className="flex min-w-0 items-center gap-2">
-        <span className="flex size-[30px] shrink-0 items-center justify-center rounded-lg bg-[var(--ops-accent-soft)] text-[var(--ops-accent)]">
-          <OpsIcon name={icon} />
-        </span>
-        <span className="truncate whitespace-nowrap text-[13px] font-medium text-[var(--ops-body)]" title={label}>{label}</span>
-      </div>
-      <span className="font-mono-num mt-auto text-2xl font-bold leading-[1.4] text-[var(--ops-heading)]">
-        {value == null ? "–" : formatCount(value)}
-      </span>
-      <div className="mt-1 flex h-[21px] min-w-0 items-center gap-1.5 text-xs">
-        {chip ? (
-          <span className="rounded-full bg-[var(--ops-warning-bg)] px-2 py-0.5 text-[11px] font-medium text-[var(--ops-warning-fg)]">{chip}</span>
-        ) : delta ? (
-          <>
-            <span className={`font-mono-num shrink-0 font-medium ${tone}`}>{arrow}{delta.value}</span>
-            <span className="truncate text-[var(--ops-faint)]">{delta.caption}</span>
-          </>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
 function StatusChip({ status }: { status: OpsInquiry["status"] }) {
   const tone = status === "OPEN"
     ? "bg-[var(--ops-warning-bg)] text-[var(--ops-warning-fg)]"
@@ -82,86 +36,11 @@ function StatusChip({ status }: { status: OpsInquiry["status"] }) {
   return <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${tone}`}>{STATUS_LABEL[status]}</span>;
 }
 
-function Panel({ icon, title, action, children, className = "" }: {
-  icon: OpsIconName;
-  title: string;
-  action?: ReactNode;
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <section aria-label={title} className={`${CARD} flex min-w-0 flex-col p-[19px] ${className}`}>
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="flex items-center gap-2 text-[15px] font-bold text-[var(--ops-heading)]">
-          <OpsIcon name={icon} size={18} className="text-[var(--ops-heading)]" />
-          {title}
-        </h2>
-        {action}
-      </div>
-      {children}
-    </section>
-  );
-}
-
 function ViewAll({ to }: { to: string }) {
   return (
     <Link to={to} className="flex items-center gap-1 text-[13px] font-medium text-[var(--ops-body)] hover:text-[var(--ops-heading)]">
       전체 보기 <OpsIcon name="chevRight" size={14} />
     </Link>
-  );
-}
-
-const DONUT_SIZE = 164;
-const DONUT_STROKE = 24;
-const DONUT_COLORS = ["var(--ops-accent)", "var(--ops-donut-site)"];
-
-function AccessDonut({ access }: { access: DashboardAccess }) {
-  const shares = accessShares(access.items);
-  const r = (DONUT_SIZE - DONUT_STROKE) / 2;
-  const circumference = 2 * Math.PI * r;
-  let offset = 0;
-  return (
-    <div className="flex flex-1 flex-wrap items-center justify-around gap-6 pt-4">
-      <div className="relative" style={{ width: DONUT_SIZE, height: DONUT_SIZE }}>
-        <svg width={DONUT_SIZE} height={DONUT_SIZE} viewBox={`0 0 ${DONUT_SIZE} ${DONUT_SIZE}`} className="-rotate-90" aria-hidden>
-          <circle cx={DONUT_SIZE / 2} cy={DONUT_SIZE / 2} r={r} fill="none" stroke="var(--ops-chip-bg)" strokeWidth={DONUT_STROKE} />
-          {access.total > 0 && access.items.map((item, i) => {
-            const length = (shares[i] / 100) * circumference;
-            const segment = (
-              <circle
-                key={item.role}
-                cx={DONUT_SIZE / 2}
-                cy={DONUT_SIZE / 2}
-                r={r}
-                fill="none"
-                stroke={DONUT_COLORS[i % DONUT_COLORS.length]}
-                strokeWidth={DONUT_STROKE}
-                strokeDasharray={`${length} ${circumference - length}`}
-                strokeDashoffset={-offset}
-              />
-            );
-            offset += length;
-            return segment;
-          })}
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-xs text-[var(--ops-faint)]">전체 접속</span>
-          <span className="font-mono-num text-[22px] font-bold text-[var(--ops-heading)]">{formatCount(access.total)}회</span>
-        </div>
-      </div>
-      <ul className="flex min-w-[220px] flex-col gap-6">
-        {access.items.map((item, i) => (
-          <li key={item.role} className="flex items-start gap-2">
-            <span className="mt-1.5 size-2.5 shrink-0 rounded-full" style={{ background: DONUT_COLORS[i % DONUT_COLORS.length] }} aria-hidden />
-            <span className="flex-1 text-sm font-medium text-[var(--ops-body)]">폭염가드 ({item.label})</span>
-            <span className="flex flex-col items-end">
-              <span className="font-mono-num text-base font-bold text-[var(--ops-heading)]">{shares[i].toFixed(1)}%</span>
-              <span className="font-mono-num text-xs text-[var(--ops-faint)]">{formatCount(item.count)}회</span>
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
   );
 }
 
@@ -297,11 +176,11 @@ export default function OpsDashboardPage() {
             <div className={`grid gap-4 ${access === null ? "" : "lg:grid-cols-2"}`}>
               <Panel icon="message" title="최근 문의" action={<ViewAll to="/ops/inquiries?tab=all" />} className="min-h-[280px]">
                 {!inquirySummary ? (
-                  <p role={error ? "alert" : "status"} className={`pt-6 text-sm ${error ? "text-[var(--color-danger-text)]" : "text-[var(--ops-faint)]"}`}>
+                  <p role={error ? "alert" : "status"} className={`m-auto py-6 text-center text-sm ${error ? "text-[var(--color-danger-text)]" : "text-[var(--ops-faint)]"}`}>
                     {error || "불러오는 중..."}
                   </p>
                 ) : inquirySummary.recent.length === 0 ? (
-                  <p className="pt-6 text-sm text-[var(--ops-faint)]">아직 접수된 문의가 없어요.</p>
+                  <p className="m-auto py-6 text-center text-sm text-[var(--ops-faint)]">아직 접수된 문의가 없어요.</p>
                 ) : (
                   <ul className="mt-3 flex flex-col divide-y divide-[var(--ops-divider)]">
                     {inquirySummary.recent.map((item) => (
@@ -325,7 +204,7 @@ export default function OpsDashboardPage() {
                 <Panel icon="pie" title="사이트 접속 비중" className="min-h-[280px]"
                   action={<span className="text-xs text-[var(--ops-faint)]">최근 {days}일 · 관리자 로그인</span>}>
                   {!access ? (
-                    <p role="status" className="pt-6 text-sm text-[var(--ops-faint)]">불러오는 중...</p>
+                    <p role="status" className="m-auto py-6 text-center text-sm text-[var(--ops-faint)]">불러오는 중...</p>
                   ) : (
                     <>
                       <AccessDonut access={access} />
