@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import HQLayout, { HQContent } from "../../components/hq/HQLayout";
 import RecordTable, { SiteHeatBadge } from "../../components/hq/RecordTable";
 import { EmptyBlock, ErrorBlock, LoadingBlock } from "../../components/hq/LoadState";
@@ -38,16 +38,22 @@ export default function ScreenHQRecords() {
     loadSites();
   }, [loadSites]);
 
+  // 조회 순번. 필터를 빠르게 바꿨을 때 늦게 온 이전 조건의 응답(더 보기 포함)을 버린다.
+  const requestSeq = useRef(0);
+
   // 필터가 바뀌면 커서를 지우고 첫 페이지부터 다시 조회한다.
   const load = useCallback(async () => {
+    const seq = ++requestSeq.current;
     setError("");
     setRecords(null);
     setCursor(null);
     try {
       const res = await hqApi.listRecords({ date: date || undefined, siteId: siteId || undefined, limit: 50 });
+      if (seq !== requestSeq.current) return;
       setRecords(res.items);
       setCursor(res.page?.nextCursor ?? null);
     } catch (err) {
+      if (seq !== requestSeq.current) return;
       setError(errorMessage(err, "기록을 불러오지 못했어요."));
     }
   }, [date, siteId]);
@@ -58,12 +64,16 @@ export default function ScreenHQRecords() {
 
   const loadMore = async () => {
     if (!cursor || loadingMore) return;
+    const seq = requestSeq.current;
     setLoadingMore(true);
     try {
       const res = await hqApi.listRecords({ date: date || undefined, siteId: siteId || undefined, limit: 50, cursor });
+      // 그사이 필터가 바뀌었으면 다른 조건의 기록이라 붙이지 않는다.
+      if (seq !== requestSeq.current) return;
       setRecords((prev) => [...(prev ?? []), ...res.items]);
       setCursor(res.page?.nextCursor ?? null);
     } catch (err) {
+      if (seq !== requestSeq.current) return;
       setError(errorMessage(err, "기록을 더 불러오지 못했어요."));
     } finally {
       setLoadingMore(false);
