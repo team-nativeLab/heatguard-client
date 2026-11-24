@@ -307,9 +307,9 @@ export default function OpsInquiriesPage() {
                 />
               </div>
               {!items ? (
-                <p role="status" className="p-6 text-center text-sm text-[var(--ops-faint)]">문의를 불러오는 중...</p>
+                <p role="status" className="m-auto p-6 text-center text-sm text-[var(--ops-faint)]">문의를 불러오는 중...</p>
               ) : visible.length === 0 ? (
-                <p className="p-6 text-center text-sm text-[var(--ops-faint)]">조건에 맞는 문의가 없어요.</p>
+                <p className="m-auto p-6 text-center text-sm text-[var(--ops-faint)]">조건에 맞는 문의가 없어요.</p>
               ) : (
                 <ul className="flex flex-col px-2 pb-2">
                   {visible.map((item) => {
