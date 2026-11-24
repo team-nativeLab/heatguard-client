@@ -25,6 +25,7 @@ import OpsInquiriesPage from "./pages/ops/OpsInquiriesPage";
 import OpsDashboardPage from "./pages/ops/OpsDashboardPage";
 import OpsStatsPage from "./pages/ops/OpsStatsPage";
 import OpsSettingsPage from "./pages/ops/OpsSettingsPage";
+import OpsInvitationPage from "./pages/ops/OpsInvitationPage";
 import OpsMembersPage from "./pages/ops/OpsMembersPage";
 import OpsSignupsPage from "./pages/ops/OpsSignupsPage";
 import OpsActivityPage from "./pages/ops/OpsActivityPage";
@@ -148,6 +149,7 @@ export default function App() {
         {/* 운영자 콘솔 */}
         <Route path="/ops" element={<Navigate to="/ops/dashboard" replace />} />
         <Route path="/ops/login" element={<OpsLoginPage />} />
+        <Route path="/ops/invitation" element={<OpsInvitationPage />} />
         <Route path="/ops/dashboard" element={<ProtectedOps><OpsDashboardPage /></ProtectedOps>} />
         <Route path="/ops/inquiries" element={<ProtectedOps><OpsInquiriesPage /></ProtectedOps>} />
         <Route path="/ops/stats" element={<ProtectedOps><OpsStatsPage /></ProtectedOps>} />
