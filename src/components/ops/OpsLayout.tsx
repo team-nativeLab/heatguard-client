@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNod
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
 import OpsIcon, { type OpsIconName } from "./OpsIcon";
-import { opsAdminApi, opsApi, type OpsUser } from "../../api";
+import { opsAdminApi, opsApi } from "../../api";
+import { clearOpsMeCache, useOpsMe } from "../../hooks/useOpsMe";
 import type { OpsNotification } from "../../lib/opsAdmin";
 import { relativeTime } from "../../lib/opsInquiry";
 import { usePolling } from "../../shared/hooks/usePolling";
@@ -47,6 +48,7 @@ function useOpsLogout() {
       // 서버 세션 정리에 실패해도 화면에서는 로그아웃 처리한다.
     }
     markSignedOut("ops");
+    clearOpsMeCache();
     showToast("로그아웃했어요.");
     navigate("/ops/login", { replace: true });
   };
@@ -234,15 +236,9 @@ function OpsBell() {
 }
 
 function OpsTopBar() {
-  const [me, setMe] = useState<OpsUser | null>(null);
+  const me = useOpsMe();
   const { open, setOpen, ref } = usePopover();
   const { logout, loggingOut } = useOpsLogout();
-
-  useEffect(() => {
-    let alive = true;
-    opsApi.me().then((user) => alive && setMe(user)).catch(() => {});
-    return () => { alive = false; };
-  }, []);
 
   return (
     <header className="flex h-20 shrink-0 items-center justify-end gap-4 px-4 md:px-8">
@@ -259,13 +255,18 @@ function OpsTopBar() {
           <span className="flex size-8 items-center justify-center rounded-full bg-[var(--ops-chip-bg)] text-[var(--ops-body)]">
             <OpsIcon name="user" />
           </span>
-          <span className="max-w-[160px] truncate">{me?.name ?? "운영자"}</span>
+          {/* 불러오기 전에는 더미 이름 대신 빈 자리만 둔다 */}
+          {me ? (
+            <span className="max-w-[160px] truncate">{me.name}</span>
+          ) : (
+            <span aria-label="불러오는 중" className="h-4 w-14 animate-pulse rounded bg-[var(--ops-chip-bg)]" />
+          )}
           <OpsIcon name="chevDown" className="text-[var(--ops-body)]" />
         </button>
         {open && (
           <div role="menu" className="absolute right-0 top-full z-20 mt-2 w-56 rounded-xl border border-[var(--ops-border)] bg-[var(--ops-surface)] p-2 shadow-lg">
             <div className="px-3 py-2">
-              <p className="truncate text-sm font-medium text-[var(--ops-heading)]">{me?.name ?? "운영자"}</p>
+              <p className="truncate text-sm font-medium text-[var(--ops-heading)]">{me?.name ?? ""}</p>
               <p className="truncate text-xs text-[var(--ops-faint)]">{me?.email ?? ""}</p>
             </div>
             <button

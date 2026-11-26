@@ -4,6 +4,7 @@ import { useToast } from "../../shared/ui/toastContext";
 import { clearSiteMeCache } from "../../hooks/useSiteMe";
 import { clearMembership } from "../../lib/membership";
 import { clearHqMeCache } from "../../hooks/useHqMe";
+import { clearOpsMeCache } from "../../hooks/useOpsMe";
 import { markSignedOut } from "../../shared/auth/authScope";
 import { UNAUTHORIZED_EVENT } from "../../api";
 
@@ -26,6 +27,7 @@ export default function SessionGuard() {
       // 운영자 세션은 본사·현장과 따로 관리한다.
       if (path.startsWith("/ops")) {
         markSignedOut("ops");
+        clearOpsMeCache();
         showToast("로그인이 만료됐어요. 다시 로그인해주세요.", "error");
         navigate("/ops/login", { replace: true });
         return;
