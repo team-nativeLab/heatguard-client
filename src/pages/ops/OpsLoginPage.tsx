@@ -6,6 +6,7 @@ import AuthSubmitButton from "../../components/auth/AuthSubmitButton";
 import { AnimatedLockIcon, FileTextIcon, MailIcon } from "../../components/auth/AuthIcons";
 import { useToast } from "../../shared/ui/toastContext";
 import { markSignedIn } from "../../shared/auth/authScope";
+import { clearOpsMeCache } from "../../hooks/useOpsMe";
 import { ApiError, errorMessage, opsApi } from "../../api";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -52,6 +53,8 @@ export default function OpsLoginPage() {
     try {
       await opsApi.login({ email: email.trim(), password });
       markSignedIn("ops");
+      // 다른 운영자로 로그인했을 수 있으니 이전 이름을 버린다.
+      clearOpsMeCache();
       navigate(redirectTo, { replace: true });
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
